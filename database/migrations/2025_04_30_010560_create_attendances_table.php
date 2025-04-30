@@ -15,6 +15,7 @@ return new class extends Migration
             $table->timestamp('check_in');
             $table->timestamp('check_out')->nullable();
             $table->text('observations')->nullable();
+            $table->string('status')->default('en_clase');
             $table->timestamps();
         });
     }

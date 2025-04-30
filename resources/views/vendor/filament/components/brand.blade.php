@@ -1,0 +1,1 @@
+<img src="{{ asset('logo.png') }}" alt="Piedtritas" class="h-10"> 
