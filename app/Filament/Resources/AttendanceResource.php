@@ -27,6 +27,7 @@ use Torgodly\Html2Media\Tables\Actions\Html2MediaAction;
 use Illuminate\Support\Facades\Notification;
 use App\Enums\Country;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use App\Filament\Widgets\BirthdaysThisMonth;
 
 
 class AttendanceResource extends Resource
@@ -97,9 +98,38 @@ class AttendanceResource extends Resource
                                 'female' => 'Niña',
                             ])
                             ->required(),
+                        Forms\Components\Select::make('allergies')
+                            ->label('Alergias')
+                            ->options(Allergy::query()->pluck('name', 'id'))
+                            ->multiple()
+                            ->preload()
+                            ->searchable()
+                            ->createOptionForm([
+                                Forms\Components\TextInput::make('name')
+                                    ->label('Nombre de la alergia')
+                                    ->required()
+                                    ->maxLength(255),
+                                Forms\Components\ColorPicker::make('color')
+                                    ->label('Color')
+                                    ->required(),
+                            ])
+                            ->createOptionUsing(function (array $data) {
+                                $allergy = Allergy::create($data);
+                                return $allergy->id;
+                            }),
                     ])
                     ->createOptionUsing(function (array $data) {
-                        $kid = Kid::create($data);
+                        $kid = Kid::create([
+                            'first_name' => $data['first_name'],
+                            'last_name' => $data['last_name'],
+                            'birth_date' => $data['birth_date'],
+                            'gender' => $data['gender'],
+                        ]);
+
+                        if (isset($data['allergies'])) {
+                            $kid->allergies()->sync($data['allergies']);
+                        }
+
                         return $kid->id;
                     }),
                 Select::make('contact_id')
@@ -332,7 +362,7 @@ class AttendanceResource extends Resource
                             $message .= "\nAlergias: " . $kid->allergies->pluck('name')->join(', ');
                         }
                         
-                        $whatsappUrl = "https://wa.me/{$contact->phone}?text=" . urlencode($message);
+                        $whatsappUrl = "https://wa.me/{$contact->full_phone}?text=" . urlencode($message);
                         return redirect($whatsappUrl);
                     }),
                 Html2MediaAction::make('print')
@@ -371,6 +401,7 @@ class AttendanceResource extends Resource
     {
         return [
             AttendanceStats::class,
+            BirthdaysThisMonth::class,
         ];
     }
 } 

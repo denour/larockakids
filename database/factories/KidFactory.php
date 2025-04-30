@@ -26,11 +26,22 @@ class KidFactory extends Factory
      */
     public function definition(): array
     {
+        $currentMonth = now()->month;
+        $currentYear = now()->year;
+        
+        // 30% de probabilidad de que el cumpleaños sea este mes
+        $birthDate = fake()->boolean(30) 
+            ? fake()->dateTimeBetween(
+                startDate: "{$currentYear}-{$currentMonth}-01",
+                endDate: "{$currentYear}-{$currentMonth}-" . now()->daysInMonth
+            )
+            : fake()->dateTimeBetween('-10 years', 'now');
+
         return [
-            'first_name' => $this->faker->firstName(),
-            'last_name' => $this->faker->lastName(),
-            'birth_date' => $this->faker->date(),
-            'gender' => $this->faker->randomElement(['male', 'female']),
+            'first_name' => fake()->firstName(),
+            'last_name' => fake()->lastName(),
+            'birth_date' => $birthDate,
+            'gender' => fake()->randomElement(['male', 'female']),
         ];
     }
 

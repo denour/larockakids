@@ -2,9 +2,9 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Widgets\AgePieChart;
-use App\Filament\Widgets\AttendanceStats;
-use App\Filament\Widgets\GenderPieChart;
+use App\Filament\Widgets\BirthdaysThisMonth;
+use App\Filament\Widgets\AgeDistributionChart;
+use App\Filament\Widgets\GenderDistributionChart;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -12,6 +12,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\Widgets;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -46,9 +47,9 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                \App\Filament\Widgets\AttendanceStats::class,
-                \App\Filament\Widgets\GenderPieChart::class,
-                \App\Filament\Widgets\AgePieChart::class,
+                BirthdaysThisMonth::class,
+                AgeDistributionChart::class,
+                GenderDistributionChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,

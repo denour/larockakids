@@ -12,15 +12,7 @@ class KidSeeder extends Seeder
      */
     public function run(): void
     {
-        Kid::factory()
-            ->count(50)
-            ->create([
-                'birth_date' => function () {
-                    // Generar fechas de nacimiento para niños menores de 5 años
-                    $maxDate = now()->subYears(5);
-                    $minDate = now()->subYears(1);
-                    return fake()->dateTimeBetween($maxDate, $minDate)->format('Y-m-d');
-                },
-            ]);
+        // Crear 20 niños, aproximadamente 6 tendrán cumpleaños este mes (30%)
+        Kid::factory()->count(20)->create();
     }
 }
