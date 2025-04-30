@@ -32,6 +32,8 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->passwordReset()
+            ->profile()
             ->font('Best Kids')
             ->brandName('Piedritas')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
