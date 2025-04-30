@@ -15,6 +15,8 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use App\Enums\Country;
 
 class KidResource extends Resource
 {
@@ -77,19 +79,30 @@ class KidResource extends Resource
                                 ->label('Apellidos')
                                 ->required()
                                 ->maxLength(255),
-                            Forms\Components\TextInput::make('phone')
+                            PhoneInput::make('phone')
                                 ->label('Teléfono')
                                 ->required()
-                                ->maxLength(20),
-                            Forms\Components\TextInput::make('international_code')
-                                ->label('Código Internacional')
-                                ->required()
-                                ->maxLength(5),
+                                ->defaultCountry(Country::getDefaultCountry())
+                                ->live()
+                                ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                    $set('international_code', $state);
+                                }),
                             Forms\Components\TextInput::make('email')
                                 ->label('Correo Electrónico')
                                 ->email()
                                 ->maxLength(255),
                         ])
+                        ->createOptionUsing(function (array $data) {
+                            $contact = Contact::create([
+                                'first_name' => $data['first_name'],
+                                'last_name' => $data['last_name'],
+                                'phone' => $data['phone'],
+                                'international_code' => $data['phone'],
+                                'email' => $data['email'],
+                            ]);
+
+                            return $contact->id;
+                        })
                         ->required(),
                     Forms\Components\Select::make('relationship_type')
                         ->label('Parentesco')

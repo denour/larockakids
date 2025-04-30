@@ -25,6 +25,8 @@ use Filament\Forms\Components\Actions\Action as FormAction;
 use Filament\Forms\Components\Modal;
 use Torgodly\Html2Media\Tables\Actions\Html2MediaAction;
 use Illuminate\Support\Facades\Notification;
+use App\Enums\Country;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 
 
 class AttendanceResource extends Resource
@@ -114,7 +116,50 @@ class AttendanceResource extends Resource
                             ]);
                     })
                     ->searchable()
-                    ->required(),
+                    ->required()
+                    ->createOptionForm([
+                        Forms\Components\TextInput::make('first_name')
+                            ->label('Nombre')
+                            ->required()
+                            ->maxLength(255),
+                        Forms\Components\TextInput::make('last_name')
+                            ->label('Apellidos')
+                            ->required()
+                            ->maxLength(255),
+                        PhoneInput::make('phone')
+                            ->label('Teléfono')
+                            ->required()
+                            ->defaultCountry(Country::getDefaultCountry())
+                            ->live()
+                            ->afterStateUpdated(function ($state, Forms\Set $set) {
+                                $set('international_code', $state);
+                            }),
+                        Forms\Components\TextInput::make('email')
+                            ->label('Correo Electrónico')
+                            ->email()
+                            ->maxLength(255),
+                    ])
+                    ->createOptionUsing(function (array $data, Forms\Get $get) {
+                        $contact = Contact::create([
+                            'first_name' => $data['first_name'],
+                            'last_name' => $data['last_name'],
+                            'phone' => $data['phone'],
+                            'international_code' => $data['phone'],
+                            'email' => $data['email'],
+                        ]);
+
+                        $kid = Kid::find($get('kid_id'));
+                        if ($kid) {
+                            $kid->contacts()->attach($contact->id, ['relationship_type' => 'parent']);
+                        }
+
+                        return $contact->id;
+                    })
+                    ->createOptionAction(
+                        fn (Forms\Components\Actions\Action $action) => $action
+                            ->modalHeading('Crear nuevo contacto')
+                            ->modalSubmitActionLabel('Crear contacto')
+                    ),
                 Textarea::make('observations')
                     ->label('Observaciones')
                     ->maxLength(65535)

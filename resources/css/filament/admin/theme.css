@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Best+Kids&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    :root {
+        --font-family-sans: 'Best Kids', system-ui, -apple-system, sans-serif;
+    }
+}
+
+@layer utilities {
+    .font-best-kids {
+        font-family: 'Best Kids', system-ui, -apple-system, sans-serif;
+    }
+} 
