@@ -362,7 +362,8 @@ class AttendanceResource extends Resource
                             $message .= "\nAlergias: " . $kid->allergies->pluck('name')->join(', ');
                         }
                         
-                        $whatsappUrl = "https://wa.me/{$contact->full_phone}?text=" . urlencode($message);
+                        $phoneNumber = str_replace('+', '', $contact->full_phone);
+                        $whatsappUrl = "https://wa.me/{$phoneNumber}?text=" . urlencode($message);
                         return redirect($whatsappUrl);
                     }),
                 Html2MediaAction::make('print')
