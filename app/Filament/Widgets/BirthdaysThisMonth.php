@@ -7,6 +7,7 @@ use Carbon\Carbon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
+use Illuminate\Support\Facades\DB;
 
 class BirthdaysThisMonth extends BaseWidget
 {
@@ -27,11 +28,15 @@ class BirthdaysThisMonth extends BaseWidget
         $nextWeek = $today->copy()->addWeek();
         $endOfNextWeek = $nextWeek->copy()->endOfWeek();
         
+        $orderByDay = DB::connection()->getDriverName() === 'pgsql' 
+            ? 'EXTRACT(DAY FROM birth_date)'
+            : 'DAYOFMONTH(birth_date)';
+        
         return $table
             ->query(
                 Kid::query()
                     ->whereMonth('birth_date', $currentMonth)
-                    ->orderByRaw('DAY(birth_date)')
+                    ->orderByRaw($orderByDay)
             )
             ->columns([
                 Tables\Columns\TextColumn::make('full_name')
