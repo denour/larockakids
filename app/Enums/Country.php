@@ -72,8 +72,8 @@ enum Country: string
             ->toArray();
     }
 
-    public static function getDefaultCountry(): string
+    public static function getDefaultCountry(): self
     {
-        return self::MEXICO->value;
+        return self::MEXICO;
     }
 } 

@@ -111,9 +111,7 @@ class AttendanceResource extends Resource
                         }
                         return $kid->contacts()
                             ->get()
-                            ->mapWithKeys(fn ($contact) => [
-                                $contact->id => $contact->first_name . ' ' . $contact->last_name
-                            ]);
+                            ->pluck('full_name', 'id');
                     })
                     ->searchable()
                     ->required()
@@ -129,10 +127,10 @@ class AttendanceResource extends Resource
                         PhoneInput::make('phone')
                             ->label('Teléfono')
                             ->required()
-                            ->defaultCountry(Country::getDefaultCountry())
+                            ->defaultCountry(Country::getDefaultCountry()->value)
                             ->live()
                             ->afterStateUpdated(function ($state, Forms\Set $set) {
-                                $set('international_code', $state);
+                                $set('international_code', Country::getDefaultCountry()->getCode());
                             }),
                         Forms\Components\TextInput::make('email')
                             ->label('Correo Electrónico')
@@ -144,7 +142,7 @@ class AttendanceResource extends Resource
                             'first_name' => $data['first_name'],
                             'last_name' => $data['last_name'],
                             'phone' => $data['phone'],
-                            'international_code' => $data['phone'],
+                            'international_code' => Country::getDefaultCountry()->getCode(),
                             'email' => $data['email'],
                         ]);
 
@@ -170,6 +168,7 @@ class AttendanceResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('kid.full_name')
                     ->label('Niño')

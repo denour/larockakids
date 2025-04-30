@@ -24,6 +24,16 @@ class Contact extends Model
     ];
 
     /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'full_name',
+        'full_phone',
+    ];
+
+    /**
      * The validation rules for the model.
      *
      * @return array<string, string>

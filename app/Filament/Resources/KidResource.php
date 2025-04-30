@@ -67,7 +67,7 @@ class KidResource extends Resource
                 ->schema([
                     Forms\Components\Select::make('contact_id')
                         ->label('Contacto')
-                        ->options(Contact::query()->pluck('first_name', 'id'))
+                        ->options(Contact::query()->pluck('full_name', 'id'))
                         ->searchable()
                         ->preload()
                         ->createOptionForm([
@@ -82,10 +82,10 @@ class KidResource extends Resource
                             PhoneInput::make('phone')
                                 ->label('Teléfono')
                                 ->required()
-                                ->defaultCountry(Country::getDefaultCountry())
+                                ->defaultCountry(Country::getDefaultCountry()->value)
                                 ->live()
                                 ->afterStateUpdated(function ($state, Forms\Set $set) {
-                                    $set('international_code', $state);
+                                    $set('international_code', Country::getDefaultCountry()->getCode());
                                 }),
                             Forms\Components\TextInput::make('email')
                                 ->label('Correo Electrónico')
@@ -97,7 +97,7 @@ class KidResource extends Resource
                                 'first_name' => $data['first_name'],
                                 'last_name' => $data['last_name'],
                                 'phone' => $data['phone'],
-                                'international_code' => $data['phone'],
+                                'international_code' => Country::getDefaultCountry()->getCode(),
                                 'email' => $data['email'],
                             ]);
 
