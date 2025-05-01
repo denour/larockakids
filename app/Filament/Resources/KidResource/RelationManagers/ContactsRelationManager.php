@@ -9,6 +9,8 @@ use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
+use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
+use App\Enums\Country;
 
 class ContactsRelationManager extends RelationManager
 {
@@ -20,38 +22,26 @@ class ContactsRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\Select::make('id')
-                    ->label('Contacto')
-                    ->options(Contact::query()->pluck('first_name', 'id'))
-                    ->searchable()
-                    ->preload()
-                    ->createOptionForm([
-                        Forms\Components\TextInput::make('first_name')
-                            ->label('Nombre')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('last_name')
-                            ->label('Apellidos')
-                            ->required()
-                            ->maxLength(255),
-                        Forms\Components\TextInput::make('phone')
-                            ->label('Teléfono')
-                            ->required()
-                            ->maxLength(20),
-                        Forms\Components\TextInput::make('international_code')
-                            ->label('Código Internacional')
-                            ->required()
-                            ->maxLength(5),
-                        Forms\Components\TextInput::make('email')
-                            ->label('Correo Electrónico')
-                            ->email()
-                            ->maxLength(255),
-                    ])
-                    ->createOptionUsing(function (array $data): int {
-                        $contact = Contact::create($data);
-                        return $contact->id;
-                    })
-                    ->required(),
+                Forms\Components\TextInput::make('first_name')
+                    ->label('Nombre')
+                    ->required()
+                    ->maxLength(255),
+                Forms\Components\TextInput::make('last_name')
+                    ->label('Apellidos')
+                    ->required()
+                    ->maxLength(255),
+                PhoneInput::make('phone')
+                    ->label('Teléfono')
+                    ->required()
+                    ->defaultCountry(Country::getDefaultCountry()->value)
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        $set('international_code', Country::getDefaultCountry()->getCode());
+                    }),
+                Forms\Components\TextInput::make('email')
+                    ->label('Correo Electrónico')
+                    ->email()
+                    ->maxLength(255),
                 Forms\Components\Select::make('relationship_type')
                     ->label('Parentesco')
                     ->options([
@@ -74,6 +64,8 @@ class ContactsRelationManager extends RelationManager
                     ->label('Nombre'),
                 Tables\Columns\TextColumn::make('last_name')
                     ->label('Apellidos'),
+                Tables\Columns\TextColumn::make('phone')
+                    ->label('Teléfono'),
                 Tables\Columns\TextColumn::make('pivot.relationship_type')
                     ->label('Parentesco')
                     ->formatStateUsing(function ($state) {
@@ -93,7 +85,14 @@ class ContactsRelationManager extends RelationManager
             ->headerActions([
                 Tables\Actions\CreateAction::make()
                     ->using(function (array $data, string $model): Model {
-                        $contact = Contact::find($data['id']);
+                        $contact = Contact::create([
+                            'first_name' => $data['first_name'],
+                            'last_name' => $data['last_name'],
+                            'phone' => $data['phone'],
+                            'international_code' => Country::getDefaultCountry()->getCode(),
+                            'email' => $data['email'],
+                        ]);
+                        
                         $this->getOwnerRecord()->contacts()->attach($contact->id, [
                             'relationship_type' => $data['relationship_type']
                         ]);
@@ -101,19 +100,7 @@ class ContactsRelationManager extends RelationManager
                     }),
             ])
             ->actions([
-                Tables\Actions\EditAction::make()
-                    ->form([
-                        Forms\Components\Select::make('relationship_type')
-                            ->label('Parentesco')
-                            ->options([
-                                'parent' => 'Padre/Madre',
-                                'family' => 'Familiar',
-                                'friend of parent' => 'Amigo de los Padres',
-                                'guardian' => 'Tutor',
-                                'other' => 'Otro',
-                            ])
-                            ->required(),
-                    ]),
+                Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([

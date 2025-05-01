@@ -27,7 +27,7 @@ use Torgodly\Html2Media\Tables\Actions\Html2MediaAction;
 use Illuminate\Support\Facades\Notification;
 use App\Enums\Country;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
-use App\Filament\Widgets\BirthdaysThisMonth;
+use App\Events\WhatsAppNotification;
 
 
 class AttendanceResource extends Resource
@@ -326,34 +326,53 @@ class AttendanceResource extends Resource
                     ->action(function (Attendance $record, array $data) {
                         $contact = $record->contact;
                         $kid = $record->kid;
-                        $baseMessage = "🚨 *ALERTA - La Roca Kids*\n\n";
-                        $baseMessage .= "Hola {$contact->first_name},\n\n";
                         
-                        switch ($data['situation']) {
-                            case 'fever':
-                                $temperature = $data['temperature'] ?? 'no registrada';
-                                $message = "{$baseMessage}te informamos que {$kid->first_name} presenta fiebre.\n";
-                                $message .= "Temperatura: {$temperature}°C\n";
-                                $message .= "Por favor, ven a recogerlo lo antes posible.";
-                                break;
-                            case 'accident':
-                                $message = "{$baseMessage}te informamos que {$kid->first_name} ha tenido un accidente.\n";
-                                $message .= "Por favor, ven a recogerlo lo antes posible.";
-                                break;
-                            case 'pickup':
-                                $message = "{$baseMessage}te recordamos que es hora de recoger a {$kid->first_name}.\n";
-                                $message .= "Hora de entrada: {$record->check_in->format('H:i')}";
-                                break;
-                            case 'other':
-                                $message = "{$baseMessage}te informamos que {$kid->first_name} necesita atención.\n";
-                                $message .= "Por favor, ven a recogerlo lo antes posible.";
-                                break;
-                        }
+                        // Construir el mensaje base
+                        $baseMessage = [
+                            'header' => "🚨 *ALERTA - La Roca Kids*\n\n",
+                            'greeting' => "Hola {$contact->first_name},\n\n",
+                        ];
                         
+                        // Construir el mensaje según la situación
+                        $situationMessage = match($data['situation']) {
+                            'fever' => [
+                                'situation' => "te informamos que {$kid->first_name} presenta fiebre.\n",
+                                'details' => "Temperatura: " . ($data['temperature'] ?? 'no registrada') . "°C\n",
+                                'action' => "Por favor, ven a recogerlo lo antes posible."
+                            ],
+                            'accident' => [
+                                'situation' => "te informamos que {$kid->first_name} ha tenido un accidente.\n",
+                                'details' => "",
+                                'action' => "Por favor, ven a recogerlo lo antes posible."
+                            ],
+                            'pickup' => [
+                                'situation' => "te recordamos que es hora de recoger a {$kid->first_name}.\n",
+                                'details' => "Hora de entrada: {$record->check_in->format('H:i')}",
+                                'action' => ""
+                            ],
+                            'other' => [
+                                'situation' => "te informamos que {$kid->first_name} necesita atención.\n",
+                                'details' => "",
+                                'action' => "Por favor, ven a recogerlo lo antes posible."
+                            ],
+                            default => throw new \InvalidArgumentException('Tipo de notificación no válido')
+                        };
+                        
+                        // Construir el mensaje final
+                        $message = implode('', [
+                            $baseMessage['header'],
+                            $baseMessage['greeting'],
+                            $situationMessage['situation'],
+                            $situationMessage['details'],
+                            $situationMessage['action']
+                        ]);
+                        
+                        // Agregar mensaje adicional si existe
                         if (!empty($data['message'])) {
                             $message .= "\n\n*Mensaje adicional:*\n{$data['message']}";
                         }
                         
+                        // Agregar datos del niño
                         $message .= "\n\n*Datos del niño:*\n";
                         $message .= "Nombre: {$kid->first_name} {$kid->last_name}\n";
                         $message .= "Edad: {$kid->age} años";
@@ -361,10 +380,22 @@ class AttendanceResource extends Resource
                         if ($kid->allergies->isNotEmpty()) {
                             $message .= "\nAlergias: " . $kid->allergies->pluck('name')->join(', ');
                         }
+
+                        // Limpiar el número de teléfono
+                        $phoneNumber = preg_replace('/[^0-9]/', '', $contact->phone);
+
+                        // Disparar el evento
+                        broadcast(new WhatsAppNotification(
+                            message: $message,
+                            phoneNumber: $phoneNumber
+                        ))->toOthers();
                         
-                        $phoneNumber = str_replace('+', '', $contact->full_phone);
-                        $whatsappUrl = "https://wa.me/{$phoneNumber}?text=" . urlencode($message);
-                        return redirect($whatsappUrl);
+                        // Mostrar notificación de éxito
+                        \Filament\Notifications\Notification::make()
+                            ->title('Notificación enviada')
+                            ->body('Se ha preparado el mensaje en WhatsApp')
+                            ->success()
+                            ->send();
                     }),
                 Html2MediaAction::make('print')
                     ->label('Imprimir Sticker')
@@ -402,7 +433,6 @@ class AttendanceResource extends Resource
     {
         return [
             AttendanceStats::class,
-            BirthdaysThisMonth::class,
         ];
     }
 } 
