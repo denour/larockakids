@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\AttendanceStatus;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -9,7 +10,7 @@ use Illuminate\Console\Command;
 class CleanAttendances extends Command
 {
     protected $signature = 'attendances:clean';
-    protected $description = 'Limpia las asistencias del día que ya tienen registrada su hora de salida';
+    protected $description = 'Actualiza el estado de las asistencias del día que ya tienen registrada su hora de salida';
 
     public function handle()
     {
@@ -17,8 +18,9 @@ class CleanAttendances extends Command
         
         $count = Attendance::whereDate('check_in', $today)
             ->whereNotNull('check_out')
-            ->delete();
+            ->where('status', '!=', AttendanceStatus::RETIRADO)
+            ->update(['status' => AttendanceStatus::RETIRADO]);
 
-        $this->info("Se han archivado {$count} registros de asistencia del día {$today->format('d/m/Y')}");
+        $this->info("Se han actualizado {$count} registros de asistencia del día {$today->format('d/m/Y')} a estado RETIRADO");
     }
 } 
