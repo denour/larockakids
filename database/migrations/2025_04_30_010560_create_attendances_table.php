@@ -17,6 +17,7 @@ return new class extends Migration
             $table->text('observations')->nullable();
             $table->string('status')->default('en_clase');
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -20,6 +20,7 @@ use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Vormkracht10\TwoFactorAuth\TwoFactorAuthPlugin;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -30,6 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->registration(false)
             ->colors([
                 'primary' => Color::Amber,
             ])
@@ -42,6 +44,9 @@ class AdminPanelProvider extends PanelProvider
             ->brandLogoHeight('2.5rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
+            ->plugins([
+                TwoFactorAuthPlugin::make(),
+            ])
             ->pages([
                 Pages\Dashboard::class,
             ])
@@ -65,6 +70,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])
+            ->authGuard('web')
             ->renderHook(
                 'panels::body.end',
                 fn () => view('filament.scripts.sticker')

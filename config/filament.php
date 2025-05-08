@@ -1,17 +1,23 @@
 <?php
 
 return [
-    'default_filesystem_disk' => 'public',
     'auth' => [
         'guard' => 'web',
         'pages' => [
-            'login' => \App\Filament\Pages\Auth\Login::class,
+            'login' => \Filament\Pages\Auth\Login::class,
+        ],
+        'registration' => false,
+    ],
+    'layout' => [
+        'sidebar' => [
+            'is_collapsible_on_desktop' => true,
+            'groups' => [
+                'are_collapsible' => true,
+            ],
         ],
     ],
     'pages' => [
-        'namespace' => 'App\\Filament\\Pages',
-        'path' => app_path('Filament/Pages'),
-        'register' => [],
+        'dashboard' => \Filament\Pages\Dashboard::class,
     ],
     'resources' => [
         'namespace' => 'App\\Filament\\Resources',
