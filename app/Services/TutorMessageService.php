@@ -33,7 +33,7 @@ class TutorMessageService
         $values = [
             '[tutor]' => $contact->full_name,
             '[nino]' => $kid->full_name,
-            '[fecha]' => Carbon::now()->format('d/m/Y'),
+            '[fecha]' => Carbon::now()->format('d/m/Y h:i A'),
             '[comentario]' => $additionalData['comment'] ?? '',
         ];
 
