@@ -1,0 +1,686 @@
+[
+    {
+        "Nombre": "Giana Custodio",
+        "Tutor": "Jaquelin Diaz",
+        "Telefono": "6645387221",
+        "Fecha Nacimiento": "07\/05\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Paola Barragan",
+        "Tutor": "Lety Mora",
+        "Telefono": "6643167388",
+        "Fecha Nacimiento": "07\/06\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Leilani Ramos",
+        "Tutor": "Talpa Carreno",
+        "Telefono": "6647238705",
+        "Fecha Nacimiento": "14\/09\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Ansel Villa",
+        "Tutor": "Alex Alberistain",
+        "Telefono": "6643104326",
+        "Fecha Nacimiento": "22\/01\/2020",
+        "Observaciones": "ALERGICO AL MANI",
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Giana Valentina Gomez",
+        "Tutor": "Fabian Gomez",
+        "Telefono": "6641295343",
+        "Fecha Nacimiento": "09\/12\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Lucas Cadena",
+        "Tutor": "Luis Cadena",
+        "Telefono": "6644913257",
+        "Fecha Nacimiento": "09\/07\/2020",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Omar Emanuel",
+        "Tutor": "Omar Valera",
+        "Telefono": "6631557551",
+        "Fecha Nacimiento": "24\/04\/2024",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Vera Marine",
+        "Tutor": "Mavet Toledo",
+        "Telefono": "6643642468",
+        "Fecha Nacimiento": "23\/11\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Amy Castaneda",
+        "Tutor": "Joseline Castaneda",
+        "Telefono": "6644376854",
+        "Fecha Nacimiento": "03\/10\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Jose Luis Reyes",
+        "Tutor": "Vernica Villanueva",
+        "Telefono": "6642421939",
+        "Fecha Nacimiento": "05\/12\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Abril Gonzales",
+        "Tutor": "Fernanda  Montoya",
+        "Telefono": "6731159229",
+        "Fecha Nacimiento": "02\/07\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Kenya Amezcua",
+        "Tutor": "Montse Cano",
+        "Telefono": "6195472955",
+        "Fecha Nacimiento": "13\/12\/2019",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Benicio Gutierrez",
+        "Tutor": "Romer Gutierrez",
+        "Telefono": "6632252390",
+        "Fecha Nacimiento": "31\/07\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Gretel Musio",
+        "Tutor": "Isabel Altamirano",
+        "Telefono": "6643716325",
+        "Fecha Nacimiento": "16\/08\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Dante Hernandez",
+        "Tutor": "Eduardo  Hernandez",
+        "Telefono": "6648048602",
+        "Fecha Nacimiento": "07\/08\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Emma Rojas",
+        "Tutor": "Kamila Rojas",
+        "Telefono": "6196014170",
+        "Fecha Nacimiento": "05\/04\/2020",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Kanji Rojas",
+        "Tutor": "Kamila Rojas",
+        "Telefono": "6196014170",
+        "Fecha Nacimiento": "10\/02\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Fernanda Lazaron",
+        "Tutor": "Celina Borbon",
+        "Telefono": "6643855838",
+        "Fecha Nacimiento": "14\/10\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Mabi Padron",
+        "Tutor": "Nestor Castro",
+        "Telefono": "6863668511",
+        "Fecha Nacimiento": "02\/05\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Naomi Campa",
+        "Tutor": "Jimena Venites",
+        "Telefono": "6644052137",
+        "Fecha Nacimiento": "26\/07\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Tiago Martinez",
+        "Tutor": "Diego Martinez",
+        "Telefono": "6644443885",
+        "Fecha Nacimiento": "03\/01\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Gaby Gamez",
+        "Tutor": "Susana Gamez",
+        "Telefono": "6643621800",
+        "Fecha Nacimiento": "27\/05\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Emilia Preciado",
+        "Tutor": "Ana Karen Cipres",
+        "Telefono": "6645977440",
+        "Fecha Nacimiento": "15\/09\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Elli Gutierrez",
+        "Tutor": "Michelle  Torres",
+        "Telefono": "6647654899",
+        "Fecha Nacimiento": "18\/03\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Mia Espinoza",
+        "Tutor": "Denise Espinoza",
+        "Telefono": "6644929111",
+        "Fecha Nacimiento": "01\/11\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Gretel Albestrain",
+        "Tutor": "Andrea Albestrain",
+        "Telefono": "6643104326",
+        "Fecha Nacimiento": "01\/01\/2021",
+        "Observaciones": null,
+        "Activo": 0,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Amaia Gonzales",
+        "Tutor": "Michelle Torres",
+        "Telefono": "6647654899",
+        "Fecha Nacimiento": "15\/05\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Isabella Castillo",
+        "Tutor": "Jaqueline Ochoa",
+        "Telefono": "6194947447",
+        "Fecha Nacimiento": "07\/12\/2021",
+        "Observaciones": "ALERGIA FRESAS Y LACTOSA",
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Gal Villa",
+        "Tutor": "Andrea Albestrain",
+        "Telefono": "6643104326",
+        "Fecha Nacimiento": "01\/01\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Fernanda Mendoza",
+        "Tutor": "Victor Mendoza",
+        "Telefono": "6643423395",
+        "Fecha Nacimiento": "15\/05\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Emilio Josue",
+        "Tutor": "Leti Mora",
+        "Telefono": "6643167388",
+        "Fecha Nacimiento": "12\/02\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Victoria Gomez",
+        "Tutor": "David Gomez",
+        "Telefono": "6647557407",
+        "Fecha Nacimiento": "15\/05\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Kaylee Tovar",
+        "Tutor": "Martin Tovar",
+        "Telefono": "6652502541",
+        "Fecha Nacimiento": "15\/09\/2021",
+        "Observaciones": "ALERGIA FRESAS Y LACTOSA",
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Jesus Mateo Hernandez Pineda",
+        "Tutor": "Guadalupe Hernandez",
+        "Telefono": "6647528406",
+        "Fecha Nacimiento": "21\/10\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Eleana Moreno",
+        "Tutor": "Daniela Gonzalez",
+        "Telefono": "6643479653",
+        "Fecha Nacimiento": "17\/01\/2020",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Santiago Carron",
+        "Tutor": "Miriam Garcia",
+        "Telefono": "6642361786",
+        "Fecha Nacimiento": "20\/03\/2020",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Luz Maria Oliva",
+        "Tutor": "Laura Gonzalez",
+        "Telefono": "6644870985",
+        "Fecha Nacimiento": "30\/06\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Ivanna  Cordova",
+        "Tutor": "Yoselyn Pavon",
+        "Telefono": "5510613593",
+        "Fecha Nacimiento": "10\/02\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Giana Custodio",
+        "Tutor": "Jaquelin Diaz",
+        "Telefono": "6645387221",
+        "Fecha Nacimiento": "07\/05\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Paola Barragan",
+        "Tutor": "Lety Mora",
+        "Telefono": "6643167388",
+        "Fecha Nacimiento": "07\/06\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Leilani Ramos",
+        "Tutor": "Talpa Carreno",
+        "Telefono": "6647238705",
+        "Fecha Nacimiento": "14\/09\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Ansel Villa",
+        "Tutor": "Alex Alberistain",
+        "Telefono": "6643104326",
+        "Fecha Nacimiento": "22\/01\/2020",
+        "Observaciones": "ALERGICO AL MANI",
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Giana Valentina Gomez",
+        "Tutor": "Fabian Gomez",
+        "Telefono": "6641295343",
+        "Fecha Nacimiento": "09\/12\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Lucas Cadena",
+        "Tutor": "Luis Cadena",
+        "Telefono": "6644913257",
+        "Fecha Nacimiento": "09\/07\/2020",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Omar Emanuel",
+        "Tutor": "Omar Valera",
+        "Telefono": "6631557551",
+        "Fecha Nacimiento": "24\/04\/2024",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Vera Marine",
+        "Tutor": "Mavet Toledo",
+        "Telefono": "6643642468",
+        "Fecha Nacimiento": "23\/11\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Amy Castaneda",
+        "Tutor": "Joseline Castaneda",
+        "Telefono": "6644376854",
+        "Fecha Nacimiento": "03\/10\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Jose Luis Reyes",
+        "Tutor": "Vernica Villanueva",
+        "Telefono": "6642421939",
+        "Fecha Nacimiento": "05\/12\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Abril Gonzales",
+        "Tutor": "Fernanda  Montoya",
+        "Telefono": "6731159229",
+        "Fecha Nacimiento": "02\/07\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Kenya Amezcua",
+        "Tutor": "Montse Cano",
+        "Telefono": "6195472955",
+        "Fecha Nacimiento": "13\/12\/2019",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Benicio Gutierrez",
+        "Tutor": "Romer Gutierrez",
+        "Telefono": "6632252390",
+        "Fecha Nacimiento": "31\/07\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Gretel Musio",
+        "Tutor": "Isabel Altamirano",
+        "Telefono": "6643716325",
+        "Fecha Nacimiento": "16\/08\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Dante Hernandez",
+        "Tutor": "Eduardo  Hernandez",
+        "Telefono": "6648048602",
+        "Fecha Nacimiento": "07\/08\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Emma Rojas",
+        "Tutor": "Kamila Rojas",
+        "Telefono": "6196014170",
+        "Fecha Nacimiento": "05\/04\/2020",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Kanji Rojas",
+        "Tutor": "Kamila Rojas",
+        "Telefono": "6196014170",
+        "Fecha Nacimiento": "10\/02\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Fernanda Lazaron",
+        "Tutor": "Celina Borbon",
+        "Telefono": "6643855838",
+        "Fecha Nacimiento": "14\/10\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Mabi Padron",
+        "Tutor": "Nestor Castro",
+        "Telefono": "6863668511",
+        "Fecha Nacimiento": "02\/05\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Naomi Campa",
+        "Tutor": "Jimena Venites",
+        "Telefono": "6644052137",
+        "Fecha Nacimiento": "26\/07\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Tiago Martinez",
+        "Tutor": "Diego Martinez",
+        "Telefono": "6644443885",
+        "Fecha Nacimiento": "03\/01\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Gaby Gamez",
+        "Tutor": "Susana Gamez",
+        "Telefono": "6643621800",
+        "Fecha Nacimiento": "27\/05\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Emilia Preciado",
+        "Tutor": "Ana Karen Cipres",
+        "Telefono": "6645977440",
+        "Fecha Nacimiento": "15\/09\/2023",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Elli Gutierrez",
+        "Tutor": "Michelle  Torres",
+        "Telefono": "6647654899",
+        "Fecha Nacimiento": "18\/03\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Mia Espinoza",
+        "Tutor": "Denise Espinoza",
+        "Telefono": "6644929111",
+        "Fecha Nacimiento": "01\/11\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Gretel Albestrain",
+        "Tutor": "Andrea Albestrain",
+        "Telefono": "6643104326",
+        "Fecha Nacimiento": "01\/01\/2021",
+        "Observaciones": null,
+        "Activo": 0,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Amaia Gonzales",
+        "Tutor": "Michelle Torres",
+        "Telefono": "6647654899",
+        "Fecha Nacimiento": "15\/05\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Isabella Castillo",
+        "Tutor": "Jaqueline Ochoa",
+        "Telefono": "6194947447",
+        "Fecha Nacimiento": "07\/12\/2021",
+        "Observaciones": "ALERGIA FRESAS Y LACTOSA",
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Gal Villa",
+        "Tutor": "Andrea Albestrain",
+        "Telefono": "6643104326",
+        "Fecha Nacimiento": "01\/01\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Fernanda Mendoza",
+        "Tutor": "Victor Mendoza",
+        "Telefono": "6643423395",
+        "Fecha Nacimiento": "15\/05\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Emilio Josue",
+        "Tutor": "Leti Mora",
+        "Telefono": "6643167388",
+        "Fecha Nacimiento": "12\/02\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Victoria Gomez",
+        "Tutor": "David Gomez",
+        "Telefono": "6647557407",
+        "Fecha Nacimiento": "15\/05\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Kaylee Tovar",
+        "Tutor": "Martin Tovar",
+        "Telefono": "6652502541",
+        "Fecha Nacimiento": "15\/09\/2021",
+        "Observaciones": "ALERGIA FRESAS Y LACTOSA",
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Jesus Mateo Hernandez Pineda",
+        "Tutor": "Guadalupe Hernandez",
+        "Telefono": "6647528406",
+        "Fecha Nacimiento": "21\/10\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Eleana Moreno",
+        "Tutor": "Daniela Gonzalez",
+        "Telefono": "6643479653",
+        "Fecha Nacimiento": "17\/01\/2020",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Santiago Carron",
+        "Tutor": "Miriam Garcia",
+        "Telefono": "6642361786",
+        "Fecha Nacimiento": "20\/03\/2020",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "male"
+    },
+    {
+        "Nombre": "Luz Maria Oliva",
+        "Tutor": "Laura Gonzalez",
+        "Telefono": "6644870985",
+        "Fecha Nacimiento": "30\/06\/2021",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    },
+    {
+        "Nombre": "Ivanna  Cordova",
+        "Tutor": "Yoselyn Pavon",
+        "Telefono": "5510613593",
+        "Fecha Nacimiento": "10\/02\/2022",
+        "Observaciones": null,
+        "Activo": 1,
+        "Genero": "female"
+    }
+]
