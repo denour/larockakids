@@ -25,9 +25,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call([
             AllergySeeder::class,
-            KidSeeder::class,
             AttendanceSeeder::class,
             TutorMessageSeeder::class,
+            KidsExportSeeder::class,
         ]);
     }
 }

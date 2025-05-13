@@ -16,7 +16,9 @@ return new class extends Migration
             $table->string('first_name');
             $table->string('last_name');
             $table->date('birth_date');
-            $table->enum('gender', ['male', 'female']);
+            $table->enum('gender', ['male', 'female'])->default('male');
+            $table->string('medical_notes')->nullable();
+            $table->boolean('is_active')->default(true);
             $table->timestamps();
         });
     }

@@ -22,6 +22,10 @@ class Kid extends Model
         'gender',
     ];
 
+    protected $default = [
+        'gender' => 'male',
+    ];
+    
     /**
      * The attributes that should be cast.
      *
