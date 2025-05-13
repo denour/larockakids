@@ -21,6 +21,7 @@ class TutorMessage extends Model
 
     protected $casts = [
         'is_active' => 'boolean',
+        'message' => 'string',
     ];
 
     /**
@@ -39,13 +40,42 @@ class TutorMessage extends Model
     public function replaceTags(array $values): string
     {
         $message = $this->message;
-        $tags = TutorMessageType::getTags();
+        
+        // Mapeo de tags a variables
+        $tagMap = [
+            '[tutor]' => '[tutor]',
+            '[nino]' => '[nino]',
+            '[fecha]' => '[fecha]',
+            '[hora]' => '[hora]',
+            '[comentario]' => '[comentario]',
+        ];
 
-        foreach ($tags as $tag => $variable) {
+        // Reemplazar cada tag con su valor correspondiente
+        foreach ($tagMap as $tag => $variable) {
             $value = $values[$variable] ?? '';
             $message = str_replace($tag, $value, $message);
         }
 
         return $message;
+    }
+
+    /**
+     * Mutador para el campo message
+     */
+    public function setMessageAttribute($value)
+    {
+        if ($value instanceof \Illuminate\Support\HtmlString) {
+            $this->attributes['message'] = $value->toHtml();
+        } else {
+            $this->attributes['message'] = $value;
+        }
+    }
+
+    /**
+     * Accesor para el campo message
+     */
+    public function getMessageAttribute($value)
+    {
+        return new \Illuminate\Support\HtmlString($value);
     }
 } 

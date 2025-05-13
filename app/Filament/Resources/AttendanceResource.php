@@ -28,6 +28,7 @@ use Illuminate\Support\Facades\Notification;
 use App\Enums\Country;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use App\Events\WhatsAppNotification;
+use App\Services\TutorMessageService;
 
 
 class AttendanceResource extends Resource
@@ -265,49 +266,24 @@ class AttendanceResource extends Resource
                     }),
             ])
             ->actions([
-                Tables\Actions\Action::make('checkout')
-                    ->label('Salida')
-                    ->icon('heroicon-o-arrow-right-on-rectangle')
-                    ->color('success')
-                    ->modalHeading('Registrar Salida')
-                    ->modalIcon('heroicon-o-arrow-right-on-rectangle')
-                    ->modalIconColor('success')
-                    ->modalDescription('¿Estás seguro de que deseas registrar la salida del niño?')
-                    ->form([
-                        Forms\Components\Textarea::make('observations')
-                            ->label('Observaciones')
-                            ->placeholder('Escribe alguna observación sobre la salida del niño...')
-                            ->maxLength(255),
-                    ])
-                    ->action(function (Attendance $record, array $data) {
-                        $record->update([
-                            'check_out' => now(),
-                            'observations' => $data['observations'] ?? null,
-                        ]);
-                        
-                        \Filament\Notifications\Notification::make()
-                            ->title('Salida registrada')
-                            ->body("Se ha registrado la salida de {$record->kid->first_name} a las " . now()->format('H:i'))
-                            ->success()
-                            ->send();
-                    })
-                    ->requiresConfirmation(),
                 Tables\Actions\Action::make('whatsapp')
                     ->label('Notificar')
-                    ->icon('heroicon-o-exclamation-triangle')
-                    ->color('danger')
-                    ->modalHeading(fn (Attendance $record) => "🚨 Notificar a {$record->contact->first_name}")
-                    ->modalDescription(fn (Attendance $record) => "Vas a enviar una notificación al responsable de {$record->kid->first_name}")
-                    ->modalIcon('heroicon-o-exclamation-triangle')
-                    ->modalIconColor('danger')
+                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->color('primary')
+                    ->modalHeading(fn (Attendance $record) => "📱 Notificar a {$record->contact->full_name}")
+                    ->modalDescription(fn (Attendance $record) => "Vas a enviar una notificación al responsable de {$record->kid->full_name}")
+                    ->modalIcon('heroicon-o-chat-bubble-left-right')
+                    ->modalIconColor('primary')
                     ->form([
                         Forms\Components\Select::make('situation')
                             ->label('Tipo de Notificación')
                             ->options([
-                                'fever' => 'Fiebre',
-                                'accident' => 'Accidente',
-                                'pickup' => 'Recoger al niño',
-                                'other' => 'Otra situación',
+                                'bathroom' => 'Baño',
+                                'diaper' => 'Pañal',
+                                'unconsolable' => 'Inconsolable',
+                                'sick' => 'Enfermo',
+                                'recovered' => 'Recuperado',
+                                'exit' => 'Salida',
                             ])
                             ->required()
                             ->helperText('Selecciona el tipo de notificación que deseas enviar'),
@@ -316,84 +292,56 @@ class AttendanceResource extends Resource
                             ->placeholder('Escribe un mensaje adicional si lo deseas...')
                             ->maxLength(255)
                             ->helperText('Este mensaje se agregará al final de la notificación'),
-                        Forms\Components\TextInput::make('temperature')
-                            ->label('Temperatura')
-                            ->numeric()
-                            ->suffix('°C')
-                            ->visible(fn (Forms\Get $get) => $get('situation') === 'fever')
-                            ->helperText('Ingresa la temperatura si es una notificación de fiebre'),
                     ])
                     ->action(function (Attendance $record, array $data) {
+                        $tutorMessageService = app(TutorMessageService::class);
                         $contact = $record->contact;
                         $kid = $record->kid;
-                        
-                        // Construir el mensaje base
-                        $baseMessage = [
-                            'header' => "🚨 *ALERTA - La Roca Kids*\n\n",
-                            'greeting' => "Hola {$contact->first_name},\n\n",
-                        ];
-                        
-                        // Construir el mensaje según la situación
-                        $situationMessage = match($data['situation']) {
-                            'fever' => [
-                                'situation' => "te informamos que {$kid->first_name} presenta fiebre.\n",
-                                'details' => "Temperatura: " . ($data['temperature'] ?? 'no registrada') . "°C\n",
-                                'action' => "Por favor, ven a recogerlo lo antes posible."
-                            ],
-                            'accident' => [
-                                'situation' => "te informamos que {$kid->first_name} ha tenido un accidente.\n",
-                                'details' => "",
-                                'action' => "Por favor, ven a recogerlo lo antes posible."
-                            ],
-                            'pickup' => [
-                                'situation' => "te recordamos que es hora de recoger a {$kid->first_name}.\n",
-                                'details' => "Hora de entrada: {$record->check_in->format('H:i')}",
-                                'action' => ""
-                            ],
-                            'other' => [
-                                'situation' => "te informamos que {$kid->first_name} necesita atención.\n",
-                                'details' => "",
-                                'action' => "Por favor, ven a recogerlo lo antes posible."
-                            ],
-                            default => throw new \InvalidArgumentException('Tipo de notificación no válido')
-                        };
-                        
-                        // Construir el mensaje final
-                        $message = implode('', [
-                            $baseMessage['header'],
-                            $baseMessage['greeting'],
-                            $situationMessage['situation'],
-                            $situationMessage['details'],
-                            $situationMessage['action']
-                        ]);
-                        
-                        // Agregar mensaje adicional si existe
-                        if (!empty($data['message'])) {
-                            $message .= "\n\n*Mensaje adicional:*\n{$data['message']}";
-                        }
-                        
-                        // Agregar datos del niño
-                        $message .= "\n\n*Datos del niño:*\n";
-                        $message .= "Nombre: {$kid->first_name} {$kid->last_name}\n";
-                        $message .= "Edad: {$kid->age} años";
-                        
-                        if ($kid->allergies->isNotEmpty()) {
-                            $message .= "\nAlergias: " . $kid->allergies->pluck('name')->join(', ');
-                        }
 
-                        // Limpiar el número de teléfono
-                        $phoneNumber = preg_replace('/[^0-9]/', '', $contact->phone);
-
-                        // Disparar el evento
-                        broadcast(new WhatsAppNotification(
-                            message: $message,
-                            phoneNumber: $phoneNumber
-                        ))->toOthers();
+                        // Enviar mensaje según la situación
+                        switch($data['situation']) {
+                            case 'bathroom':
+                                $tutorMessageService->sendBathroomMessage($contact, $kid);
+                                break;
+                            case 'diaper':
+                                $tutorMessageService->sendDiaperMessage($contact, $kid);
+                                break;
+                            case 'unconsolable':
+                                $tutorMessageService->sendUnconsolableMessage($contact, $kid);
+                                break;
+                            case 'sick':
+                                $tutorMessageService->sendSickMessage($contact, $kid);
+                                break;
+                            case 'recovered':
+                                $tutorMessageService->sendRecoveredMessage($contact, $kid);
+                                break;
+                            case 'exit':
+                                $tutorMessageService->sendExitMessage($contact, $kid);
+                                break;
+                        }
                         
                         // Mostrar notificación de éxito
                         \Filament\Notifications\Notification::make()
                             ->title('Notificación enviada')
-                            ->body('Se ha preparado el mensaje en WhatsApp')
+                            ->body('Se ha enviado el mensaje al tutor')
+                            ->success()
+                            ->send();
+                    }),
+                Tables\Actions\Action::make('exit')
+                    ->label('Registrar Salida')
+                    ->icon('heroicon-o-arrow-right-on-rectangle')
+                    ->color('success')
+                    ->action(function (Attendance $record) {
+                        $record->update([
+                            'check_out' => now(),
+                        ]);
+
+                        $tutorMessageService = app(TutorMessageService::class);
+                        $tutorMessageService->sendExitMessage($record->contact, $record->kid);
+                        
+                        \Filament\Notifications\Notification::make()
+                            ->title('Salida registrada')
+                            ->body("Se ha registrado la salida de {$record->kid->full_name} y enviado el mensaje a {$record->contact->full_name}")
                             ->success()
                             ->send();
                     }),

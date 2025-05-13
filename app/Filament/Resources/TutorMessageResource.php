@@ -47,13 +47,27 @@ class TutorMessageResource extends Resource
                     ->maxLength(255)
                     ->helperText('Un nombre descriptivo para identificar este mensaje'),
                 TiptapEditor::make('message')
+                    ->mentionItems([
+                        ['label' => '[tutor]', 'id' => 'Tutor'],
+                        ['label' => '[nino]', 'id' => 'Nino'],
+                        ['label' => '[fecha]', 'id' => 'Fecha'],
+                        ['label' => '[comentario]', 'id' => 'Comentario'],
+                    ])
                     ->label('Mensaje')
                     ->required()
                     ->profile('simple')
                     ->output(TiptapOutput::Html)
                     ->placeholder('Escribe el mensaje aquí...')
                     ->helperText('Escribe @ para insertar una etiqueta')
-                    ->columnSpanFull(),
+                    ->columnSpanFull()
+                    ->extraAttributes([
+                        'class' => 'mention-highlight',
+                        'data-mention-attributes' => json_encode([
+                            'class' => 'mention',
+                            'data-type' => 'mention',
+                            'contenteditable' => 'false'
+                        ])
+                    ]),
                 Forms\Components\TextInput::make('description')
                     ->label('Descripción')
                     ->maxLength(255)

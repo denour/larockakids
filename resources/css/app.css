@@ -9,3 +9,25 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Estilos para las menciones en el editor Tiptap */
+.mention-highlight .mention {
+    background-color: #fef08a;
+    color: #854d0e;
+    padding: 0.125rem 0.25rem;
+    border-radius: 0.25rem;
+    font-weight: 500;
+    display: inline-block;
+    pointer-events: none;
+    user-select: none;
+}
+
+.mention-highlight .mention:hover {
+    background-color: #fde047;
+    cursor: default;
+}
+
+.mention-highlight .mention[contenteditable="false"] {
+    pointer-events: none;
+    user-select: none;
+}
