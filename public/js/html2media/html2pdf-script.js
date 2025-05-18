@@ -19,7 +19,7 @@ function performAction({ action = 'print', element, ...customOptions } = {}) {
         jsPDF: {
             unit: 'mm',
             format: 'a4',
-            orientation: 'portrait'
+            orientation: 'landscape'
         },
         html2canvas: {
             scale: 2,
