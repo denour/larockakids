@@ -43,10 +43,6 @@ class BirthdaysThisMonth extends BaseWidget
                     ->label('Nombre Completo')
                     ->searchable(['first_name', 'last_name'])
                     ->sortable(),
-                Tables\Columns\TextColumn::make('birth_date')
-                    ->label('Fecha de Cumpleaños')
-                    ->date('d/m')
-                    ->sortable(),
                 Tables\Columns\TextColumn::make('age')
                     ->label('Edad Actual')
                     ->formatStateUsing(fn (Kid $record) => $record->age . ' años')
@@ -61,7 +57,7 @@ class BirthdaysThisMonth extends BaseWidget
                     ->sortable(),
                 Tables\Columns\TextColumn::make('birth_date')
                     ->label('Cuándo')
-                    ->formatStateUsing(function ($state) use ($today, $startOfWeek, $endOfWeek, $nextWeek, $endOfNextWeek) {
+                    ->formatStateUsing(function ($state) use ($today) {
                         $birthDate = Carbon::parse($state);
                         $birthDateThisYear = $birthDate->copy()->year($today->year);
                         
@@ -69,25 +65,9 @@ class BirthdaysThisMonth extends BaseWidget
                             return '🎉 ¡Hoy!';
                         }
                         
-                        if ($birthDateThisYear->between($startOfWeek, $endOfWeek)) {
-                            return '📅 Esta semana';
-                        }
-                        
-                        if ($birthDateThisYear->between($nextWeek, $endOfNextWeek)) {
-                            return '⏳ En dos semanas';
-                        }
-                        
-                        if ($birthDateThisYear->isBefore($startOfWeek)) {
-                            return '✅ La semana pasada';
-                        }
-                        
-                        return '📅 Próximamente';
+                        return ucfirst($birthDateThisYear->locale('es')->isoFormat('D [de] MMMM'));
                     })
                     ->sortable(),
-                Tables\Columns\TextColumn::make('allergies.name')
-                    ->label('Alergias')
-                    ->listWithLineBreaks()
-                    ->limitList(2),
             ])
             ->defaultSort('birth_date', 'asc');
     }

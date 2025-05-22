@@ -80,6 +80,22 @@ class AttendanceResource extends Resource
                     })
                     ->searchable()
                     ->required()
+                    ->live()
+                    ->afterStateUpdated(function ($state, Forms\Set $set) {
+                        if (!$state) {
+                            return;
+                        }
+                        $kid = Kid::find($state);
+                        if ($kid) {
+                            $firstContact = $kid->contacts()
+                                ->orderBy('first_name')
+                                ->orderBy('last_name')
+                                ->first();
+                            if ($firstContact) {
+                                $set('contact_id', $firstContact->id);
+                            }
+                        }
+                    })
                     ->createOptionForm([
                         Forms\Components\TextInput::make('first_name')
                             ->label('Nombre')

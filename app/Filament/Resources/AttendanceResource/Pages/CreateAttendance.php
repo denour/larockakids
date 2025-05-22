@@ -6,7 +6,7 @@ use App\Filament\Resources\AttendanceResource;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
-use App\Events\WhatsAppNotification;
+use App\Services\TutorMessageService;
 
 class CreateAttendance extends CreateRecord
 {
@@ -27,36 +27,41 @@ class CreateAttendance extends CreateRecord
 
     protected function afterCreate(): void
     {
-        // Enviar notificación por WhatsApp
         $kid = $this->record->kid;
         $contact = $this->record->contact;
         
-        $message = "👋 *Bienvenido a La Roca Kids*\n\n";
-        $message .= "Hola {$contact->first_name},\n\n";
-        $message .= "Te informamos que {$kid->first_name} ha ingresado al centro.\n\n";
-        $message .= "*Datos del niño:*\n";
-        $message .= "Nombre: {$kid->first_name} {$kid->last_name}\n";
-        $message .= "Edad: {$kid->age} años\n";
-        $message .= "Hora de entrada: " . now()->format('H:i') . "\n";
-        
-        if ($kid->allergies->isNotEmpty()) {
-            $message .= "\n⚠️ *Alergias:*\n";
-            $message .= $kid->allergies->pluck('name')->join(', ');
+        if ($kid && $contact) {
+            $tutorMessageService = app(TutorMessageService::class);
+
+            // Verificar si el niño y contacto son nuevos (creados hoy)
+            $isNewKid = $kid->created_at->isToday();
+            $isNewContact = $contact->created_at->isToday();
+
+            if ($isNewKid && $isNewContact) {
+                // Enviar mensaje de bienvenida para nuevos registros
+                $tutorMessageService->sendWelcomeMessage($contact, $kid);
+            } else {
+                // Enviar mensaje de entrada normal
+                $tutorMessageService->sendEntryMessage($contact, $kid);
+            }
+
+            // Abrir el diálogo de impresión en la misma página
+            $this->js("
+                const printContent = document.createElement('div');
+                printContent.innerHTML = `" . view('components.sticker', [
+                    'kid' => $kid,
+                    'contact' => $contact,
+                ])->render() . "`;
+                printContent.style.display = 'none';
+                document.body.appendChild(printContent);
+                
+                const originalContent = document.body.innerHTML;
+                document.body.innerHTML = printContent.innerHTML;
+                
+                window.print();
+                
+                document.body.innerHTML = originalContent;
+            ");
         }
-
-        // Limpiar el número de teléfono
-        $phoneNumber = preg_replace('/[^0-9]/', '', $contact->phone);
-
-        // Disparar el evento de WhatsApp
-        broadcast(new WhatsAppNotification(
-            message: $message,
-            phoneNumber: $phoneNumber
-        ))->toOthers();
-
-        // Mostrar modal del sticker
-        $this->dispatch('open-modal', id: 'sticker-modal', data: [
-            'kid' => $kid,
-            'contact' => $contact,
-        ]);
     }
 } 
