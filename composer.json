@@ -8,13 +8,16 @@
     "require": {
         "php": "^8.2",
         "awcodes/filament-tiptap-editor": "^3.0",
+        "eightynine/filament-excel-import": "^3.1",
         "facebook/graph-sdk": "^5.1",
         "filament/filament": "^3.3",
         "guzzlehttp/guzzle": "^7.9",
         "laravel/fortify": "^1.25",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "psr/simple-cache": "^2.0",
         "pusher/pusher-php-server": "^7.2",
+        "pxlrbt/filament-excel": "^2.1",
         "torgodly/html2media": "^1.1",
         "vormkracht10/filament-2fa": "^2.1",
         "ysfkaya/filament-phone-input": "^3.1"

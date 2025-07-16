@@ -17,6 +17,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
 use App\Enums\Country;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Columns\Column;
+use App\Exports\KidsWithContactsExport;
 
 class KidResource extends Resource
 {
@@ -148,6 +152,7 @@ class KidResource extends Resource
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make()
                         ->label('Eliminar seleccionados'),
+                    // ExportBulkAction eliminado para evitar error
                 ]),
             ]);
     }
