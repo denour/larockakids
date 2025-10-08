@@ -219,25 +219,26 @@ class AttendanceResource extends Resource
             ->columns([
                 Tables\Columns\TextColumn::make('kid.full_name')
                     ->label('Niño')
-                    ->searchable()
-                    ->sortable()
-                    ->description(fn ($record) => 
-                        $record->kid->allergies->isNotEmpty() 
-                            ? view('filament.tables.columns.allergies-badges', [
-                                'allergies' => $record->kid->allergies
-                            ])
-                            : null
-                    )
-                    ->html(),
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('kid', function ($query) use ($search) {
+                            $query->where('first_name', 'like', "%{$search}%")
+                                  ->orWhere('last_name', 'like', "%{$search}%");
+                        });
+                    })
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('kid.age')
                     ->label('Edad')
                     ->sortable()
                     ->alignCenter(),
                 Tables\Columns\TextColumn::make('contact.full_name')
                     ->label('Responsable')
-                    ->searchable()
-                    ->sortable()
-                    ->description(fn ($record) => $record->contact->phone),
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('contact', function ($query) use ($search) {
+                            $query->where('first_name', 'like', "%{$search}%")
+                                  ->orWhere('last_name', 'like', "%{$search}%");
+                        });
+                    })
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('check_in')
                     ->label('Hora de entrada')
                     ->formatStateUsing(fn ($state) => $state ? $state->diffForHumans() : '')
@@ -335,7 +336,7 @@ class AttendanceResource extends Resource
                                 $tutorMessageService->sendExitMessage($contact, $kid);
                                 break;
                         }
-                        
+
                         // Mostrar notificación de éxito
                         \Filament\Notifications\Notification::make()
                             ->title('Notificación enviada')
@@ -354,7 +355,7 @@ class AttendanceResource extends Resource
 
                         $tutorMessageService = app(TutorMessageService::class);
                         $tutorMessageService->sendExitMessage($record->contact, $record->kid);
-                        
+
                         \Filament\Notifications\Notification::make()
                             ->title('Salida registrada')
                             ->body("Se ha registrado la salida de {$record->kid->full_name} y enviado el mensaje a {$record->contact->full_name}")
@@ -364,6 +365,9 @@ class AttendanceResource extends Resource
                 Html2MediaAction::make('print')
                     ->label('Imprimir Sticker')
                     ->icon('heroicon-o-printer')
+                    ->format([62, 62], 'mm')
+                    ->margin([0, 0, 0, 0]) // Set custom margins
+
                     ->content(fn (Attendance $record) => view('components.sticker', [
                         'kid' => $record->kid,
                         'contact' => $record->contact,
@@ -399,4 +403,4 @@ class AttendanceResource extends Resource
             AttendanceStats::class,
         ];
     }
-} 
+}

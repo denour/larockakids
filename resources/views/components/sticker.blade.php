@@ -18,19 +18,19 @@
     ">
         {{ $kid->first_name }} {{ $kid->last_name }}
     </div>
-    
+
     <div class="detalle" style="margin-bottom: 4px; color: black;">
         <strong>Edad:</strong> {{ $kid->age }} años
     </div>
-    
+
     <div class="detalle" style="margin-bottom: 4px; color: black;">
         <strong>Responsable:</strong> {{ $contact->first_name }} {{ $contact->last_name }}
     </div>
-    
+
     <div class="detalle" style="margin-bottom: 4px; color: black;">
         <strong>Fecha:</strong> {{ now()->format('d/m/Y') }}
     </div>
-    
+
     <div class="detalle" style="margin-bottom: 4px; color: black;">
         <strong>Hora:</strong> {{ now()->format('H:i') }}
     </div>
