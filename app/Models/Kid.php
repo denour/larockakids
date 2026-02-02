@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\QrCodeStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Kid extends Model
 {
@@ -25,7 +27,7 @@ class Kid extends Model
     protected $default = [
         'gender' => 'male',
     ];
-    
+
     /**
      * The attributes that should be cast.
      *
@@ -69,4 +71,12 @@ class Kid extends Model
     {
         return "{$this->first_name} {$this->last_name}";
     }
-} 
+
+    /**
+     * Get the currently assigned QR code for this kid.
+     */
+    public function qrCode(): HasOne
+    {
+        return $this->hasOne(QrCode::class)->where('status', QrCodeStatus::Assigned);
+    }
+}
