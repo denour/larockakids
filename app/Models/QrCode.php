@@ -109,7 +109,7 @@ class QrCode extends Model
     }
 
     /**
-     * Get the QR image URL (with temporary URL for S3/R2).
+     * Get the QR image URL.
      */
     protected function qrImageUrl(): Attribute
     {
@@ -119,17 +119,7 @@ class QrCode extends Model
                     return null;
                 }
 
-                $disk = Storage::disk(config('filesystems.default'));
-
-                if (method_exists($disk, 'temporaryUrl')) {
-                    try {
-                        return $disk->temporaryUrl($this->qr_image_path, now()->addHour());
-                    } catch (\Exception) {
-                        // Fall back to regular URL if temporaryUrl fails
-                    }
-                }
-
-                return $disk->url($this->qr_image_path);
+                return Storage::disk(config('filesystems.default'))->url($this->qr_image_path);
             }
         );
     }
