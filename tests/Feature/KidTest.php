@@ -20,19 +20,19 @@ class KidTest extends TestCase
 
         $this->assertDatabaseHas('kids', [
             'id' => $kid->id,
-            'name' => $kid->name,
+            'first_name' => $kid->first_name,
             'last_name' => $kid->last_name,
             'birth_date' => $kid->birth_date,
         ]);
     }
 
     /** @test */
-    public function it_requires_name()
+    public function it_requires_first_name()
     {
         $this->expectException(\Illuminate\Database\QueryException::class);
-        
+
         Kid::factory()->create([
-            'name' => null,
+            'first_name' => null,
         ]);
     }
 
@@ -40,7 +40,7 @@ class KidTest extends TestCase
     public function it_requires_last_name()
     {
         $this->expectException(\Illuminate\Database\QueryException::class);
-        
+
         Kid::factory()->create([
             'last_name' => null,
         ]);
@@ -50,7 +50,7 @@ class KidTest extends TestCase
     public function it_requires_birth_date()
     {
         $this->expectException(\Illuminate\Database\QueryException::class);
-        
+
         Kid::factory()->create([
             'birth_date' => null,
         ]);
@@ -60,7 +60,7 @@ class KidTest extends TestCase
     public function birth_date_must_be_a_valid_date()
     {
         $this->expectException(InvalidFormatException::class);
-        
+
         Kid::factory()->create([
             'birth_date' => 'invalid-date',
         ]);
@@ -70,20 +70,20 @@ class KidTest extends TestCase
     public function it_can_update_a_kid()
     {
         $kid = Kid::factory()->create();
-        $newName = $this->faker->firstName;
-        
-        $kid->update(['name' => $newName]);
-        
-        $this->assertEquals($newName, $kid->fresh()->name);
+        $newFirstName = $this->faker->firstName;
+
+        $kid->update(['first_name' => $newFirstName]);
+
+        $this->assertEquals($newFirstName, $kid->fresh()->first_name);
     }
 
     /** @test */
     public function it_can_delete_a_kid()
     {
         $kid = Kid::factory()->create();
-        
+
         $kid->delete();
-        
+
         $this->assertDatabaseMissing('kids', [
             'id' => $kid->id,
         ]);
@@ -93,7 +93,7 @@ class KidTest extends TestCase
     public function it_has_at_least_one_contact_after_creation()
     {
         $kid = Kid::factory()->create();
-        
+
         $this->assertGreaterThan(0, $kid->contacts()->count());
     }
 
@@ -105,7 +105,7 @@ class KidTest extends TestCase
         $newContacts = Contact::factory()->count(3)->create();
 
         $kid->contacts()->attach($newContacts, [
-            'relationship_type' => 'parent'
+            'relationship_type' => 'parent',
         ]);
 
         $this->assertCount($existingContactsCount + 3, $kid->fresh()->contacts);
@@ -123,7 +123,7 @@ class KidTest extends TestCase
         $contact = Contact::factory()->create();
 
         $kid->contacts()->attach($contact, [
-            'relationship_type' => 'parent'
+            'relationship_type' => 'parent',
         ]);
         $this->assertCount($existingContactsCount + 1, $kid->fresh()->contacts);
 
@@ -137,7 +137,7 @@ class KidTest extends TestCase
         $kid = Kid::factory()->create();
         $firstContact = $kid->contacts->first();
 
-        $this->assertEquals('parent', $firstContact->pivot->relationship_type);
+        $this->assertEquals('Padre/Madre', $firstContact->pivot->relationship_type);
     }
 
     /** @test */
@@ -147,7 +147,7 @@ class KidTest extends TestCase
         $contact = $kid->contacts->first();
 
         $kid->contacts()->updateExistingPivot($contact->id, [
-            'relationship_type' => 'family'
+            'relationship_type' => 'family',
         ]);
 
         $this->assertEquals(

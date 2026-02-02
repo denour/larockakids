@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Enums\QrCodeStatus;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Facades\Storage;
 
 class QrCode extends Model
 {
@@ -104,5 +106,31 @@ class QrCode extends Model
             'status' => QrCodeStatus::Available,
             'assigned_at' => null,
         ]);
+    }
+
+    /**
+     * Get the QR image URL (with temporary URL for S3/R2).
+     */
+    protected function qrImageUrl(): Attribute
+    {
+        return Attribute::make(
+            get: function (): ?string {
+                if (! $this->qr_image_path) {
+                    return null;
+                }
+
+                $disk = Storage::disk(config('filesystems.default'));
+
+                if (method_exists($disk, 'temporaryUrl')) {
+                    try {
+                        return $disk->temporaryUrl($this->qr_image_path, now()->addHour());
+                    } catch (\Exception) {
+                        // Fall back to regular URL if temporaryUrl fails
+                    }
+                }
+
+                return $disk->url($this->qr_image_path);
+            }
+        );
     }
 }
