@@ -21,50 +21,57 @@ class TutorMessageSeeder extends Seeder
             [
                 'label' => TutorMessageType::ENTRY->value,
                 'name' => TutorMessageType::ENTRY->getLabel(),
-                'message' => "Hola [tutor], [nino] ha sido registrado en Piedritas a las [fecha].",
+                'message' => 'Hola [tutor], [nino] ha sido registrado en Piedritas a las [fecha].',
                 'description' => TutorMessageType::ENTRY->getDescription(),
                 'is_active' => true,
             ],
             [
                 'label' => TutorMessageType::BATHROOM->value,
                 'name' => TutorMessageType::BATHROOM->getLabel(),
-                'message' => "Hola [tutor], [nino] quiere hacer pipí. ¿Podrías apoyarnos viniendo a Piedritas cuando te sea posible?",
+                'message' => 'Hola [tutor], [nino] quiere hacer pipí. ¿Podrías apoyarnos viniendo a Piedritas cuando te sea posible?',
                 'description' => TutorMessageType::BATHROOM->getDescription(),
                 'is_active' => true,
             ],
             [
                 'label' => TutorMessageType::DIAPER->value,
                 'name' => TutorMessageType::DIAPER->getLabel(),
-                'message' => "Hola [tutor], detectamos que [nino] necesita cambio de pañal. Agradeceríamos mucho tu apoyo si pudieras venir pronto.",
+                'message' => 'Hola [tutor], detectamos que [nino] necesita cambio de pañal. Agradeceríamos mucho tu apoyo si pudieras venir pronto.',
                 'description' => TutorMessageType::DIAPER->getDescription(),
                 'is_active' => true,
             ],
             [
                 'label' => TutorMessageType::UNCONSOLABLE->value,
                 'name' => TutorMessageType::UNCONSOLABLE->getLabel(),
-                'message' => "Hola [tutor], [nino] se encuentra algo inquieto(a) y no lo hemos podido consolar. ¿Crees que puedas venir a verlo(a)?",
+                'message' => 'Hola [tutor], [nino] se encuentra algo inquieto(a) y no lo hemos podido consolar. ¿Crees que puedas venir a verlo(a)?',
                 'description' => TutorMessageType::UNCONSOLABLE->getDescription(),
                 'is_active' => true,
             ],
             [
                 'label' => TutorMessageType::SICK->value,
                 'name' => TutorMessageType::SICK->getLabel(),
-                'message' => "Hola [tutor], [nino] dice que se siente un poco mal. Por precaución, te pedimos si puedes venir a verlo(a) en cuanto puedas.",
+                'message' => 'Hola [tutor], [nino] dice que se siente un poco mal. Por precaución, te pedimos si puedes venir a verlo(a) en cuanto puedas.',
                 'description' => TutorMessageType::SICK->getDescription(),
                 'is_active' => true,
             ],
             [
                 'label' => TutorMessageType::RECOVERED->value,
                 'name' => TutorMessageType::RECOVERED->getLabel(),
-                'message' => "Hola [tutor], buenas noticias: [nino] ya se encuentra mejor y ha regresado a sus actividades con normalidad.",
+                'message' => 'Hola [tutor], buenas noticias: [nino] ya se encuentra mejor y ha regresado a sus actividades con normalidad.',
                 'description' => TutorMessageType::RECOVERED->getDescription(),
                 'is_active' => true,
             ],
             [
                 'label' => TutorMessageType::EXIT->value,
                 'name' => TutorMessageType::EXIT->getLabel(),
-                'message' => "Hola [tutor], [nino] ha salido de Piedritas a las [fecha]. ¡Gracias por tu apoyo!",
+                'message' => 'Hola [tutor], [nino] ha salido de Piedritas a las [fecha]. ¡Gracias por tu apoyo!',
                 'description' => TutorMessageType::EXIT->getDescription(),
+                'is_active' => true,
+            ],
+            [
+                'label' => TutorMessageType::ASSISTANCE->value,
+                'name' => TutorMessageType::ASSISTANCE->getLabel(),
+                'message' => 'Hola [tutor], tu hijo(a) [nino] necesita asistencia. Por favor acude a recogerlo.',
+                'description' => TutorMessageType::ASSISTANCE->getDescription(),
                 'is_active' => true,
             ],
         ];
@@ -73,4 +80,4 @@ class TutorMessageSeeder extends Seeder
             TutorMessage::create($message);
         }
     }
-} 
+}

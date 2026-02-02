@@ -12,10 +12,11 @@ enum TutorMessageType: string
     case SICK = 'sick';
     case RECOVERED = 'recovered';
     case EXIT = 'exit';
+    case ASSISTANCE = 'assistance';
 
     public function getLabel(): string
     {
-        return match($this) {
+        return match ($this) {
             self::WELCOME => 'Bienvenida',
             self::ENTRY => 'Entrada',
             self::BATHROOM => 'Baño',
@@ -24,12 +25,13 @@ enum TutorMessageType: string
             self::SICK => 'Enfermo',
             self::RECOVERED => 'Recuperado',
             self::EXIT => 'Salida',
+            self::ASSISTANCE => 'Asistencia',
         };
     }
 
     public function getDescription(): string
     {
-        return match($this) {
+        return match ($this) {
             self::WELCOME => 'Se envía cuando se registra un nuevo niño en el sistema.',
             self::ENTRY => 'Se envía cuando se registra la entrada de un niño.',
             self::BATHROOM => 'Se envía cuando un niño necesita ir al baño.',
@@ -38,6 +40,7 @@ enum TutorMessageType: string
             self::SICK => 'Se envía cuando un niño se siente enfermo.',
             self::RECOVERED => 'Se envía cuando un niño se ha recuperado.',
             self::EXIT => 'Se envía cuando se registra la salida de un niño.',
+            self::ASSISTANCE => 'Se envía cuando un niño necesita asistencia y ya tiene entrada registrada.',
         };
     }
 
@@ -66,4 +69,4 @@ enum TutorMessageType: string
             return [$tag => $tag];
         })->toArray();
     }
-} 
+}

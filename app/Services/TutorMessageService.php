@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Models\TutorMessage;
+use App\Events\WhatsAppNotification;
 use App\Models\Contact;
 use App\Models\Kid;
-use App\Events\WhatsAppNotification;
+use App\Models\TutorMessage;
 use Illuminate\Support\Carbon;
 
 class TutorMessageService
@@ -24,8 +24,8 @@ class TutorMessageService
     {
         // Obtener el mensaje base
         $message = TutorMessage::findByLabel($label);
-        
-        if (!$message) {
+
+        if (! $message) {
             throw new \Exception("No se encontró un mensaje para el label: {$label}");
         }
 
@@ -113,4 +113,12 @@ class TutorMessageService
     {
         $this->sendMessage('exit', $contact, $kid);
     }
-} 
+
+    /**
+     * Envía un mensaje de asistencia
+     */
+    public function sendAssistanceMessage(Contact $contact, Kid $kid): void
+    {
+        $this->sendMessage('assistance', $contact, $kid);
+    }
+}
