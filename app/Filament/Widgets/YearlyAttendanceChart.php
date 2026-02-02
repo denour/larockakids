@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
+use Illuminate\Support\Facades\DB;
 
 class YearlyAttendanceChart extends ChartWidget
 {
@@ -21,12 +22,21 @@ class YearlyAttendanceChart extends ChartWidget
         $endDate = Carbon::now()->endOfMonth();
         $startDate = Carbon::now()->subYear()->startOfMonth();
 
+        $driver = DB::getDriverName();
+
+        if ($driver === 'pgsql') {
+            $yearExpr = 'EXTRACT(YEAR FROM check_in)::integer';
+            $monthExpr = 'EXTRACT(MONTH FROM check_in)::integer';
+        } else {
+            $yearExpr = 'YEAR(check_in)';
+            $monthExpr = 'MONTH(check_in)';
+        }
+
         $monthlyData = Attendance::query()
             ->whereBetween('check_in', [$startDate, $endDate])
-            ->selectRaw('YEAR(check_in) as year, MONTH(check_in) as month, COUNT(*) as total')
-            ->groupBy('year', 'month')
-            ->orderBy('year')
-            ->orderBy('month')
+            ->selectRaw("{$yearExpr} as year, {$monthExpr} as month, COUNT(*) as total")
+            ->groupByRaw("{$yearExpr}, {$monthExpr}")
+            ->orderByRaw("{$yearExpr}, {$monthExpr}")
             ->get()
             ->keyBy(fn ($item) => $item->year.'-'.str_pad($item->month, 2, '0', STR_PAD_LEFT));
 
