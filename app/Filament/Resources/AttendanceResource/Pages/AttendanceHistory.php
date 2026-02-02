@@ -3,15 +3,21 @@
 namespace App\Filament\Resources\AttendanceResource\Pages;
 
 use App\Filament\Resources\AttendanceResource;
+use App\Filament\Widgets\AttendanceComparisonChart;
 use App\Filament\Widgets\AttendanceHistoryStats;
 use App\Filament\Widgets\BestStreakRanking;
+use App\Filament\Widgets\QuarterlyAttendanceChart;
 use App\Filament\Widgets\RecentAbsencesRanking;
 use App\Filament\Widgets\TopAttendanceRanking;
+use App\Filament\Widgets\WeeklyAttendanceChart;
+use App\Filament\Widgets\YearlyAttendanceChart;
 use App\Models\Attendance;
+use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Livewire\Attributes\Url;
 
 class AttendanceHistory extends ListRecords
 {
@@ -22,6 +28,20 @@ class AttendanceHistory extends ListRecords
     protected static ?string $navigationLabel = 'Historial';
 
     protected static ?string $navigationIcon = 'heroicon-o-clock';
+
+    #[Url]
+    public bool $showCharts = false;
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('toggleCharts')
+                ->label(fn () => $this->showCharts ? 'Ocultar Gráficas' : 'Ver Gráficas')
+                ->icon(fn () => $this->showCharts ? 'heroicon-o-eye-slash' : 'heroicon-o-chart-bar')
+                ->color('gray')
+                ->action(fn () => $this->showCharts = ! $this->showCharts),
+        ];
+    }
 
     protected function getTableQuery(): Builder
     {
@@ -126,6 +146,20 @@ class AttendanceHistory extends ListRecords
             TopAttendanceRanking::class,
             BestStreakRanking::class,
             RecentAbsencesRanking::class,
+        ];
+    }
+
+    protected function getFooterWidgets(): array
+    {
+        if (! $this->showCharts) {
+            return [];
+        }
+
+        return [
+            WeeklyAttendanceChart::class,
+            QuarterlyAttendanceChart::class,
+            YearlyAttendanceChart::class,
+            AttendanceComparisonChart::class,
         ];
     }
 }

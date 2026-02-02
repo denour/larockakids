@@ -16,6 +16,8 @@ class WeeklyAttendanceChart extends ChartWidget
 
     protected static ?string $pollingInterval = null;
 
+    protected static bool $isDiscovered = false;
+
     protected function getData(): array
     {
         $startOfMonth = Carbon::now()->startOfMonth();

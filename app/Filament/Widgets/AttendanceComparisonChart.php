@@ -16,6 +16,8 @@ class AttendanceComparisonChart extends ChartWidget
 
     protected static ?string $pollingInterval = null;
 
+    protected static bool $isDiscovered = false;
+
     protected function getData(): array
     {
         $thisMonthStart = Carbon::now()->startOfMonth();

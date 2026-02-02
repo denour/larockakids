@@ -121,6 +121,7 @@ class QrCodeResource extends Resource
                     ->action(function (QrCode $record, array $data): void {
                         $kid = Kid::find($data['kid_id']);
                         $record->assignToKid($kid);
+                        $record->refresh();
 
                         Notification::make()
                             ->success()
@@ -140,6 +141,7 @@ class QrCodeResource extends Resource
                     ->action(function (QrCode $record): void {
                         $kidName = $record->kid?->full_name;
                         $record->markAsLost();
+                        $record->refresh();
 
                         Notification::make()
                             ->warning()
@@ -159,6 +161,7 @@ class QrCodeResource extends Resource
                     ->action(function (QrCode $record): void {
                         $kidName = $record->kid?->full_name;
                         $record->unassign();
+                        $record->refresh();
 
                         Notification::make()
                             ->success()

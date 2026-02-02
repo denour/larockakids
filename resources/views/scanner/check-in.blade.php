@@ -68,87 +68,102 @@
             border-radius: 16px;
         }
 
-        .result-overlay {
+        /* Toast notifications */
+        .toast-container {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
-            display: none;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 24px;
             z-index: 100;
-        }
-
-        .result-overlay.show {
             display: flex;
-        }
-
-        .result-icon {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 24px;
+            padding: 16px;
+            padding-top: calc(16px + env(safe-area-inset-top));
+            pointer-events: none;
         }
 
-        .result-icon.success {
-            background: #16a34a;
+        .toast {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+            max-width: 400px;
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            animation: slideIn 0.3s ease-out;
+            pointer-events: auto;
         }
 
-        .result-icon.error {
-            background: #dc2626;
+        .toast.hiding {
+            animation: slideOut 0.3s ease-in forwards;
         }
 
-        .result-icon.assistance {
-            background: #ca8a04;
+        @keyframes slideIn {
+            from {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
-        .result-icon svg {
-            width: 40px;
-            height: 40px;
+        @keyframes slideOut {
+            from {
+                transform: translateY(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateY(-100%);
+                opacity: 0;
+            }
+        }
+
+        .toast.success {
+            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+        }
+
+        .toast.error {
+            background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        }
+
+        .toast.assistance {
+            background: linear-gradient(135deg, #ca8a04 0%, #a16207 100%);
+        }
+
+        .toast-icon {
+            width: 32px;
+            height: 32px;
+            flex-shrink: 0;
+        }
+
+        .toast-icon svg {
+            width: 100%;
+            height: 100%;
             fill: white;
         }
 
-        .result-message {
-            font-size: 20px;
+        .toast-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .toast-message {
+            font-size: 14px;
             font-weight: 600;
-            text-align: center;
-            margin-bottom: 12px;
+            margin-bottom: 2px;
         }
 
-        .result-details {
-            font-size: 16px;
-            text-align: center;
-            opacity: 0.8;
-            margin-bottom: 32px;
-        }
-
-        .btn {
-            width: 100%;
-            max-width: 300px;
-            padding: 16px 32px;
-            border: none;
-            border-radius: 12px;
+        .toast-name {
             font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            touch-action: manipulation;
-            min-height: 56px;
-        }
-
-        .btn-primary {
-            background: #16a34a;
-            color: white;
-        }
-
-        .btn-primary:active {
-            background: #15803d;
+            font-weight: 700;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .loading {
@@ -189,6 +204,26 @@
             font-size: 14px;
             opacity: 0.8;
             margin-bottom: 20px;
+        }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            touch-action: manipulation;
+            min-height: 56px;
+        }
+
+        .btn-primary {
+            background: #16a34a;
+            color: white;
+        }
+
+        .btn-primary:active {
+            background: #15803d;
         }
 
         .mode-switch {
@@ -233,26 +268,12 @@
         </div>
     </div>
 
-    <div class="result-overlay" id="result-overlay">
-        <div class="result-icon" id="result-icon">
-            <svg id="icon-success" viewBox="0 0 24 24" style="display: none;">
-                <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-            </svg>
-            <svg id="icon-error" viewBox="0 0 24 24" style="display: none;">
-                <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-            </svg>
-            <svg id="icon-assistance" viewBox="0 0 24 24" style="display: none;">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/>
-            </svg>
-        </div>
-        <div class="result-message" id="result-message"></div>
-        <div class="result-details" id="result-details"></div>
-        <button class="btn btn-primary" onclick="scanAgain()">Escanear Otro</button>
-    </div>
+    <div class="toast-container" id="toast-container"></div>
 
     <script>
         let html5QrCode = null;
         let isProcessing = false;
+        let scanCooldown = false;
 
         function startScanner() {
             document.getElementById('permission-error').style.display = 'none';
@@ -277,10 +298,9 @@
         }
 
         function onScanSuccess(decodedText, decodedResult) {
-            if (isProcessing) return;
+            if (isProcessing || scanCooldown) return;
             isProcessing = true;
 
-            html5QrCode.pause();
             document.getElementById('loading').classList.add('show');
 
             fetch('{{ route("scanner.check-in.process") }}', {
@@ -294,11 +314,11 @@
             })
             .then(response => response.json())
             .then(data => {
-                showResult(data);
+                showToast(data);
             })
             .catch(error => {
                 console.error('Error:', error);
-                showResult({
+                showToast({
                     success: false,
                     message: 'Error de conexion',
                     action: null,
@@ -307,6 +327,13 @@
             })
             .finally(() => {
                 document.getElementById('loading').classList.remove('show');
+                isProcessing = false;
+
+                // Cooldown to prevent scanning the same code multiple times
+                scanCooldown = true;
+                setTimeout(() => {
+                    scanCooldown = false;
+                }, 2000);
             });
         }
 
@@ -314,37 +341,44 @@
             // Ignore scan failures (no QR detected in frame)
         }
 
-        function showResult(data) {
-            const overlay = document.getElementById('result-overlay');
-            const icon = document.getElementById('result-icon');
-            const message = document.getElementById('result-message');
-            const details = document.getElementById('result-details');
+        function showToast(data) {
+            const container = document.getElementById('toast-container');
 
-            // Reset icons
-            document.getElementById('icon-success').style.display = 'none';
-            document.getElementById('icon-error').style.display = 'none';
-            document.getElementById('icon-assistance').style.display = 'none';
+            const toast = document.createElement('div');
+            toast.className = 'toast';
 
-            // Remove all classes
-            icon.classList.remove('success', 'error', 'assistance');
-
+            // Set toast type
             if (data.success) {
                 if (data.action === 'assistance') {
-                    icon.classList.add('assistance');
-                    document.getElementById('icon-assistance').style.display = 'block';
+                    toast.classList.add('assistance');
                 } else {
-                    icon.classList.add('success');
-                    document.getElementById('icon-success').style.display = 'block';
+                    toast.classList.add('success');
                 }
             } else {
-                icon.classList.add('error');
-                document.getElementById('icon-error').style.display = 'block';
+                toast.classList.add('error');
             }
 
-            message.textContent = data.message;
-            details.textContent = data.kid_name ? data.kid_name : '';
+            // Get icon SVG
+            let iconSvg = '';
+            if (data.success) {
+                if (data.action === 'assistance') {
+                    iconSvg = '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/></svg>';
+                } else {
+                    iconSvg = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+                }
+            } else {
+                iconSvg = '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
+            }
 
-            overlay.classList.add('show');
+            toast.innerHTML = `
+                <div class="toast-icon">${iconSvg}</div>
+                <div class="toast-content">
+                    <div class="toast-message">${data.message}</div>
+                    ${data.kid_name ? `<div class="toast-name">${data.kid_name}</div>` : ''}
+                </div>
+            `;
+
+            container.appendChild(toast);
 
             // Play sound feedback
             if (data.success) {
@@ -352,12 +386,14 @@
             } else {
                 playErrorSound();
             }
-        }
 
-        function scanAgain() {
-            document.getElementById('result-overlay').classList.remove('show');
-            isProcessing = false;
-            html5QrCode.resume();
+            // Auto-remove after 4 seconds
+            setTimeout(() => {
+                toast.classList.add('hiding');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 4000);
         }
 
         function playSuccessSound() {

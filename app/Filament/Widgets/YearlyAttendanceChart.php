@@ -17,6 +17,8 @@ class YearlyAttendanceChart extends ChartWidget
 
     protected static ?string $pollingInterval = null;
 
+    protected static bool $isDiscovered = false;
+
     protected function getData(): array
     {
         $endDate = Carbon::now()->endOfMonth();
