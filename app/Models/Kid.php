@@ -6,6 +6,7 @@ use App\Enums\QrCodeStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
 class Kid extends Model
@@ -78,5 +79,13 @@ class Kid extends Model
     public function qrCode(): HasOne
     {
         return $this->hasOne(QrCode::class)->where('status', QrCodeStatus::Assigned);
+    }
+
+    /**
+     * Get all attendances for this kid.
+     */
+    public function attendances(): HasMany
+    {
+        return $this->hasMany(Attendance::class);
     }
 }

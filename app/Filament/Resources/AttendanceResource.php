@@ -2,34 +2,25 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\Country;
 use App\Filament\Resources\AttendanceResource\Pages;
 use App\Filament\Widgets\AttendanceStats;
-use App\Models\Attendance;
-use App\Models\Kid;
-use App\Models\Contact;
 use App\Models\Allergy;
+use App\Models\Attendance;
+use App\Models\Contact;
+use App\Models\Kid;
+use App\Services\TutorMessageService;
+use Carbon\Carbon;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Filament\Tables\Filters\Filter;
-use Filament\Tables\Actions\Action;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Carbon\Carbon;
-use Filament\Forms\Components\Select;
-use Filament\Forms\Components\Textarea;
-use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\Actions\Action as FormAction;
-use Filament\Forms\Components\Modal;
 use Torgodly\Html2Media\Tables\Actions\Html2MediaAction;
-use Illuminate\Support\Facades\Notification;
-use App\Enums\Country;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
-use App\Events\WhatsAppNotification;
-use App\Services\TutorMessageService;
-
 
 class AttendanceResource extends Resource
 {
@@ -75,14 +66,14 @@ class AttendanceResource extends Resource
                             ->whereNotNull('birth_date')
                             ->get()
                             ->mapWithKeys(fn ($kid) => [
-                                $kid->id => $kid->first_name . ' ' . $kid->last_name
+                                $kid->id => $kid->first_name.' '.$kid->last_name,
                             ]);
                     })
                     ->searchable()
                     ->required()
                     ->live()
                     ->afterStateUpdated(function ($state, Forms\Set $set) {
-                        if (!$state) {
+                        if (! $state) {
                             return;
                         }
                         $kid = Kid::find($state);
@@ -132,6 +123,7 @@ class AttendanceResource extends Resource
                             ])
                             ->createOptionUsing(function (array $data) {
                                 $allergy = Allergy::create($data);
+
                                 return $allergy->id;
                             }),
                     ])
@@ -153,9 +145,10 @@ class AttendanceResource extends Resource
                     ->label('Responsable')
                     ->options(function (Forms\Get $get) {
                         $kid = Kid::find($get('kid_id'));
-                        if (!$kid) {
+                        if (! $kid) {
                             return [];
                         }
+
                         return $kid->contacts()
                             ->get()
                             ->pluck('full_name', 'id');
@@ -222,7 +215,7 @@ class AttendanceResource extends Resource
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas('kid', function ($query) use ($search) {
                             $query->where('first_name', 'like', "%{$search}%")
-                                  ->orWhere('last_name', 'like', "%{$search}%");
+                                ->orWhere('last_name', 'like', "%{$search}%");
                         });
                     })
                     ->sortable(),
@@ -235,7 +228,7 @@ class AttendanceResource extends Resource
                     ->searchable(query: function (Builder $query, string $search): Builder {
                         return $query->whereHas('contact', function ($query) use ($search) {
                             $query->where('first_name', 'like', "%{$search}%")
-                                  ->orWhere('last_name', 'like', "%{$search}%");
+                                ->orWhere('last_name', 'like', "%{$search}%");
                         });
                     })
                     ->sortable(),
@@ -257,7 +250,9 @@ class AttendanceResource extends Resource
                     ])
                     ->query(function (Builder $query, $data) {
                         $value = $data['value'] ?? null;
-                        if (!$value) return;
+                        if (! $value) {
+                            return;
+                        }
 
                         $now = now();
                         switch ($value) {
@@ -316,7 +311,7 @@ class AttendanceResource extends Resource
                         $kid = $record->kid;
 
                         // Enviar mensaje según la situación
-                        switch($data['situation']) {
+                        switch ($data['situation']) {
                             case 'bathroom':
                                 $tutorMessageService->sendBathroomMessage($contact, $kid);
                                 break;
@@ -392,6 +387,7 @@ class AttendanceResource extends Resource
     {
         return [
             'index' => Pages\ListAttendances::route('/'),
+            'history' => Pages\AttendanceHistory::route('/history'),
             'create' => Pages\CreateAttendance::route('/create'),
             'edit' => Pages\EditAttendance::route('/{record}/edit'),
         ];
