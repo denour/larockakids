@@ -11,6 +11,8 @@ class AttendanceHistoryStats extends BaseWidget
 {
     protected static ?int $sort = 1;
 
+    protected static bool $isDiscovered = false;
+
     protected function getStats(): array
     {
         $now = Carbon::now();

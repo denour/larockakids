@@ -14,6 +14,8 @@ class RecentAbsencesRanking extends BaseWidget
 {
     protected static ?int $sort = 4;
 
+    protected static bool $isDiscovered = false;
+
     protected int|string|array $columnSpan = 1;
 
     protected static ?string $heading = 'Ausencias Recientes';
