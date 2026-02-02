@@ -183,8 +183,12 @@ class QrCodeResource extends Resource
                     Tables\Actions\BulkAction::make('printSelected')
                         ->label('Imprimir Seleccionados')
                         ->icon('heroicon-o-printer')
-                        ->url(fn (Collection $records) => route('qr-codes.print-batch', ['ids' => $records->pluck('id')->join(',')]))
-                        ->openUrlInNewTab()
+                        ->action(function (Collection $records, Tables\Actions\BulkAction $action) {
+                            $ids = $records->pluck('id')->join(',');
+                            $url = route('qr-codes.print-batch', ['ids' => $ids]);
+
+                            $action->redirect($url, shouldOpenInNewTab: true);
+                        })
                         ->deselectRecordsAfterCompletion(),
                     Tables\Actions\DeleteBulkAction::make()
                         ->label('Eliminar Seleccionados'),
