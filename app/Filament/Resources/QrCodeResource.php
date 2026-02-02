@@ -63,7 +63,7 @@ class QrCodeResource extends Resource
                     ->copyable(),
                 Tables\Columns\ImageColumn::make('qr_image_path')
                     ->label('QR')
-                    ->disk('public')
+                    ->disk(config('filesystems.default'))
                     ->width(50)
                     ->height(50),
                 Tables\Columns\TextColumn::make('status')

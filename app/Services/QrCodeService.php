@@ -9,6 +9,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Writer;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class QrCodeService
@@ -17,10 +18,13 @@ class QrCodeService
 
     protected string $storagePath;
 
+    protected string $disk;
+
     public function __construct()
     {
         $this->prefix = config('qrcode.prefix', 'LRK');
-        $this->storagePath = 'public/qr-codes';
+        $this->storagePath = 'qr-codes';
+        $this->disk = config('filesystems.default', 'local');
     }
 
     /**
@@ -63,7 +67,8 @@ class QrCodeService
      */
     public function generateQrImage(string $code): string
     {
-        Storage::makeDirectory($this->storagePath);
+        $storage = Storage::disk($this->disk);
+        $storage->makeDirectory($this->storagePath);
 
         $renderer = new ImageRenderer(
             new RendererStyle(300, 2),
@@ -76,9 +81,9 @@ class QrCodeService
         $filename = "{$code}.svg";
         $path = "{$this->storagePath}/{$filename}";
 
-        Storage::put($path, $svg);
+        $storage->put($path, $svg, 'public');
 
-        return str_replace('public/', '', $path);
+        return $path;
     }
 
     /**
@@ -98,10 +103,19 @@ class QrCodeService
      */
     protected function getNextSequenceNumber(string $prefix): int
     {
-        $lastCode = QrCode::query()
-            ->where('code', 'like', "{$prefix}-%")
-            ->orderByRaw('CAST(SUBSTRING(code, ?) AS UNSIGNED) DESC', [strlen($prefix) + 2])
-            ->value('code');
+        $position = strlen($prefix) + 2;
+
+        $query = QrCode::query()
+            ->where('code', 'like', "{$prefix}-%");
+
+        $driver = DB::connection()->getDriverName();
+        if ($driver === 'pgsql') {
+            $query->orderByRaw("CAST(SUBSTRING(code, {$position}) AS INTEGER) DESC");
+        } else {
+            $query->orderByRaw("CAST(SUBSTRING(code, {$position}) AS UNSIGNED) DESC");
+        }
+
+        $lastCode = $query->value('code');
 
         if (! $lastCode) {
             return 1;
@@ -129,7 +143,7 @@ class QrCodeService
             return null;
         }
 
-        return Storage::url($qrCode->qr_image_path);
+        return Storage::disk($this->disk)->url($qrCode->qr_image_path);
     }
 
     /**
@@ -138,7 +152,7 @@ class QrCodeService
     public function deleteImage(QrCode $qrCode): void
     {
         if ($qrCode->qr_image_path) {
-            Storage::delete('public/'.$qrCode->qr_image_path);
+            Storage::disk($this->disk)->delete($qrCode->qr_image_path);
         }
     }
 }
