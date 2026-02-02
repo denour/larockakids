@@ -7,6 +7,7 @@ use App\Filament\Widgets\AttendanceHistoryStats;
 use App\Filament\Widgets\BestStreakRanking;
 use App\Filament\Widgets\RecentAbsencesRanking;
 use App\Filament\Widgets\TopAttendanceRanking;
+use App\Filament\Widgets\YoungAbsencesRanking;
 use App\Models\Attendance;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables;
@@ -126,6 +127,7 @@ class AttendanceHistory extends ListRecords
             TopAttendanceRanking::class,
             BestStreakRanking::class,
             RecentAbsencesRanking::class,
+            YoungAbsencesRanking::class,
         ];
     }
 }
