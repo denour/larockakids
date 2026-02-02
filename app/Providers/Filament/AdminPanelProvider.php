@@ -2,10 +2,8 @@
 
 namespace App\Providers\Filament;
 
-use App\Filament\Widgets\AgeDistributionChart;
 use App\Filament\Widgets\AttendanceStats;
 use App\Filament\Widgets\BirthdaysThisMonth;
-use App\Filament\Widgets\GenderDistributionChart;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -50,12 +48,9 @@ class AdminPanelProvider extends PanelProvider
             ->pages([
                 Pages\Dashboard::class,
             ])
-            ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
                 AttendanceStats::class,
                 BirthdaysThisMonth::class,
-                AgeDistributionChart::class,
-                GenderDistributionChart::class,
             ])
             ->middleware([
                 EncryptCookies::class,

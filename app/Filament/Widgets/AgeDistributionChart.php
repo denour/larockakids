@@ -8,9 +8,12 @@ use Filament\Widgets\ChartWidget;
 class AgeDistributionChart extends ChartWidget
 {
     protected static ?string $heading = 'Distribución de Edades';
+
     protected static ?int $sort = 2;
-    protected int | string | array $columnSpan = 1;
-    protected int | string | array $columnStart = 2;
+
+    protected int|string|array $columnSpan = 1;
+
+    protected static bool $isDiscovered = false;
 
     protected function getData(): array
     {
@@ -20,7 +23,7 @@ class AgeDistributionChart extends ChartWidget
             '2-3' => 0,
             '4-5' => 0,
             '6-7' => 0,
-            '8+' => 0
+            '8+' => 0,
         ];
 
         foreach ($kids as $kid) {
@@ -48,7 +51,7 @@ class AgeDistributionChart extends ChartWidget
                         '#36A2EB',
                         '#FFCE56',
                         '#4BC0C0',
-                        '#9966FF'
+                        '#9966FF',
                     ],
                 ],
             ],
@@ -60,4 +63,4 @@ class AgeDistributionChart extends ChartWidget
     {
         return 'pie';
     }
-} 
+}
