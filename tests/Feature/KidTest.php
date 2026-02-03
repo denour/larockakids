@@ -147,12 +147,12 @@ class KidTest extends TestCase
         $contact = $kid->contacts->first();
 
         $kid->contacts()->updateExistingPivot($contact->id, [
-            'relationship_type' => 'family',
+            'relationship_type' => 'Tío',
         ]);
 
         $this->assertEquals(
-            'family',
-            $kid->fresh()->contacts->first()->pivot->relationship_type
+            'Tío',
+            $kid->fresh()->contacts()->where('contact_id', $contact->id)->first()->pivot->relationship_type
         );
     }
 }

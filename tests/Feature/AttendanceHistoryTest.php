@@ -125,7 +125,7 @@ class AttendanceHistoryTest extends TestCase
         Livewire::test(TopAttendanceRanking::class)
             ->assertSee('Carlos López')
             ->assertSee('María Pérez')
-            ->assertSee('Top Asistencias');
+            ->assertSee('Top 10 Asistencias');
     }
 
     public function test_streak_calculation_is_correct(): void
