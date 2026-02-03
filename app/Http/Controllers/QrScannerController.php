@@ -28,7 +28,7 @@ class QrScannerController extends Controller
             'code' => 'required|string',
         ]);
 
-        $result = $this->scannerService->processCheckIn($request->input('code'));
+        $result = $this->scannerService->processCheckIn($request->input('code'), $request->ip());
 
         return response()->json([
             'success' => $result['success'],
@@ -55,7 +55,7 @@ class QrScannerController extends Controller
             'code' => 'required|string',
         ]);
 
-        $result = $this->scannerService->processCheckOut($request->input('code'));
+        $result = $this->scannerService->processCheckOut($request->input('code'), $request->ip());
 
         return response()->json([
             'success' => $result['success'],

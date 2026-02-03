@@ -18,7 +18,7 @@ class AttendanceScannerService
      *
      * @return array{success: bool, message: string, kid?: Kid, action?: string}
      */
-    public function processCheckIn(string $code): array
+    public function processCheckIn(string $code, ?string $ip = null): array
     {
         $qrCode = QrCode::where('code', $code)->first();
 
@@ -48,6 +48,13 @@ class AttendanceScannerService
         }
 
         if ($activeAttendance) {
+            if ($activeAttendance->check_in_ip && $activeAttendance->check_in_ip !== $ip) {
+                return [
+                    'success' => false,
+                    'message' => 'Error de autenticación: esta acción debe realizarse desde el dispositivo original.',
+                ];
+            }
+
             $this->tutorMessageService->sendAssistanceMessage($primaryContact, $kid);
 
             return [
@@ -62,6 +69,7 @@ class AttendanceScannerService
             'kid_id' => $kid->id,
             'contact_id' => $primaryContact->id,
             'check_in' => Carbon::now(),
+            'check_in_ip' => $ip,
             'status' => AttendanceStatus::EN_CLASE,
         ]);
 
@@ -80,7 +88,7 @@ class AttendanceScannerService
      *
      * @return array{success: bool, message: string, kid?: Kid, action?: string}
      */
-    public function processCheckOut(string $code): array
+    public function processCheckOut(string $code, ?string $ip = null): array
     {
         $qrCode = QrCode::where('code', $code)->first();
 
@@ -105,6 +113,13 @@ class AttendanceScannerService
             return [
                 'success' => false,
                 'message' => 'No hay entrada registrada para '.$kid->full_name.' hoy.',
+            ];
+        }
+
+        if ($activeAttendance->check_in_ip && $activeAttendance->check_in_ip !== $ip) {
+            return [
+                'success' => false,
+                'message' => 'Error de autenticación: esta acción debe realizarse desde el dispositivo original.',
             ];
         }
 

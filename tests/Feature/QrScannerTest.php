@@ -308,4 +308,189 @@ class QrScannerTest extends TestCase
             'contact_id' => $parentContact->id,
         ]);
     }
+
+    /** @test */
+    public function check_in_stores_client_ip(): void
+    {
+        Event::fake([WhatsAppNotification::class]);
+
+        $contact = Contact::factory()->create();
+        $kid = Kid::factory()->create();
+        $kid->contacts()->sync([]);
+        $kid->contacts()->attach($contact->id, ['relationship_type' => 'parent']);
+
+        QrCode::factory()->create([
+            'code' => 'TEST-0007',
+            'kid_id' => $kid->id,
+            'status' => QrCodeStatus::Assigned,
+            'assigned_at' => now(),
+        ]);
+
+        $response = $this->postJson(route('scanner.check-in.process'), [
+            'code' => 'TEST-0007',
+        ], ['REMOTE_ADDR' => '192.168.1.100']);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'action' => 'check_in',
+        ]);
+
+        $this->assertDatabaseHas('attendances', [
+            'kid_id' => $kid->id,
+            'check_in_ip' => '192.168.1.100',
+        ]);
+    }
+
+    /** @test */
+    public function check_out_fails_when_ip_does_not_match(): void
+    {
+        Event::fake([WhatsAppNotification::class]);
+
+        $contact = Contact::factory()->create();
+        $kid = Kid::factory()->create();
+        $kid->contacts()->sync([]);
+        $kid->contacts()->attach($contact->id, ['relationship_type' => 'parent']);
+
+        QrCode::factory()->create([
+            'code' => 'TEST-0008',
+            'kid_id' => $kid->id,
+            'status' => QrCodeStatus::Assigned,
+            'assigned_at' => now(),
+        ]);
+
+        Attendance::create([
+            'kid_id' => $kid->id,
+            'contact_id' => $contact->id,
+            'check_in' => now(),
+            'check_in_ip' => '192.168.1.100',
+            'status' => AttendanceStatus::EN_CLASE,
+        ]);
+
+        $response = $this->postJson(route('scanner.check-out.process'), [
+            'code' => 'TEST-0008',
+        ], ['REMOTE_ADDR' => '192.168.1.200']);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => false,
+        ]);
+        $response->assertJsonFragment(['message' => 'Error de autenticación: esta acción debe realizarse desde el dispositivo original.']);
+
+        Event::assertNotDispatched(WhatsAppNotification::class);
+    }
+
+    /** @test */
+    public function check_out_succeeds_when_ip_matches(): void
+    {
+        Event::fake([WhatsAppNotification::class]);
+
+        $contact = Contact::factory()->create();
+        $kid = Kid::factory()->create();
+        $kid->contacts()->sync([]);
+        $kid->contacts()->attach($contact->id, ['relationship_type' => 'parent']);
+
+        QrCode::factory()->create([
+            'code' => 'TEST-0009',
+            'kid_id' => $kid->id,
+            'status' => QrCodeStatus::Assigned,
+            'assigned_at' => now(),
+        ]);
+
+        Attendance::create([
+            'kid_id' => $kid->id,
+            'contact_id' => $contact->id,
+            'check_in' => now(),
+            'check_in_ip' => '192.168.1.100',
+            'status' => AttendanceStatus::EN_CLASE,
+        ]);
+
+        $response = $this->postJson(route('scanner.check-out.process'), [
+            'code' => 'TEST-0009',
+        ], ['REMOTE_ADDR' => '192.168.1.100']);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'action' => 'check_out',
+        ]);
+
+        Event::assertDispatched(WhatsAppNotification::class);
+    }
+
+    /** @test */
+    public function assistance_message_fails_when_ip_does_not_match(): void
+    {
+        Event::fake([WhatsAppNotification::class]);
+
+        $contact = Contact::factory()->create();
+        $kid = Kid::factory()->create();
+        $kid->contacts()->sync([]);
+        $kid->contacts()->attach($contact->id, ['relationship_type' => 'parent']);
+
+        QrCode::factory()->create([
+            'code' => 'TEST-0010',
+            'kid_id' => $kid->id,
+            'status' => QrCodeStatus::Assigned,
+            'assigned_at' => now(),
+        ]);
+
+        Attendance::create([
+            'kid_id' => $kid->id,
+            'contact_id' => $contact->id,
+            'check_in' => now(),
+            'check_in_ip' => '192.168.1.100',
+            'status' => AttendanceStatus::EN_CLASE,
+        ]);
+
+        $response = $this->postJson(route('scanner.check-in.process'), [
+            'code' => 'TEST-0010',
+        ], ['REMOTE_ADDR' => '192.168.1.200']);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => false,
+        ]);
+        $response->assertJsonFragment(['message' => 'Error de autenticación: esta acción debe realizarse desde el dispositivo original.']);
+
+        Event::assertNotDispatched(WhatsAppNotification::class);
+    }
+
+    /** @test */
+    public function assistance_message_succeeds_when_ip_matches(): void
+    {
+        Event::fake([WhatsAppNotification::class]);
+
+        $contact = Contact::factory()->create();
+        $kid = Kid::factory()->create();
+        $kid->contacts()->sync([]);
+        $kid->contacts()->attach($contact->id, ['relationship_type' => 'parent']);
+
+        QrCode::factory()->create([
+            'code' => 'TEST-0011',
+            'kid_id' => $kid->id,
+            'status' => QrCodeStatus::Assigned,
+            'assigned_at' => now(),
+        ]);
+
+        Attendance::create([
+            'kid_id' => $kid->id,
+            'contact_id' => $contact->id,
+            'check_in' => now(),
+            'check_in_ip' => '192.168.1.100',
+            'status' => AttendanceStatus::EN_CLASE,
+        ]);
+
+        $response = $this->postJson(route('scanner.check-in.process'), [
+            'code' => 'TEST-0011',
+        ], ['REMOTE_ADDR' => '192.168.1.100']);
+
+        $response->assertStatus(200);
+        $response->assertJson([
+            'success' => true,
+            'action' => 'assistance',
+        ]);
+
+        Event::assertDispatched(WhatsAppNotification::class);
+    }
 }

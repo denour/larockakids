@@ -13,7 +13,7 @@
 
         @page {
             size: A4;
-            margin: 10mm;
+            margin: 5mm;
         }
 
         body {
@@ -22,25 +22,26 @@
         }
 
         .print-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10mm;
-            justify-content: flex-start;
-            padding: 10mm;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 3mm;
+            padding: 5mm;
+            max-width: 210mm;
+            margin: 0 auto;
         }
 
         .badge {
-            width: 54mm;
-            height: 85mm;
+            width: 100%;
+            height: 90mm;
             background: white;
             border: 1px solid #ddd;
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 5mm;
-            page-break-inside: avoid;
+            padding: 3mm;
+            break-inside: avoid;
         }
 
         .badge-header {
@@ -49,20 +50,20 @@
         }
 
         .badge-logo {
-            font-size: 14px;
+            font-size: 11px;
             font-weight: bold;
             color: #4a5568;
-            margin-bottom: 2mm;
+            margin-bottom: 1mm;
         }
 
         .badge-title {
-            font-size: 10px;
+            font-size: 8px;
             color: #718096;
         }
 
         .badge-qr {
-            width: 40mm;
-            height: 40mm;
+            width: 35mm;
+            height: 35mm;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -75,21 +76,25 @@
         }
 
         .badge-code {
-            font-size: 16px;
+            font-size: 12px;
             font-weight: bold;
             color: #2d3748;
             letter-spacing: 1px;
         }
 
         .badge-kid-name {
-            font-size: 11px;
+            font-size: 9px;
             color: #4a5568;
             text-align: center;
-            min-height: 14px;
+            min-height: 12px;
+            max-width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .badge-footer {
-            font-size: 8px;
+            font-size: 7px;
             color: #a0aec0;
             text-align: center;
         }
@@ -127,6 +132,8 @@
         @media print {
             body {
                 background: white;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
 
             .no-print {
@@ -135,10 +142,11 @@
 
             .print-container {
                 padding: 0;
+                gap: 2mm;
             }
 
             .badge {
-                border: 1px solid #ccc;
+                border: 1px solid #999;
                 box-shadow: none;
             }
         }

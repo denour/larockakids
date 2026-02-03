@@ -185,13 +185,13 @@ class QrCodeResource extends Resource
                     Tables\Actions\BulkAction::make('printSelected')
                         ->label('Imprimir Seleccionados')
                         ->icon('heroicon-o-printer')
+                        ->deselectRecordsAfterCompletion()
                         ->action(function (Collection $records, Tables\Actions\BulkAction $action) {
                             $ids = $records->pluck('id')->join(',');
                             $url = route('qr-codes.print-batch', ['ids' => $ids]);
 
-                            $action->redirect($url, shouldOpenInNewTab: true);
-                        })
-                        ->deselectRecordsAfterCompletion(),
+                            $action->getLivewire()->js("window.open('{$url}', '_blank')");
+                        }),
                     Tables\Actions\DeleteBulkAction::make()
                         ->label('Eliminar Seleccionados'),
                 ]),

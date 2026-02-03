@@ -16,6 +16,7 @@ class Attendance extends Model
         'kid_id',
         'contact_id',
         'check_in',
+        'check_in_ip',
         'check_out',
         'observations',
         'status',
@@ -37,4 +38,4 @@ class Attendance extends Model
     {
         return $this->belongsTo(Contact::class);
     }
-} 
+}
