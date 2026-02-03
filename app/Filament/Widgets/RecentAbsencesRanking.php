@@ -2,13 +2,13 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Attendance;
 use App\Models\Kid;
 use Carbon\Carbon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class RecentAbsencesRanking extends BaseWidget
 {
@@ -49,8 +49,7 @@ class RecentAbsencesRanking extends BaseWidget
                     ->label('Niño'),
                 Tables\Columns\TextColumn::make('last_attendance')
                     ->label('Última Asistencia')
-                    ->state(function ($record) {
-                        $absenceData = $this->calculateAbsences();
+                    ->state(function ($record) use ($absenceData) {
                         $kidAbsence = $absenceData->firstWhere('kid_id', $record->id);
 
                         return $kidAbsence ? $kidAbsence['last_attendance'] : '-';
@@ -58,8 +57,7 @@ class RecentAbsencesRanking extends BaseWidget
                     ->alignCenter(),
                 Tables\Columns\TextColumn::make('sundays_missed')
                     ->label('Domingos Sin Venir')
-                    ->state(function ($record) {
-                        $absenceData = $this->calculateAbsences();
+                    ->state(function ($record) use ($absenceData) {
                         $kidAbsence = $absenceData->firstWhere('kid_id', $record->id);
 
                         return $kidAbsence ? $kidAbsence['sundays_missed'] : 0;
@@ -76,47 +74,46 @@ class RecentAbsencesRanking extends BaseWidget
      */
     protected function calculateAbsences(): Collection
     {
-        $lastSunday = Carbon::now();
-        if (! $lastSunday->isSunday()) {
-            $lastSunday = $lastSunday->previous(Carbon::SUNDAY);
-        }
-
-        $kids = Kid::whereNotNull('birth_date')
-            ->whereHas('attendances')
-            ->get();
-
-        $absences = [];
-
-        foreach ($kids as $kid) {
-            $lastAttendance = Attendance::where('kid_id', $kid->id)
-                ->orderByDesc('check_in')
-                ->first();
-
-            if (! $lastAttendance) {
-                continue;
+        return Cache::remember('recent_absences', now()->addHours(1), function () {
+            $lastSunday = Carbon::now();
+            if (! $lastSunday->isSunday()) {
+                $lastSunday = $lastSunday->previous(Carbon::SUNDAY);
             }
 
-            $lastAttendanceDate = Carbon::parse($lastAttendance->check_in);
-            $sundaysMissed = $this->countSundaysBetween($lastAttendanceDate, $lastSunday);
+            // Load all kids with their latest attendance in one query
+            $kids = Kid::whereNotNull('birth_date')
+                ->whereHas('attendances')
+                ->with(['attendances' => fn ($q) => $q->orderByDesc('check_in')->limit(1)])
+                ->get();
 
-            if ($sundaysMissed > 0) {
-                $absences[] = [
-                    'kid_id' => $kid->id,
-                    'last_attendance' => $lastAttendanceDate->format('d M Y'),
-                    'sundays_missed' => $sundaysMissed,
-                ];
+            $absences = [];
+
+            foreach ($kids as $kid) {
+                $lastAttendance = $kid->attendances->first();
+
+                if (! $lastAttendance) {
+                    continue;
+                }
+
+                $lastAttendanceDate = Carbon::parse($lastAttendance->check_in);
+                $sundaysMissed = $this->countSundaysBetween($lastAttendanceDate, $lastSunday);
+
+                if ($sundaysMissed > 0) {
+                    $absences[] = [
+                        'kid_id' => $kid->id,
+                        'last_attendance' => $lastAttendanceDate->format('d M Y'),
+                        'sundays_missed' => $sundaysMissed,
+                    ];
+                }
             }
-        }
 
-        return collect($absences)
-            ->sortByDesc('sundays_missed')
-            ->take(10)
-            ->values();
+            return collect($absences)
+                ->sortByDesc('sundays_missed')
+                ->take(10)
+                ->values();
+        });
     }
 
-    /**
-     * Count the number of Sundays between two dates (exclusive of start date).
-     */
     protected function countSundaysBetween(Carbon $startDate, Carbon $endDate): int
     {
         $count = 0;

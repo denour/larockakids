@@ -9,6 +9,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class TopAttendanceRanking extends BaseWidget
 {
@@ -20,11 +21,9 @@ class TopAttendanceRanking extends BaseWidget
 
     protected static ?string $heading = 'Top 10 Asistencias';
 
-    protected ?Collection $undefeatedKids = null;
-
     public function table(Table $table): Table
     {
-        $this->undefeatedKids = $this->getUndefeatedKids();
+        $undefeatedKids = $this->getUndefeatedKids();
 
         return $table
             ->query(
@@ -38,26 +37,17 @@ class TopAttendanceRanking extends BaseWidget
             ->columns([
                 Tables\Columns\TextColumn::make('rank')
                     ->label('#')
-                    ->state(function ($record, $rowLoop) {
-                        return $rowLoop->iteration;
-                    })
+                    ->state(fn ($record, $rowLoop) => $rowLoop->iteration)
                     ->alignCenter()
                     ->width('50px'),
                 Tables\Columns\TextColumn::make('full_name')
                     ->label('Niño')
-                    ->description(function ($record) {
-                        if ($this->undefeatedKids->contains($record->id)) {
-                            return '🏆 Invicto';
-                        }
-
-                        return null;
-                    })
-                    ->searchable(['first_name', 'last_name']),
+                    ->description(fn ($record) => $undefeatedKids->contains($record->id) ? '🏆 Invicto' : null),
                 Tables\Columns\TextColumn::make('attendances_count')
                     ->label('Total')
                     ->alignCenter()
                     ->badge()
-                    ->color(fn ($record) => $this->undefeatedKids->contains($record->id) ? 'warning' : 'success'),
+                    ->color(fn ($record) => $undefeatedKids->contains($record->id) ? 'warning' : 'success'),
             ])
             ->paginated(false);
     }
@@ -67,60 +57,51 @@ class TopAttendanceRanking extends BaseWidget
      */
     protected function getUndefeatedKids(): Collection
     {
-        $sundays = $this->getSundaysFromPast(52);
-        $kids = Kid::whereNotNull('birth_date')
-            ->whereHas('attendances')
-            ->get();
+        return Cache::remember('undefeated_kids', now()->addHours(1), function () {
+            $sundays = $this->getSundaysFromPast(52);
 
-        $undefeated = collect();
+            // Load all kids with their attendances in one query
+            $kids = Kid::whereNotNull('birth_date')
+                ->whereHas('attendances')
+                ->with(['attendances:id,kid_id,check_in'])
+                ->get();
 
-        foreach ($kids as $kid) {
-            $attendanceDates = Attendance::where('kid_id', $kid->id)
-                ->pluck('check_in')
-                ->map(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
-                ->toArray();
+            $undefeated = collect();
 
-            if (empty($attendanceDates)) {
-                continue;
-            }
+            foreach ($kids as $kid) {
+                $attendanceDates = $kid->attendances
+                    ->pluck('check_in')
+                    ->map(fn ($date) => Carbon::parse($date)->format('Y-m-d'))
+                    ->toArray();
 
-            // Find the first Sunday the kid attended
-            $firstAttendanceDate = Attendance::where('kid_id', $kid->id)
-                ->orderBy('check_in')
-                ->first();
-
-            if (! $firstAttendanceDate) {
-                continue;
-            }
-
-            $firstDate = Carbon::parse($firstAttendanceDate->check_in);
-
-            // Check all Sundays from first attendance to now
-            $isUndefeated = true;
-            foreach ($sundays as $sunday) {
-                // Only check Sundays after first attendance
-                if ($sunday->lt($firstDate->startOfDay())) {
+                if (empty($attendanceDates)) {
                     continue;
                 }
 
-                $sundayDate = $sunday->format('Y-m-d');
-                if (! in_array($sundayDate, $attendanceDates)) {
-                    $isUndefeated = false;
-                    break;
+                $firstDate = Carbon::parse(min($attendanceDates));
+
+                $isUndefeated = true;
+                foreach ($sundays as $sunday) {
+                    if ($sunday->lt($firstDate->startOfDay())) {
+                        continue;
+                    }
+
+                    if (! in_array($sunday->format('Y-m-d'), $attendanceDates)) {
+                        $isUndefeated = false;
+                        break;
+                    }
+                }
+
+                if ($isUndefeated) {
+                    $undefeated->push($kid->id);
                 }
             }
 
-            if ($isUndefeated) {
-                $undefeated->push($kid->id);
-            }
-        }
-
-        return $undefeated;
+            return $undefeated;
+        });
     }
 
     /**
-     * Get array of Sundays from today going back.
-     *
      * @return array<Carbon>
      */
     protected function getSundaysFromPast(int $weeks): array

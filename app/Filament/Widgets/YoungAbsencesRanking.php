@@ -2,13 +2,13 @@
 
 namespace App\Filament\Widgets;
 
-use App\Models\Attendance;
 use App\Models\Kid;
 use Carbon\Carbon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Widgets\TableWidget as BaseWidget;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
 
 class YoungAbsencesRanking extends BaseWidget
 {
@@ -77,51 +77,49 @@ class YoungAbsencesRanking extends BaseWidget
      */
     protected function calculateYoungAbsences(): Collection
     {
-        $lastSunday = Carbon::now();
-        if (! $lastSunday->isSunday()) {
-            $lastSunday = $lastSunday->previous(Carbon::SUNDAY);
-        }
-
-        // Get kids under 5 years old who have attended before
-        $fiveYearsAgo = Carbon::now()->subYears(5);
-        $kids = Kid::whereNotNull('birth_date')
-            ->where('birth_date', '>', $fiveYearsAgo)
-            ->whereHas('attendances')
-            ->get();
-
-        $absences = [];
-
-        foreach ($kids as $kid) {
-            $lastAttendance = Attendance::where('kid_id', $kid->id)
-                ->orderByDesc('check_in')
-                ->first();
-
-            if (! $lastAttendance) {
-                continue;
+        return Cache::remember('young_absences', now()->addHours(1), function () {
+            $lastSunday = Carbon::now();
+            if (! $lastSunday->isSunday()) {
+                $lastSunday = $lastSunday->previous(Carbon::SUNDAY);
             }
 
-            $lastAttendanceDate = Carbon::parse($lastAttendance->check_in);
-            $sundaysMissed = $this->countSundaysBetween($lastAttendanceDate, $lastSunday);
+            $fiveYearsAgo = Carbon::now()->subYears(5);
 
-            // Only show kids who missed at least 3 Sundays
-            if ($sundaysMissed >= 3) {
-                $absences[] = [
-                    'kid_id' => $kid->id,
-                    'last_attendance' => $lastAttendanceDate->format('d M Y'),
-                    'sundays_missed' => $sundaysMissed,
-                ];
+            // Load all young kids with their latest attendance in one query
+            $kids = Kid::whereNotNull('birth_date')
+                ->where('birth_date', '>', $fiveYearsAgo)
+                ->whereHas('attendances')
+                ->with(['attendances' => fn ($q) => $q->orderByDesc('check_in')->limit(1)])
+                ->get();
+
+            $absences = [];
+
+            foreach ($kids as $kid) {
+                $lastAttendance = $kid->attendances->first();
+
+                if (! $lastAttendance) {
+                    continue;
+                }
+
+                $lastAttendanceDate = Carbon::parse($lastAttendance->check_in);
+                $sundaysMissed = $this->countSundaysBetween($lastAttendanceDate, $lastSunday);
+
+                if ($sundaysMissed >= 3) {
+                    $absences[] = [
+                        'kid_id' => $kid->id,
+                        'last_attendance' => $lastAttendanceDate->format('d M Y'),
+                        'sundays_missed' => $sundaysMissed,
+                    ];
+                }
             }
-        }
 
-        return collect($absences)
-            ->sortByDesc('sundays_missed')
-            ->take(10)
-            ->values();
+            return collect($absences)
+                ->sortByDesc('sundays_missed')
+                ->take(10)
+                ->values();
+        });
     }
 
-    /**
-     * Count the number of Sundays between two dates (exclusive of start date).
-     */
     protected function countSundaysBetween(Carbon $startDate, Carbon $endDate): int
     {
         $count = 0;
