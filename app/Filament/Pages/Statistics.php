@@ -5,10 +5,14 @@ namespace App\Filament\Pages;
 use App\Filament\Widgets\AgeDistributionChart;
 use App\Filament\Widgets\AttendanceComparisonChart;
 use App\Filament\Widgets\AttendanceHistoryStats;
+use App\Filament\Widgets\BestStreakRanking;
 use App\Filament\Widgets\GenderDistributionChart;
 use App\Filament\Widgets\QuarterlyAttendanceChart;
+use App\Filament\Widgets\RecentAbsencesRanking;
+use App\Filament\Widgets\TopAttendanceRanking;
 use App\Filament\Widgets\WeeklyAttendanceChart;
 use App\Filament\Widgets\YearlyAttendanceChart;
+use App\Filament\Widgets\YoungAbsencesRanking;
 use Filament\Pages\Page;
 
 class Statistics extends Page
@@ -27,6 +31,10 @@ class Statistics extends Page
     {
         return [
             AttendanceHistoryStats::class,
+            TopAttendanceRanking::class,
+            BestStreakRanking::class,
+            RecentAbsencesRanking::class,
+            YoungAbsencesRanking::class,
         ];
     }
 

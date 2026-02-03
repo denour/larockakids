@@ -9,6 +9,7 @@ use App\Filament\Widgets\RecentAbsencesRanking;
 use App\Filament\Widgets\TopAttendanceRanking;
 use App\Filament\Widgets\YoungAbsencesRanking;
 use App\Models\Attendance;
+use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -23,6 +24,17 @@ class AttendanceHistory extends ListRecords
     protected static ?string $navigationLabel = 'Historial';
 
     protected static ?string $navigationIcon = 'heroicon-o-clock';
+
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\Action::make('back')
+                ->label('Asistencias de Hoy')
+                ->icon('heroicon-o-arrow-left')
+                ->color('gray')
+                ->url(AttendanceResource::getUrl('index')),
+        ];
+    }
 
     protected function getTableQuery(): Builder
     {

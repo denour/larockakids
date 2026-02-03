@@ -14,6 +14,11 @@ class ListAttendances extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
+            Actions\Action::make('history')
+                ->label('Ver Historial')
+                ->icon('heroicon-o-clock')
+                ->color('gray')
+                ->url(AttendanceResource::getUrl('history')),
             Actions\CreateAction::make()
                 ->label('Registrar Asistencia'),
         ];
@@ -25,4 +30,4 @@ class ListAttendances extends ListRecords
             AttendanceStats::class,
         ];
     }
-} 
+}
