@@ -50,15 +50,15 @@
         }
 
         .badge-logo {
-            width: 35mm;
-            height: auto;
+            width: 50mm;
+            height: 70px;
             margin: 0 auto;
         }
 
         .badge-logo img {
             width: 100%;
-            height: auto;
-            object-fit: contain;
+            height: 100%;
+            object-fit: cover;
         }
 
         .badge-qr-container {
@@ -102,7 +102,7 @@
         }
 
         .badge-kid-name {
-            font-size: 10px;
+            font-size: 14px;
             font-weight: 600;
             color: #161d6a;
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
