@@ -17,7 +17,7 @@
         }
 
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: #f5f5f5;
         }
 
@@ -33,15 +33,15 @@
         .badge {
             width: 100%;
             height: 90mm;
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            background: #161d6a;
+            border-radius: 10px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 3mm;
+            padding: 4mm;
             break-inside: avoid;
+            overflow: hidden;
         }
 
         .badge-header {
@@ -50,20 +50,30 @@
         }
 
         .badge-logo {
-            font-size: 11px;
-            font-weight: bold;
-            color: #4a5568;
-            margin-bottom: 1mm;
+            width: 35mm;
+            height: auto;
+            margin: 0 auto;
         }
 
-        .badge-title {
-            font-size: 8px;
-            color: #718096;
+        .badge-logo img {
+            width: 100%;
+            height: auto;
+            object-fit: contain;
+        }
+
+        .badge-qr-container {
+            background: white;
+            border-radius: 8px;
+            padding: 3mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2mm;
         }
 
         .badge-qr {
-            width: 35mm;
-            height: 35mm;
+            width: 32mm;
+            height: 32mm;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -76,17 +86,26 @@
         }
 
         .badge-code {
-            font-size: 12px;
+            font-size: 11px;
             font-weight: bold;
-            color: #2d3748;
+            color: #161d6a;
             letter-spacing: 1px;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .badge-name-container {
+            background: white;
+            border-radius: 6px;
+            padding: 2mm 4mm;
+            width: 100%;
+            text-align: center;
         }
 
         .badge-kid-name {
-            font-size: 9px;
-            color: #4a5568;
-            text-align: center;
-            min-height: 12px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #161d6a;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             max-width: 100%;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -95,7 +114,7 @@
 
         .badge-footer {
             font-size: 7px;
-            color: #a0aec0;
+            color: rgba(255, 255, 255, 0.7);
             text-align: center;
         }
 
@@ -107,7 +126,7 @@
         }
 
         .no-print button {
-            background: #4299e1;
+            background: #161d6a;
             color: white;
             border: none;
             padding: 10px 30px;
@@ -118,7 +137,7 @@
         }
 
         .no-print button:hover {
-            background: #3182ce;
+            background: #1e40af;
         }
 
         .no-print .secondary {
@@ -146,7 +165,6 @@
             }
 
             .badge {
-                border: 1px solid #999;
                 box-shadow: none;
             }
         }
@@ -162,26 +180,30 @@
         @foreach($qrCodes as $qrCode)
             <div class="badge">
                 <div class="badge-header">
-                    <div class="badge-logo">La Roca Kids</div>
-                    <div class="badge-title">Gafete de Identificación</div>
+                    <div class="badge-logo">
+                        <img src="{{ asset('ea55fb93-0928-4e07-b6dc-7331126fd0dd.png') }}" alt="Piedritas Kids">
+                    </div>
                 </div>
 
-                <div class="badge-qr">
-                    @if($qrCode->qr_image_path)
-                        <img src="{{ Storage::url($qrCode->qr_image_path) }}" alt="QR {{ $qrCode->code }}">
-                    @else
-                        <div style="color: #a0aec0; font-size: 12px;">Sin imagen QR</div>
-                    @endif
+                <div class="badge-qr-container">
+                    <div class="badge-qr">
+                        @if($qrCode->qr_image_path)
+                            <img src="{{ Storage::url($qrCode->qr_image_path) }}" alt="QR {{ $qrCode->code }}">
+                        @else
+                            <div style="color: #a0aec0; font-size: 12px;">Sin imagen QR</div>
+                        @endif
+                    </div>
+                    <div class="badge-code">{{ $qrCode->code }}</div>
                 </div>
 
-                <div class="badge-code">{{ $qrCode->code }}</div>
-
-                <div class="badge-kid-name">
-                    @if($qrCode->kid)
-                        {{ $qrCode->kid->full_name }}
-                    @else
-                        &nbsp;
-                    @endif
+                <div class="badge-name-container">
+                    <div class="badge-kid-name">
+                        @if($qrCode->kid)
+                            {{ $qrCode->kid->full_name }}
+                        @else
+                            &nbsp;
+                        @endif
+                    </div>
                 </div>
 
                 <div class="badge-footer">

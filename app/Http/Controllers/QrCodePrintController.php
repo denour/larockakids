@@ -23,8 +23,12 @@ class QrCodePrintController extends Controller
      */
     public function printBatch(Request $request): View
     {
-        $ids = explode(',', $request->query('ids', ''));
-        $qrCodes = QrCode::whereIn('id', $ids)->with('kid')->get();
+        $idsParam = $request->query('ids', '');
+        $ids = array_filter(explode(',', $idsParam), fn ($id) => $id !== '');
+
+        $qrCodes = empty($ids)
+            ? collect()
+            : QrCode::whereIn('id', $ids)->with('kid')->get();
 
         return view('qr-codes.print', [
             'qrCodes' => $qrCodes,
