@@ -289,16 +289,23 @@ class AttendanceResource extends Resource
                     ->form([
                         Forms\Components\Select::make('situation')
                             ->label('Tipo de Notificación')
-                            ->options([
-                                'bathroom' => 'Baño',
-                                'diaper' => 'Pañal',
-                                'unconsolable' => 'Inconsolable',
-                                'sick' => 'Enfermo',
-                                'recovered' => 'Recuperado',
-                                'exit' => 'Salida',
-                            ])
+                            ->options(function () {
+                                // Solo mostrar tipos de mensaje que existen en la base de datos
+                                $availableMessages = \App\Models\TutorMessage::where('is_active', true)
+                                    ->pluck('name', 'label')
+                                    ->toArray();
+                                
+                                if (empty($availableMessages)) {
+                                    return ['none' => 'No hay mensajes configurados'];
+                                }
+                                
+                                return $availableMessages;
+                            })
                             ->required()
-                            ->helperText('Selecciona el tipo de notificación que deseas enviar'),
+                            ->disabled(fn () => \App\Models\TutorMessage::where('is_active', true)->count() === 0)
+                            ->helperText(fn () => \App\Models\TutorMessage::where('is_active', true)->count() === 0 
+                                ? 'Configura mensajes en el panel de administración primero' 
+                                : 'Selecciona el tipo de notificación que deseas enviar'),
                         Forms\Components\Textarea::make('message')
                             ->label('Mensaje Adicional')
                             ->placeholder('Escribe un mensaje adicional si lo deseas...')
