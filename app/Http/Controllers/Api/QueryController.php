@@ -34,8 +34,8 @@ class QueryController extends Controller
             'birth_date' => $kid->birth_date->format('Y-m-d'),
             'allergies' => $kid->allergies->pluck('name'),
             'contacts' => $kid->contacts->map(fn($c) => [
-                'name' => $c->name,
-                'phone' => $c->phone,
+                'name' => $c->full_name,
+                'phone' => $c->full_phone,
                 'relationship' => $c->pivot->relationship_type,
             ]),
         ]);
@@ -88,7 +88,7 @@ class QueryController extends Controller
         $csv = "ID,Nombre,Edad,Género,Fecha Nacimiento,Alergias,Contactos\n";
         foreach ($kids as $kid) {
             $allergies = $kid->allergies->pluck('name')->join('; ');
-            $contacts = $kid->contacts->map(fn($c) => "{$c->name} ({$c->phone})")->join('; ');
+            $contacts = $kid->contacts->map(fn($c) => "{$c->full_name} ({$c->full_phone})")->join('; ');
             $csv .= "{$kid->id},{$kid->full_name},{$kid->age},{$kid->gender},{$kid->birth_date->format('Y-m-d')},\"{$allergies}\",\"{$contacts}\"\n";
         }
 
