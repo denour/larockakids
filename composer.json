@@ -8,6 +8,7 @@
     "require": {
         "php": "^8.2",
         "awcodes/filament-tiptap-editor": "^3.0",
+        "chillerlan/php-qrcode": "^5.0",
         "eightynine/filament-excel-import": "^3.1",
         "facebook/graph-sdk": "^5.1",
         "filament/filament": "^3.3",

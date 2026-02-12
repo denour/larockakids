@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Imprimir Gafetes QR</title>
+    <title>Imprimir Credenciales QR</title>
     <style>
         * {
             margin: 0;
@@ -23,57 +23,62 @@
 
         .print-container {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 3mm;
+            grid-template-columns: repeat(2, 90mm);
+            gap: 5mm;
             padding: 5mm;
             max-width: 210mm;
             margin: 0 auto;
+            justify-content: center;
         }
 
         .badge {
-            width: 100%;
-            height: 90mm;
+            width: 90mm;
+            height: 54mm;
             background: #161d6a;
-            border-radius: 10px;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 3mm;
+            break-inside: avoid;
+            overflow: hidden;
+            gap: 2mm;
+        }
+
+        .badge-left {
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            padding: 4mm;
-            break-inside: avoid;
-            overflow: hidden;
-        }
-
-        .badge-header {
-            text-align: center;
-            width: 100%;
+            justify-content: center;
+            height: 100%;
         }
 
         .badge-logo {
-            width: 50mm;
-            height: 70px;
-            margin: 0 auto;
+            width: 30mm;
+            height: auto;
+            margin-bottom: 2mm;
         }
 
         .badge-logo img {
             width: 100%;
-            height: 100%;
-            object-fit: cover;
+            height: auto;
+            object-fit: contain;
         }
 
         .badge-qr-container {
             background: white;
-            border-radius: 8px;
-            padding: 3mm;
+            border-radius: 6px;
+            padding: 2mm;
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 2mm;
+            gap: 1mm;
         }
 
         .badge-qr {
-            width: 32mm;
-            height: 32mm;
+            width: 28mm;
+            height: 28mm;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -86,23 +91,33 @@
         }
 
         .badge-code {
-            font-size: 11px;
+            font-size: 9px;
             font-weight: bold;
             color: #161d6a;
             letter-spacing: 1px;
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
         }
 
+        .badge-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 2mm;
+        }
+
         .badge-name-container {
             background: white;
             border-radius: 6px;
-            padding: 2mm 4mm;
+            padding: 2mm 3mm;
             width: 100%;
             text-align: center;
         }
 
         .badge-kid-name {
-            font-size: 14px;
+            font-size: 12px;
             font-weight: 600;
             color: #161d6a;
             font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
@@ -179,35 +194,37 @@
     <div class="print-container">
         @foreach($qrCodes as $qrCode)
             <div class="badge">
-                <div class="badge-header">
+                <div class="badge-left">
+                    <div class="badge-qr-container">
+                        <div class="badge-qr">
+                            @if($qrCode->qr_image_path)
+                                <img src="{{ Storage::url($qrCode->qr_image_path) }}" alt="QR {{ $qrCode->code }}">
+                            @else
+                                <div style="color: #a0aec0; font-size: 10px;">Sin QR</div>
+                            @endif
+                        </div>
+                        <div class="badge-code">{{ $qrCode->code }}</div>
+                    </div>
+                </div>
+
+                <div class="badge-right">
                     <div class="badge-logo">
                         <img src="{{ asset('ea55fb93-0928-4e07-b6dc-7331126fd0dd.png') }}" alt="Piedritas Kids">
                     </div>
-                </div>
 
-                <div class="badge-qr-container">
-                    <div class="badge-qr">
-                        @if($qrCode->qr_image_path)
-                            <img src="{{ Storage::url($qrCode->qr_image_path) }}" alt="QR {{ $qrCode->code }}">
-                        @else
-                            <div style="color: #a0aec0; font-size: 12px;">Sin imagen QR</div>
-                        @endif
+                    <div class="badge-name-container">
+                        <div class="badge-kid-name">
+                            @if($qrCode->kid)
+                                {{ $qrCode->kid->full_name }}
+                            @else
+                                &nbsp;
+                            @endif
+                        </div>
                     </div>
-                    <div class="badge-code">{{ $qrCode->code }}</div>
-                </div>
 
-                <div class="badge-name-container">
-                    <div class="badge-kid-name">
-                        @if($qrCode->kid)
-                            {{ $qrCode->kid->full_name }}
-                        @else
-                            &nbsp;
-                        @endif
+                    <div class="badge-footer">
+                        Escanea para check-in
                     </div>
-                </div>
-
-                <div class="badge-footer">
-                    Escanea para check-in
                 </div>
             </div>
         @endforeach

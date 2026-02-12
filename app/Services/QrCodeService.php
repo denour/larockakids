@@ -4,10 +4,10 @@ namespace App\Services;
 
 use App\Enums\QrCodeStatus;
 use App\Models\QrCode;
-use BaconQrCode\Renderer\Image\SvgImageBackEnd;
-use BaconQrCode\Renderer\ImageRenderer;
-use BaconQrCode\Renderer\RendererStyle\RendererStyle;
-use BaconQrCode\Writer;
+use chillerlan\QRCode\QRCode as QRGenerator;
+use chillerlan\QRCode\QROptions;
+use chillerlan\QRCode\Data\QRMatrix;
+use chillerlan\QRCode\Common\EccLevel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -70,13 +70,16 @@ class QrCodeService
         $storage = Storage::disk($this->disk);
         $storage->makeDirectory($this->storagePath);
 
-        $renderer = new ImageRenderer(
-            new RendererStyle(300, 2),
-            new SvgImageBackEnd
-        );
+        // QR code options with high error correction for logo
+        $options = new QROptions([
+            'version'      => 5,
+            'eccLevel'     => EccLevel::H,
+        ]);
 
-        $writer = new Writer($renderer);
-        $svg = $writer->writeString($code);
+        $qrGenerator = new QRGenerator($options);
+        
+        // Generate SVG with circular dots and logo
+        $svg = $this->generateCircularSvg($qrGenerator, $code);
 
         $filename = "{$code}.svg";
         $path = "{$this->storagePath}/{$filename}";
@@ -84,6 +87,87 @@ class QrCodeService
         $storage->put($path, $svg, 'public');
 
         return $path;
+    }
+
+    /**
+     * Generate SVG with circular modules and embedded logo
+     */
+    protected function generateCircularSvg(QRGenerator $qrGenerator, string $code): string
+    {
+        // Add data segment first, then get matrix
+        $qrGenerator->addByteSegment($code);
+        $matrix = $qrGenerator->getQRMatrix();
+        $moduleCount = $matrix->getSize();
+        $scale = 10;
+        $size = $moduleCount * $scale;
+        $logoSize = $size * 0.28; // Logo takes 28% of QR
+        
+        // Start SVG
+        $svg = <<<SVG
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" 
+     viewBox="0 0 {$size} {$size}" width="{$size}" height="{$size}">
+  <rect width="100%" height="100%" fill="white"/>
+SVG;
+
+        // Draw modules as circles
+        $darkColor = '#161d6a'; // Piedritas brand color
+        $circleRadius = $scale * 0.42;
+        
+        // Logo exclusion zone (center area)
+        $logoZoneStart = ($moduleCount / 2) - ($moduleCount * 0.18);
+        $logoZoneEnd = ($moduleCount / 2) + ($moduleCount * 0.18);
+        
+        for ($y = 0; $y < $moduleCount; $y++) {
+            for ($x = 0; $x < $moduleCount; $x++) {
+                // Skip logo area
+                if ($x > $logoZoneStart && $x < $logoZoneEnd && 
+                    $y > $logoZoneStart && $y < $logoZoneEnd) {
+                    continue;
+                }
+                
+                // Get module value and check if dark
+                $moduleValue = $matrix->get($x, $y);
+                if ($matrix->isDark($moduleValue)) {
+                    $cx = ($x * $scale) + ($scale / 2);
+                    $cy = ($y * $scale) + ($scale / 2);
+                    
+                    // Finder patterns stay as rounded squares
+                    if ($matrix->checkTypeIn($x, $y, [
+                        QRMatrix::M_FINDER_DARK,
+                        QRMatrix::M_FINDER_DOT,
+                    ])) {
+                        $rectX = $x * $scale;
+                        $rectY = $y * $scale;
+                        $svg .= "  <rect x=\"{$rectX}\" y=\"{$rectY}\" width=\"{$scale}\" height=\"{$scale}\" rx=\"2\" fill=\"{$darkColor}\"/>\n";
+                    } else {
+                        $svg .= "  <circle cx=\"{$cx}\" cy=\"{$cy}\" r=\"{$circleRadius}\" fill=\"{$darkColor}\"/>\n";
+                    }
+                }
+            }
+        }
+
+        // Add logo in center with circular mask
+        $logoPath = public_path('logo.png');
+        if (file_exists($logoPath)) {
+            $logoData = base64_encode(file_get_contents($logoPath));
+            $logoCenterX = $size / 2;
+            $logoCenterY = $size / 2;
+            $logoDisplaySize = $logoSize * 0.85;
+            
+            // White circle background for logo
+            $svg .= "  <circle cx=\"{$logoCenterX}\" cy=\"{$logoCenterY}\" r=\"" . ($logoSize / 2 + 3) . "\" fill=\"white\"/>\n";
+            $svg .= "  <circle cx=\"{$logoCenterX}\" cy=\"{$logoCenterY}\" r=\"" . ($logoSize / 2) . "\" fill=\"white\" stroke=\"{$darkColor}\" stroke-width=\"3\"/>\n";
+            
+            // Logo image (rectangular, centered)
+            $logoX = $logoCenterX - ($logoDisplaySize / 2);
+            $logoY = $logoCenterY - ($logoDisplaySize / 4);
+            $svg .= "  <image x=\"{$logoX}\" y=\"{$logoY}\" width=\"{$logoDisplaySize}\" height=\"" . ($logoDisplaySize / 2) . "\" xlink:href=\"data:image/png;base64,{$logoData}\" preserveAspectRatio=\"xMidYMid meet\"/>\n";
+        }
+
+        $svg .= "</svg>";
+
+        return $svg;
     }
 
     /**
