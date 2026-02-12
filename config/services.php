@@ -35,4 +35,6 @@ return [
         ],
     ],
 
+    'api_key' => env('LAROCKAKIDS_API_KEY'),
+
 ];

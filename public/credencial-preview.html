@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Preview Credencial</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+        }
+
+        .badge {
+            width: 90mm;
+            height: 54mm;
+            background: #161d6a;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 3mm;
+            gap: 2mm;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        .badge-left {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+        }
+
+        .badge-qr-container {
+            background: white;
+            border-radius: 6px;
+            padding: 2mm;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1mm;
+        }
+
+        .badge-qr {
+            width: 28mm;
+            height: 28mm;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f0f0f0;
+        }
+
+        .badge-qr-placeholder {
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(5, 1fr);
+            gap: 1px;
+        }
+
+        .badge-qr-placeholder div {
+            background: #333;
+        }
+
+        .badge-qr-placeholder div:nth-child(odd) {
+            background: white;
+        }
+
+        .badge-code {
+            font-size: 9px;
+            font-weight: bold;
+            color: #161d6a;
+            letter-spacing: 1px;
+        }
+
+        .badge-right {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            gap: 2mm;
+        }
+
+        .badge-logo {
+            width: 30mm;
+            height: auto;
+            background: white;
+            border-radius: 4px;
+            padding: 2mm;
+            text-align: center;
+            font-weight: bold;
+            color: #161d6a;
+            font-size: 10px;
+        }
+
+        .badge-name-container {
+            background: white;
+            border-radius: 6px;
+            padding: 2mm 3mm;
+            width: 100%;
+            text-align: center;
+        }
+
+        .badge-kid-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #161d6a;
+        }
+
+        .badge-footer {
+            font-size: 7px;
+            color: rgba(255, 255, 255, 0.7);
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="badge">
+        <div class="badge-left">
+            <div class="badge-qr-container">
+                <div class="badge-qr">
+                    <svg viewBox="0 0 100 100" width="100%" height="100%">
+                        <rect x="0" y="0" width="100" height="100" fill="white"/>
+                        <rect x="5" y="5" width="25" height="25" fill="#333"/>
+                        <rect x="10" y="10" width="15" height="15" fill="white"/>
+                        <rect x="13" y="13" width="9" height="9" fill="#333"/>
+                        <rect x="70" y="5" width="25" height="25" fill="#333"/>
+                        <rect x="75" y="10" width="15" height="15" fill="white"/>
+                        <rect x="78" y="13" width="9" height="9" fill="#333"/>
+                        <rect x="5" y="70" width="25" height="25" fill="#333"/>
+                        <rect x="10" y="75" width="15" height="15" fill="white"/>
+                        <rect x="13" y="78" width="9" height="9" fill="#333"/>
+                        <rect x="35" y="5" width="5" height="5" fill="#333"/>
+                        <rect x="45" y="5" width="5" height="5" fill="#333"/>
+                        <rect x="55" y="5" width="5" height="5" fill="#333"/>
+                        <rect x="35" y="15" width="5" height="5" fill="#333"/>
+                        <rect x="50" y="15" width="5" height="5" fill="#333"/>
+                        <rect x="40" y="40" width="20" height="20" fill="#333"/>
+                        <rect x="45" y="45" width="10" height="10" fill="white"/>
+                        <rect x="70" y="40" width="5" height="5" fill="#333"/>
+                        <rect x="80" y="50" width="5" height="5" fill="#333"/>
+                        <rect x="40" y="70" width="5" height="5" fill="#333"/>
+                        <rect x="55" y="75" width="5" height="5" fill="#333"/>
+                        <rect x="70" y="70" width="25" height="25" fill="#333"/>
+                        <rect x="75" y="75" width="15" height="15" fill="white"/>
+                        <rect x="80" y="80" width="5" height="5" fill="#333"/>
+                    </svg>
+                </div>
+                <div class="badge-code">PRK-2024-001</div>
+            </div>
+        </div>
+
+        <div class="badge-right">
+            <div class="badge-logo">
+                🪨 PIEDRITAS KIDS
+            </div>
+
+            <div class="badge-name-container">
+                <div class="badge-kid-name">
+                    María García López
+                </div>
+            </div>
+
+            <div class="badge-footer">
+                Escanea para check-in
+            </div>
+        </div>
+    </div>
+</body>
+</html>
