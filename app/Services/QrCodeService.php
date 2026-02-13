@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Enums\QrCodeStatus;
 use App\Models\QrCode;
+use App\Models\Setting;
 use chillerlan\QRCode\QRCode as QRGenerator;
 use chillerlan\QRCode\QROptions;
 use chillerlan\QRCode\Data\QRMatrix;
@@ -148,9 +149,8 @@ SVG;
         }
 
         // Add logo in center with circular mask
-        $logoPath = public_path('logo.png');
-        if (file_exists($logoPath)) {
-            $logoData = base64_encode(file_get_contents($logoPath));
+        $logoData = $this->getLogoBase64();
+        if ($logoData) {
             $logoCenterX = $size / 2;
             $logoCenterY = $size / 2;
             $logoDisplaySize = $logoSize * 0.85;
@@ -238,5 +238,32 @@ SVG;
         if ($qrCode->qr_image_path) {
             Storage::disk($this->disk)->delete($qrCode->qr_image_path);
         }
+    }
+
+    /**
+     * Get logo as base64 string for embedding in QR SVG.
+     * Tries S3 first (from Settings), falls back to local logo.png
+     */
+    protected function getLogoBase64(): ?string
+    {
+        // Try to get logo from Settings (S3)
+        $logo = Setting::get('site_logo');
+        
+        if ($logo && Storage::disk('s3')->exists($logo)) {
+            try {
+                $contents = Storage::disk('s3')->get($logo);
+                return base64_encode($contents);
+            } catch (\Exception $e) {
+                // Fall through to local fallback
+            }
+        }
+        
+        // Fallback to local logo.png
+        $localPath = public_path('logo.png');
+        if (file_exists($localPath)) {
+            return base64_encode(file_get_contents($localPath));
+        }
+        
+        return null;
     }
 }
