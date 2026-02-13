@@ -40,8 +40,8 @@ class Setting extends Model
     {
         $logo = self::get('site_logo');
         
-        if ($logo && Storage::exists($logo)) {
-            return Storage::url($logo);
+        if ($logo && Storage::disk('s3')->exists($logo)) {
+            return Storage::disk('s3')->url($logo);
         }
         
         // Fallback to default logo
