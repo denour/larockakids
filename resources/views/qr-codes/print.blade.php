@@ -57,7 +57,6 @@
         .badge-logo {
             width: 42mm;
             height: auto;
-            margin-bottom: 2mm;
         }
 
         .badge-logo img {
@@ -103,9 +102,18 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
+            justify-content: flex-start;
             height: 100%;
-            gap: 2mm;
+            gap: 0;
+        }
+
+        .badge-right .badge-logo {
+            margin-top: 1mm;
+            margin-bottom: auto;
+        }
+
+        .badge-right .badge-name-container {
+            margin-bottom: 2mm;
         }
 
         .badge-name-container {
@@ -239,9 +247,6 @@
                         @endif
                     </div>
 
-                    <div class="badge-footer">
-                        Escanea para check-in
-                    </div>
                 </div>
             </div>
         @endforeach
