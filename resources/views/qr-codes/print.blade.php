@@ -109,7 +109,6 @@
 
         .badge-right .badge-logo {
             margin-top: 1mm;
-            margin-bottom: auto;
         }
 
         .badge-right .badge-name-container {
