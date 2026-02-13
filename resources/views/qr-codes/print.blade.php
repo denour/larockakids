@@ -127,6 +127,13 @@
             white-space: nowrap;
         }
 
+        .badge-kid-age {
+            font-size: 10px;
+            font-weight: 500;
+            color: #4a5568;
+            margin-top: 1mm;
+        }
+
         .badge-footer {
             font-size: 7px;
             color: rgba(255, 255, 255, 0.7);
@@ -209,7 +216,7 @@
 
                 <div class="badge-right">
                     <div class="badge-logo">
-                        <img src="{{ asset('ea55fb93-0928-4e07-b6dc-7331126fd0dd.png') }}" alt="Piedritas Kids">
+                        <img src="{{ \App\Models\Setting::getLogoUrl() }}" alt="{{ \App\Models\Setting::getSiteName() }}">
                     </div>
 
                     <div class="badge-name-container">
@@ -220,6 +227,11 @@
                                 &nbsp;
                             @endif
                         </div>
+                        @if($qrCode->kid && $qrCode->kid->birth_date)
+                            <div class="badge-kid-age">
+                                {{ $qrCode->kid->age }} Años
+                            </div>
+                        @endif
                     </div>
 
                     <div class="badge-footer">
