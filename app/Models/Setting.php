@@ -39,10 +39,9 @@ class Setting extends Model
     public static function getLogoUrl(): string
     {
         $logo = self::get('site_logo');
-        $disk = app()->environment('production') ? 's3' : 'public';
         
-        if ($logo && Storage::disk($disk)->exists($logo)) {
-            return Storage::disk($disk)->url($logo);
+        if ($logo && Storage::exists($logo)) {
+            return Storage::url($logo);
         }
         
         // Fallback to default logo

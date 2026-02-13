@@ -49,7 +49,6 @@ class Settings extends Page implements HasForms
                             ->label('Site Logo')
                             ->image()
                             ->directory('settings')
-                            ->disk(fn () => app()->environment('production') ? 's3' : 'public')
                             ->visibility('public')
                             ->imagePreviewHeight('150')
                             ->maxSize(2048)
@@ -67,9 +66,8 @@ class Settings extends Page implements HasForms
 
         // Handle logo - if it's a new upload, delete old one
         $oldLogo = Setting::get('site_logo');
-        $disk = app()->environment('production') ? 's3' : 'public';
         if ($oldLogo && isset($data['site_logo']) && $data['site_logo'] !== $oldLogo) {
-            Storage::disk($disk)->delete($oldLogo);
+            Storage::delete($oldLogo);
         }
 
         Setting::set('site_name', $data['site_name'], 'string');
