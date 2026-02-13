@@ -55,7 +55,7 @@
         }
 
         .badge-logo {
-            width: 30mm;
+            width: 42mm;
             height: auto;
             margin-bottom: 2mm;
         }
@@ -222,7 +222,12 @@
                     <div class="badge-name-container">
                         <div class="badge-kid-name">
                             @if($qrCode->kid)
-                                {{ $qrCode->kid->full_name }}
+                                @php
+                                    // Primer nombre + primer apellido
+                                    $firstName = explode(' ', $qrCode->kid->first_name)[0];
+                                    $lastName = explode(' ', $qrCode->kid->last_name)[0];
+                                @endphp
+                                {{ $firstName }} {{ $lastName }}
                             @else
                                 &nbsp;
                             @endif
