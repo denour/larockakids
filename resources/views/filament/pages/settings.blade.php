@@ -12,7 +12,7 @@
     @if($currentLogo = \App\Models\Setting::get('site_logo'))
         <div class="mt-8 p-4 bg-gray-100 dark:bg-gray-800 rounded-lg">
             <h3 class="text-lg font-medium mb-4">Current Logo Preview</h3>
-            <img src="{{ \Illuminate\Support\Facades\Storage::disk('public')->url($currentLogo) }}" 
+            <img src="{{ \App\Models\Setting::getLogoUrl() }}" 
                  alt="Current Logo" 
                  class="max-h-32 rounded shadow">
         </div>
