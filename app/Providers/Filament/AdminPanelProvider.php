@@ -19,6 +19,7 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Vormkracht10\TwoFactorAuth\TwoFactorAuthPlugin;
+use App\Models\Setting;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -36,9 +37,9 @@ class AdminPanelProvider extends PanelProvider
             ->passwordReset()
             ->profile()
             ->font('Best Kids')
-            ->brandName('Piedritas')
+            ->brandName(fn () => Setting::getSiteName())
             ->favicon(asset('favicon/favicon.ico'))
-            ->brandLogo(asset('logo.png'))
+            ->brandLogo(fn () => Setting::getLogoUrl())
             ->brandLogoHeight('2.5rem')
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
