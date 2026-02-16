@@ -43,11 +43,17 @@ class TutorMessageService
         // Limpiar el número de teléfono
         $phoneNumber = preg_replace('/[^0-9]/', '', $contact->phone);
 
-        // Disparar el evento de WhatsApp
-        broadcast(new WhatsAppNotification(
-            message: $formattedMessage,
-            phoneNumber: $phoneNumber
-        ))->toOthers();
+        // Enviar mensaje directo por WhatsApp
+        try {
+            $this->whatsappService->sendTextMessage($phoneNumber, $formattedMessage);
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Error enviando WhatsApp: ' . $e->getMessage(), [
+                'phone' => $phoneNumber,
+                'kid' => $kid->full_name,
+                'label' => $label,
+            ]);
+            throw $e;
+        }
     }
 
     /**
