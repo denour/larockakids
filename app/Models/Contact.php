@@ -10,6 +10,22 @@ class Contact extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::saving(function (Contact $contact) {
+            // Clean phone: remove +, spaces, dashes
+            $phone = preg_replace('/[\+\s\-]/', '', $contact->phone);
+
+            // Remove leading country code if duplicated
+            $code = preg_replace('/[\+\s\-]/', '', $contact->international_code);
+            if ($code && str_starts_with($phone, $code)) {
+                $phone = substr($phone, strlen($code));
+            }
+
+            $contact->phone = $phone;
+        });
+    }
+
     /**
      * The attributes that are mass assignable.
      *
@@ -58,11 +74,29 @@ class Contact extends Model
     }
 
     /**
+     * Clean phone number: remove +, spaces, dashes, and any leading country code
+     * that matches the international_code to avoid duplication.
+     */
+    public function getCleanPhoneAttribute(): string
+    {
+        // Remove +, spaces, dashes
+        $phone = preg_replace('/[\+\s\-]/', '', $this->phone);
+
+        // Remove leading country code if it's duplicated
+        $code = preg_replace('/[\+\s\-]/', '', $this->international_code);
+        if ($code && str_starts_with($phone, $code)) {
+            $phone = substr($phone, strlen($code));
+        }
+
+        return $phone;
+    }
+
+    /**
      * Get the full phone number with international code.
      */
     public function getFullPhoneAttribute(): string
     {
-        return "+{$this->international_code}{$this->phone}";
+        return "+{$this->international_code}{$this->clean_phone}";
     }
 
     /**
