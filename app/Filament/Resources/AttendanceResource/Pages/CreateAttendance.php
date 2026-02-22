@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\AttendanceResource\Pages;
 
 use App\Filament\Resources\AttendanceResource;
+use App\Events\WhatsAppNotification;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Notifications\Notification;
@@ -45,7 +46,15 @@ class CreateAttendance extends CreateRecord
                 $whatsappUrl = $tutorMessageService->getEntryMessageUrl($contact, $kid);
             }
 
-            // Abrir WhatsApp en nueva pestaña
+            // Broadcast to WhatsApp listener page via Pusher
+            $phoneNumber = str_replace('+', '', $contact->full_phone);
+            $message = ''; // Extract message from URL
+            if (preg_match('/text=(.+)$/', $whatsappUrl, $matches)) {
+                $message = urldecode($matches[1]);
+            }
+            broadcast(new WhatsAppNotification($message, $phoneNumber));
+
+            // Also try opening directly (fallback)
             $this->js("window.open('{$whatsappUrl}', '_blank');");
 
             // Abrir el diálogo de impresión en la misma página
