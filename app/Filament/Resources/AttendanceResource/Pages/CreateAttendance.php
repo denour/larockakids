@@ -38,12 +38,15 @@ class CreateAttendance extends CreateRecord
             $isNewContact = $contact->created_at->isToday();
 
             if ($isNewKid && $isNewContact) {
-                // Enviar mensaje de bienvenida para nuevos registros
-                $tutorMessageService->sendWelcomeMessage($contact, $kid);
+                // Generar URL de mensaje de bienvenida para nuevos registros
+                $whatsappUrl = $tutorMessageService->getWelcomeMessageUrl($contact, $kid);
             } else {
-                // Enviar mensaje de entrada normal
-                $tutorMessageService->sendEntryMessage($contact, $kid);
+                // Generar URL de mensaje de entrada normal
+                $whatsappUrl = $tutorMessageService->getEntryMessageUrl($contact, $kid);
             }
+
+            // Abrir WhatsApp en nueva pestaña
+            $this->js("window.open('{$whatsappUrl}', '_blank');");
 
             // Abrir el diálogo de impresión en la misma página
             $this->js("

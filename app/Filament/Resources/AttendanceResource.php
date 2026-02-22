@@ -317,34 +317,19 @@ class AttendanceResource extends Resource
                         $contact = $record->contact;
                         $kid = $record->kid;
 
-                        // Enviar mensaje según la situación
-                        switch ($data['situation']) {
-                            case 'bathroom':
-                                $tutorMessageService->sendBathroomMessage($contact, $kid);
-                                break;
-                            case 'diaper':
-                                $tutorMessageService->sendDiaperMessage($contact, $kid);
-                                break;
-                            case 'unconsolable':
-                                $tutorMessageService->sendUnconsolableMessage($contact, $kid);
-                                break;
-                            case 'sick':
-                                $tutorMessageService->sendSickMessage($contact, $kid);
-                                break;
-                            case 'recovered':
-                                $tutorMessageService->sendRecoveredMessage($contact, $kid);
-                                break;
-                            case 'exit':
-                                $tutorMessageService->sendExitMessage($contact, $kid);
-                                break;
-                        }
+                        // Generar URL de WhatsApp según la situación
+                        $whatsappUrl = match($data['situation']) {
+                            'bathroom' => $tutorMessageService->getBathroomMessageUrl($contact, $kid),
+                            'diaper' => $tutorMessageService->getDiaperMessageUrl($contact, $kid),
+                            'unconsolable' => $tutorMessageService->getUnconsolableMessageUrl($contact, $kid),
+                            'sick' => $tutorMessageService->getSickMessageUrl($contact, $kid),
+                            'recovered' => $tutorMessageService->getRecoveredMessageUrl($contact, $kid),
+                            'exit' => $tutorMessageService->getExitMessageUrl($contact, $kid),
+                            default => $tutorMessageService->generateWhatsAppUrl($data['situation'], $contact, $kid),
+                        };
 
-                        // Mostrar notificación de éxito
-                        \Filament\Notifications\Notification::make()
-                            ->title('Notificación enviada')
-                            ->body('Se ha enviado el mensaje al tutor')
-                            ->success()
-                            ->send();
+                        // Redirigir a WhatsApp Web
+                        return redirect($whatsappUrl);
                     }),
                 Tables\Actions\Action::make('exit')
                     ->label('Registrar Salida')
@@ -356,13 +341,16 @@ class AttendanceResource extends Resource
                         ]);
 
                         $tutorMessageService = app(TutorMessageService::class);
-                        $tutorMessageService->sendExitMessage($record->contact, $record->kid);
+                        $whatsappUrl = $tutorMessageService->getExitMessageUrl($record->contact, $record->kid);
 
                         \Filament\Notifications\Notification::make()
                             ->title('Salida registrada')
-                            ->body("Se ha registrado la salida de {$record->kid->full_name} y enviado el mensaje a {$record->contact->full_name}")
+                            ->body("Se ha registrado la salida de {$record->kid->full_name}")
                             ->success()
                             ->send();
+
+                        // Redirigir a WhatsApp Web
+                        return redirect($whatsappUrl);
                     }),
                 Html2MediaAction::make('print')
                     ->label('Imprimir Sticker')
