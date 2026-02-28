@@ -29,6 +29,9 @@ class YearlyAttendanceChart extends ChartWidget
         if ($driver === 'pgsql') {
             $yearExpr = 'EXTRACT(YEAR FROM check_in)::integer';
             $monthExpr = 'EXTRACT(MONTH FROM check_in)::integer';
+        } elseif ($driver === 'sqlite') {
+            $yearExpr = "cast(strftime('%Y', check_in) as integer)";
+            $monthExpr = "cast(strftime('%m', check_in) as integer)";
         } else {
             $yearExpr = 'YEAR(check_in)';
             $monthExpr = 'MONTH(check_in)';

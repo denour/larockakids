@@ -1,219 +1,165 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Enums\QrCodeStatus;
 use App\Models\Kid;
 use App\Models\QrCode;
 use App\Services\QrCodeService;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Storage;
-use PHPUnit\Framework\Attributes\Test;
-use Tests\TestCase;
 
-class QrCodeTest extends TestCase
-{
-    use RefreshDatabase;
+beforeEach(function () {
+    Storage::fake('public');
+});
 
-    protected function setUp(): void
-    {
-        parent::setUp();
-        Storage::fake('public');
-    }
+test('it can create a qr code', function () {
+    $qrCode = QrCode::factory()->create(['code' => 'LRK-0001']);
 
-    #[Test]
-    public function it_can_create_a_qr_code(): void
-    {
-        $qrCode = QrCode::factory()->create([
-            'code' => 'LRK-0001',
-        ]);
+    $this->assertDatabaseHas('qr_codes', [
+        'id' => $qrCode->id,
+        'code' => 'LRK-0001',
+        'status' => QrCodeStatus::Available->value,
+    ]);
+});
 
+test('it can generate a batch of qr codes', function () {
+    $service = app(QrCodeService::class);
+    $qrCodes = $service->generateBatch(5, 'TEST');
+
+    expect($qrCodes)->toHaveCount(5)
+        ->and($qrCodes->first()->code)->toBe('TEST-0001')
+        ->and($qrCodes->last()->code)->toBe('TEST-0005');
+
+    foreach ($qrCodes as $qrCode) {
         $this->assertDatabaseHas('qr_codes', [
             'id' => $qrCode->id,
-            'code' => 'LRK-0001',
             'status' => QrCodeStatus::Available->value,
         ]);
+        expect($qrCode->qr_image_path)->not->toBeNull();
     }
+});
 
-    #[Test]
-    public function it_can_generate_a_batch_of_qr_codes(): void
-    {
-        $service = app(QrCodeService::class);
-        $qrCodes = $service->generateBatch(5, 'TEST');
+test('it continues sequence when generating more codes', function () {
+    $service = app(QrCodeService::class);
 
-        $this->assertCount(5, $qrCodes);
-        $this->assertEquals('TEST-0001', $qrCodes->first()->code);
-        $this->assertEquals('TEST-0005', $qrCodes->last()->code);
+    $service->generateBatch(3, 'SEQ');
+    $secondBatch = $service->generateBatch(2, 'SEQ');
 
-        foreach ($qrCodes as $qrCode) {
-            $this->assertDatabaseHas('qr_codes', [
-                'id' => $qrCode->id,
-                'status' => QrCodeStatus::Available->value,
-            ]);
-            $this->assertNotNull($qrCode->qr_image_path);
-        }
-    }
+    expect($secondBatch->first()->code)->toBe('SEQ-0004')
+        ->and($secondBatch->last()->code)->toBe('SEQ-0005');
+});
 
-    #[Test]
-    public function it_continues_sequence_when_generating_more_codes(): void
-    {
-        $service = app(QrCodeService::class);
+test('it can assign qr code to kid', function () {
+    $kid = Kid::factory()->create();
+    $qrCode = QrCode::factory()->create();
 
-        $service->generateBatch(3, 'SEQ');
-        $secondBatch = $service->generateBatch(2, 'SEQ');
+    expect($qrCode->isAvailable())->toBeTrue();
 
-        $this->assertEquals('SEQ-0004', $secondBatch->first()->code);
-        $this->assertEquals('SEQ-0005', $secondBatch->last()->code);
-    }
+    $qrCode->assignToKid($kid);
+    $qrCode->refresh();
 
-    #[Test]
-    public function it_can_assign_qr_code_to_kid(): void
-    {
-        $kid = Kid::factory()->create();
-        $qrCode = QrCode::factory()->create();
+    expect($qrCode->isAssigned())->toBeTrue()
+        ->and($qrCode->kid_id)->toBe($kid->id)
+        ->and($qrCode->assigned_at)->not->toBeNull();
+});
 
-        $this->assertTrue($qrCode->isAvailable());
+test('it can mark qr code as lost', function () {
+    $kid = Kid::factory()->create();
+    $qrCode = QrCode::factory()->assigned($kid)->create();
 
-        $qrCode->assignToKid($kid);
+    expect($qrCode->isAssigned())->toBeTrue();
 
-        $qrCode->refresh();
+    $qrCode->markAsLost();
+    $qrCode->refresh();
 
-        $this->assertTrue($qrCode->isAssigned());
-        $this->assertEquals($kid->id, $qrCode->kid_id);
-        $this->assertNotNull($qrCode->assigned_at);
-    }
+    expect($qrCode->isLost())->toBeTrue()
+        ->and($qrCode->kid_id)->toBeNull()
+        ->and($qrCode->assigned_at)->toBeNull();
+});
 
-    #[Test]
-    public function it_can_mark_qr_code_as_lost(): void
-    {
-        $kid = Kid::factory()->create();
-        $qrCode = QrCode::factory()->assigned($kid)->create();
+test('it can unassign qr code', function () {
+    $kid = Kid::factory()->create();
+    $qrCode = QrCode::factory()->assigned($kid)->create();
 
-        $this->assertTrue($qrCode->isAssigned());
-        $this->assertEquals($kid->id, $qrCode->kid_id);
+    $qrCode->unassign();
+    $qrCode->refresh();
 
-        $qrCode->markAsLost();
-        $qrCode->refresh();
+    expect($qrCode->isAvailable())->toBeTrue()
+        ->and($qrCode->kid_id)->toBeNull()
+        ->and($qrCode->assigned_at)->toBeNull();
+});
 
-        $this->assertTrue($qrCode->isLost());
-        $this->assertNull($qrCode->kid_id);
-        $this->assertNull($qrCode->assigned_at);
-    }
+test('kid can have assigned qr code', function () {
+    $kid = Kid::factory()->create();
+    $qrCode = QrCode::factory()->assigned($kid)->create();
 
-    #[Test]
-    public function it_can_unassign_qr_code(): void
-    {
-        $kid = Kid::factory()->create();
-        $qrCode = QrCode::factory()->assigned($kid)->create();
+    expect($kid->qrCode)->not->toBeNull()
+        ->and($kid->qrCode->id)->toBe($qrCode->id);
+});
 
-        $this->assertTrue($qrCode->isAssigned());
+test('kid loses qr code when marked as lost', function () {
+    $kid = Kid::factory()->create();
+    $qrCode = QrCode::factory()->assigned($kid)->create();
 
-        $qrCode->unassign();
-        $qrCode->refresh();
+    expect($kid->fresh()->qrCode)->not->toBeNull();
 
-        $this->assertTrue($qrCode->isAvailable());
-        $this->assertNull($qrCode->kid_id);
-        $this->assertNull($qrCode->assigned_at);
-    }
+    $qrCode->markAsLost();
 
-    #[Test]
-    public function kid_can_have_assigned_qr_code(): void
-    {
-        $kid = Kid::factory()->create();
-        $qrCode = QrCode::factory()->assigned($kid)->create();
+    expect($kid->fresh()->qrCode)->toBeNull();
+});
 
-        $this->assertNotNull($kid->qrCode);
-        $this->assertEquals($qrCode->id, $kid->qrCode->id);
-    }
+test('kid can be assigned new qr after losing old one', function () {
+    $kid = Kid::factory()->create();
+    $oldQrCode = QrCode::factory()->assigned($kid)->create();
+    $newQrCode = QrCode::factory()->create();
 
-    #[Test]
-    public function kid_loses_qr_code_when_marked_as_lost(): void
-    {
-        $kid = Kid::factory()->create();
-        $qrCode = QrCode::factory()->assigned($kid)->create();
+    $oldQrCode->markAsLost();
+    expect($kid->fresh()->qrCode)->toBeNull();
 
-        $this->assertNotNull($kid->fresh()->qrCode);
+    $newQrCode->assignToKid($kid);
+    expect($kid->fresh()->qrCode)->not->toBeNull()
+        ->and($kid->fresh()->qrCode->id)->toBe($newQrCode->id);
+});
 
-        $qrCode->markAsLost();
+test('qr code status enum has correct labels', function () {
+    expect(QrCodeStatus::Available->getLabel())->toBe('Disponible')
+        ->and(QrCodeStatus::Assigned->getLabel())->toBe('Asignado')
+        ->and(QrCodeStatus::Lost->getLabel())->toBe('Perdido');
+});
 
-        $this->assertNull($kid->fresh()->qrCode);
-    }
+test('qr code status enum has correct colors', function () {
+    expect(QrCodeStatus::Available->getColor())->toBe('success')
+        ->and(QrCodeStatus::Assigned->getColor())->toBe('info')
+        ->and(QrCodeStatus::Lost->getColor())->toBe('danger');
+});
 
-    #[Test]
-    public function kid_can_be_assigned_new_qr_after_losing_old_one(): void
-    {
-        $kid = Kid::factory()->create();
-        $oldQrCode = QrCode::factory()->assigned($kid)->create();
-        $newQrCode = QrCode::factory()->create();
+test('it can print single qr code', function () {
+    $qrCode = QrCode::factory()->create();
 
-        $oldQrCode->markAsLost();
+    $this->get(route('qr-codes.print', $qrCode))
+        ->assertStatus(200)
+        ->assertSee($qrCode->code);
+});
 
-        $this->assertNull($kid->fresh()->qrCode);
+test('it can print batch of qr codes', function () {
+    $qrCodes = QrCode::factory()->count(3)->create();
+    $ids = $qrCodes->pluck('id')->join(',');
 
-        $newQrCode->assignToKid($kid);
+    $response = $this->get(route('qr-codes.print-batch', ['ids' => $ids]));
 
-        $this->assertNotNull($kid->fresh()->qrCode);
-        $this->assertEquals($newQrCode->id, $kid->fresh()->qrCode->id);
-    }
-
-    #[Test]
-    public function qr_code_status_enum_has_correct_labels(): void
-    {
-        $this->assertEquals('Disponible', QrCodeStatus::Available->getLabel());
-        $this->assertEquals('Asignado', QrCodeStatus::Assigned->getLabel());
-        $this->assertEquals('Perdido', QrCodeStatus::Lost->getLabel());
-    }
-
-    #[Test]
-    public function qr_code_status_enum_has_correct_colors(): void
-    {
-        $this->assertEquals('success', QrCodeStatus::Available->getColor());
-        $this->assertEquals('info', QrCodeStatus::Assigned->getColor());
-        $this->assertEquals('danger', QrCodeStatus::Lost->getColor());
-    }
-
-    #[Test]
-    public function it_can_print_single_qr_code(): void
-    {
-        $qrCode = QrCode::factory()->create();
-
-        $response = $this->get(route('qr-codes.print', $qrCode));
-
-        $response->assertStatus(200);
+    $response->assertStatus(200);
+    foreach ($qrCodes as $qrCode) {
         $response->assertSee($qrCode->code);
     }
+});
 
-    #[Test]
-    public function it_can_print_batch_of_qr_codes(): void
-    {
-        $qrCodes = QrCode::factory()->count(3)->create();
-        $ids = $qrCodes->pluck('id')->join(',');
+test('qr code requires unique code', function () {
+    QrCode::factory()->create(['code' => 'LRK-0001']);
+    QrCode::factory()->create(['code' => 'LRK-0001']);
+})->throws(\Illuminate\Database\QueryException::class);
 
-        $response = $this->get(route('qr-codes.print-batch', ['ids' => $ids]));
+test('qr code belongs to kid', function () {
+    $kid = Kid::factory()->create();
+    $qrCode = QrCode::factory()->assigned($kid)->create();
 
-        $response->assertStatus(200);
-        foreach ($qrCodes as $qrCode) {
-            $response->assertSee($qrCode->code);
-        }
-    }
-
-    #[Test]
-    public function qr_code_requires_unique_code(): void
-    {
-        QrCode::factory()->create(['code' => 'LRK-0001']);
-
-        $this->expectException(\Illuminate\Database\QueryException::class);
-
-        QrCode::factory()->create(['code' => 'LRK-0001']);
-    }
-
-    #[Test]
-    public function qr_code_belongs_to_kid(): void
-    {
-        $kid = Kid::factory()->create();
-        $qrCode = QrCode::factory()->assigned($kid)->create();
-
-        $this->assertInstanceOf(Kid::class, $qrCode->kid);
-        $this->assertEquals($kid->id, $qrCode->kid->id);
-    }
-}
+    expect($qrCode->kid)->toBeInstanceOf(Kid::class)
+        ->and($qrCode->kid->id)->toBe($kid->id);
+});

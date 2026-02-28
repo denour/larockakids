@@ -13,8 +13,8 @@ class AttendanceFactory extends Factory
 
     public function definition(): array
     {
-        $kid = Kid::inRandomOrder()->first();
-        $contact = $kid->contacts()->inRandomOrder()->first();
+        $kid = Kid::inRandomOrder()->first() ?? Kid::factory()->create();
+        $contact = $kid->contacts()->inRandomOrder()->first() ?? Contact::factory()->create();
 
         return [
             'kid_id' => $kid->id,
@@ -24,4 +24,4 @@ class AttendanceFactory extends Factory
             'observations' => $this->faker->optional(0.3)->text(200),
         ];
     }
-} 
+}

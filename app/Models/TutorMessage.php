@@ -39,21 +39,12 @@ class TutorMessage extends Model
      */
     public function replaceTags(array $values): string
     {
-        $message = $this->message;
-        
-        // Mapeo de tags a variables
-        $tagMap = [
-            '[tutor]' => '[tutor]',
-            '[nino]' => '[nino]',
-            '[fecha]' => '[fecha]',
-            '[hora]' => '[hora]',
-            '[comentario]' => '[comentario]',
-        ];
+        $message = $this->getRawOriginal('message') ?? $this->attributes['message'] ?? '';
 
-        // Reemplazar cada tag con su valor correspondiente
-        foreach ($tagMap as $tag => $variable) {
-            $value = $values[$variable] ?? '';
-            $message = str_replace($tag, $value, $message);
+        foreach ($values as $key => $value) {
+            // Support both '[tutor]' and 'tutor' as keys
+            $tag = str_starts_with($key, '[') ? $key : "[{$key}]";
+            $message = str_replace($tag, $value ?? '', $message);
         }
 
         return $message;

@@ -18,16 +18,16 @@ enum Country: string
     public function getCode(): string
     {
         return match($this) {
-            self::MEXICO => '+52',
-            self::USA => '+1',
-            self::CANADA => '+1',
-            self::SPAIN => '+34',
-            self::ARGENTINA => '+54',
-            self::COLOMBIA => '+57',
-            self::CHILE => '+56',
-            self::PERU => '+51',
-            self::VENEZUELA => '+58',
-            self::ECUADOR => '+593',
+            self::MEXICO => '52',
+            self::USA => '1',
+            self::CANADA => '1',
+            self::SPAIN => '34',
+            self::ARGENTINA => '54',
+            self::COLOMBIA => '57',
+            self::CHILE => '56',
+            self::PERU => '51',
+            self::VENEZUELA => '58',
+            self::ECUADOR => '593',
         };
     }
 
@@ -67,7 +67,7 @@ enum Country: string
     {
         return collect(self::cases())
             ->mapWithKeys(fn (Country $country) => [
-                $country->value => "{$country->getName()} ({$country->getCode()})"
+                $country->value => "{$country->getName()} (+{$country->getCode()})"
             ])
             ->toArray();
     }

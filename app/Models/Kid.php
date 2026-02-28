@@ -23,6 +23,8 @@ class Kid extends Model
         'last_name',
         'birth_date',
         'gender',
+        'medical_notes',
+        'is_active',
     ];
 
     protected $default = [

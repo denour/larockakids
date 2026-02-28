@@ -60,10 +60,10 @@ class KidFactory extends Factory
             $contacts = Contact::inRandomOrder()->take(rand(1, 3))->get();
             
             if ($contacts->isNotEmpty()) {
-                $kid->contacts()->attach($contacts->first()->id, ['relationship_type' => 'Padre/Madre']);
-                
+                $kid->contacts()->attach($contacts->first()->id, ['relationship_type' => 'parent']);
+
                 if ($contacts->count() > 1) {
-                    $kid->contacts()->attach($contacts->skip(1)->pluck('id'), ['relationship_type' => 'Otro']);
+                    $kid->contacts()->attach($contacts->skip(1)->pluck('id'), ['relationship_type' => 'other']);
                 }
             }
 

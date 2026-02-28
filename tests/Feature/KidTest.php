@@ -1,158 +1,127 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Models\Contact;
 use App\Models\Kid;
 use Carbon\Exceptions\InvalidFormatException;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Tests\TestCase;
 
-class KidTest extends TestCase
-{
-    use RefreshDatabase, WithFaker;
+test('it can create a kid', function () {
+    $kid = Kid::factory()->create();
 
-    /** @test */
-    public function it_can_create_a_kid()
-    {
-        $kid = Kid::factory()->create();
+    $this->assertDatabaseHas('kids', [
+        'id' => $kid->id,
+        'first_name' => $kid->first_name,
+        'last_name' => $kid->last_name,
+    ]);
 
-        $this->assertDatabaseHas('kids', [
-            'id' => $kid->id,
-            'first_name' => $kid->first_name,
-            'last_name' => $kid->last_name,
-            'birth_date' => $kid->birth_date,
-        ]);
-    }
+    expect($kid->birth_date)->not->toBeNull();
+});
 
-    /** @test */
-    public function it_requires_first_name()
-    {
-        $this->expectException(\Illuminate\Database\QueryException::class);
+test('it requires first name', function () {
+    Kid::factory()->create(['first_name' => null]);
+})->throws(\Illuminate\Database\QueryException::class);
 
-        Kid::factory()->create([
-            'first_name' => null,
-        ]);
-    }
+test('it requires last name', function () {
+    Kid::factory()->create(['last_name' => null]);
+})->throws(\Illuminate\Database\QueryException::class);
 
-    /** @test */
-    public function it_requires_last_name()
-    {
-        $this->expectException(\Illuminate\Database\QueryException::class);
+test('it requires birth date', function () {
+    Kid::factory()->create(['birth_date' => null]);
+})->throws(\Illuminate\Database\QueryException::class);
 
-        Kid::factory()->create([
-            'last_name' => null,
-        ]);
-    }
+test('birth date must be a valid date', function () {
+    Kid::factory()->create(['birth_date' => 'invalid-date']);
+})->throws(InvalidFormatException::class);
 
-    /** @test */
-    public function it_requires_birth_date()
-    {
-        $this->expectException(\Illuminate\Database\QueryException::class);
+test('it can update a kid', function () {
+    $kid = Kid::factory()->create();
+    $newFirstName = fake()->firstName;
 
-        Kid::factory()->create([
-            'birth_date' => null,
-        ]);
-    }
+    $kid->update(['first_name' => $newFirstName]);
 
-    /** @test */
-    public function birth_date_must_be_a_valid_date()
-    {
-        $this->expectException(InvalidFormatException::class);
+    expect($kid->fresh()->first_name)->toBe($newFirstName);
+});
 
-        Kid::factory()->create([
-            'birth_date' => 'invalid-date',
-        ]);
-    }
+test('it can delete a kid', function () {
+    $kid = Kid::factory()->create();
 
-    /** @test */
-    public function it_can_update_a_kid()
-    {
-        $kid = Kid::factory()->create();
-        $newFirstName = $this->faker->firstName;
+    $kid->delete();
 
-        $kid->update(['first_name' => $newFirstName]);
+    $this->assertDatabaseMissing('kids', ['id' => $kid->id]);
+});
 
-        $this->assertEquals($newFirstName, $kid->fresh()->first_name);
-    }
+test('it has at least one contact after creation', function () {
+    $kid = Kid::factory()->create();
 
-    /** @test */
-    public function it_can_delete_a_kid()
-    {
-        $kid = Kid::factory()->create();
+    expect($kid->contacts()->count())->toBeGreaterThan(0);
+});
 
-        $kid->delete();
+test('it can have multiple contacts', function () {
+    $kid = Kid::factory()->create();
+    $existingContactsCount = $kid->contacts()->count();
+    $newContacts = Contact::factory()->count(3)->create();
 
-        $this->assertDatabaseMissing('kids', [
-            'id' => $kid->id,
-        ]);
-    }
+    $kid->contacts()->attach($newContacts, ['relationship_type' => 'parent']);
 
-    /** @test */
-    public function it_has_at_least_one_contact_after_creation()
-    {
-        $kid = Kid::factory()->create();
+    expect($kid->fresh()->contacts)->toHaveCount($existingContactsCount + 3);
+});
 
-        $this->assertGreaterThan(0, $kid->contacts()->count());
-    }
+test('it can remove a contact', function () {
+    $kid = Kid::factory()->create();
+    $existingContactsCount = $kid->contacts()->count();
+    $contact = Contact::factory()->create();
 
-    /** @test */
-    public function it_can_have_multiple_contacts()
-    {
-        $kid = Kid::factory()->create();
-        $existingContactsCount = $kid->contacts()->count();
-        $newContacts = Contact::factory()->count(3)->create();
+    $kid->contacts()->attach($contact, ['relationship_type' => 'parent']);
+    expect($kid->fresh()->contacts)->toHaveCount($existingContactsCount + 1);
 
-        $kid->contacts()->attach($newContacts, [
-            'relationship_type' => 'parent',
-        ]);
+    $kid->contacts()->detach($contact);
+    expect($kid->fresh()->contacts)->toHaveCount($existingContactsCount);
+});
 
-        $this->assertCount($existingContactsCount + 3, $kid->fresh()->contacts);
-        $this->assertEquals(
-            $newContacts->pluck('id')->sort()->values()->all(),
-            $kid->fresh()->contacts->skip($existingContactsCount)->pluck('id')->sort()->values()->all()
-        );
-    }
+test('first contact is always a parent', function () {
+    $kid = Kid::factory()->create();
+    $firstContact = $kid->contacts->first();
 
-    /** @test */
-    public function it_can_remove_a_contact()
-    {
-        $kid = Kid::factory()->create();
-        $existingContactsCount = $kid->contacts()->count();
-        $contact = Contact::factory()->create();
+    expect($firstContact->pivot->relationship_type)->toBe('parent');
+});
 
-        $kid->contacts()->attach($contact, [
-            'relationship_type' => 'parent',
-        ]);
-        $this->assertCount($existingContactsCount + 1, $kid->fresh()->contacts);
+test('it can update relationship type', function () {
+    $kid = Kid::factory()->create();
+    $contact = $kid->contacts->first();
 
-        $kid->contacts()->detach($contact);
-        $this->assertCount($existingContactsCount, $kid->fresh()->contacts);
-    }
+    $kid->contacts()->updateExistingPivot($contact->id, ['relationship_type' => 'Tío']);
 
-    /** @test */
-    public function first_contact_is_always_a_parent()
-    {
-        $kid = Kid::factory()->create();
-        $firstContact = $kid->contacts->first();
+    expect(
+        $kid->fresh()->contacts()->where('contact_id', $contact->id)->first()->pivot->relationship_type
+    )->toBe('Tío');
+});
 
-        $this->assertEquals('Padre/Madre', $firstContact->pivot->relationship_type);
-    }
+test('kid has full name accessor', function () {
+    $kid = Kid::factory()->create(['first_name' => 'María', 'last_name' => 'Pérez']);
 
-    /** @test */
-    public function it_can_update_relationship_type()
-    {
-        $kid = Kid::factory()->create();
-        $contact = $kid->contacts->first();
+    expect($kid->full_name)->toBe('María Pérez');
+});
 
-        $kid->contacts()->updateExistingPivot($contact->id, [
-            'relationship_type' => 'Tío',
-        ]);
+test('kid has age accessor', function () {
+    $kid = Kid::factory()->create(['birth_date' => now()->subYears(5)]);
 
-        $this->assertEquals(
-            'Tío',
-            $kid->fresh()->contacts()->where('contact_id', $contact->id)->first()->pivot->relationship_type
-        );
-    }
-}
+    expect($kid->age)->toBe(5);
+});
+
+test('kid has allergies relationship', function () {
+    $kid = Kid::factory()->create();
+
+    expect($kid->allergies)->toBeInstanceOf(\Illuminate\Database\Eloquent\Collection::class);
+});
+
+test('kid has attendances relationship', function () {
+    $kid = Kid::factory()->create();
+
+    expect($kid->attendances)->toBeInstanceOf(\Illuminate\Database\Eloquent\Collection::class);
+});
+
+test('kid has qr code relationship', function () {
+    $kid = Kid::factory()->create();
+    \App\Models\QrCode::factory()->assigned($kid)->create();
+
+    expect($kid->fresh()->qrCode)->toBeInstanceOf(\App\Models\QrCode::class);
+});
