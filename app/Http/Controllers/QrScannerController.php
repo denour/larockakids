@@ -35,6 +35,8 @@ class QrScannerController extends Controller
             'message' => $result['message'],
             'action' => $result['action'] ?? null,
             'kid_name' => isset($result['kid']) ? $result['kid']->full_name : null,
+            'whatsapp_url' => $result['whatsapp_url'] ?? null,
+            'has_active_attendance' => $result['has_active_attendance'] ?? false,
         ]);
     }
 
@@ -62,6 +64,8 @@ class QrScannerController extends Controller
             'message' => $result['message'],
             'action' => $result['action'] ?? null,
             'kid_name' => isset($result['kid']) ? $result['kid']->full_name : null,
+            'whatsapp_url' => $result['whatsapp_url'] ?? null,
+            'no_active_attendance' => $result['no_active_attendance'] ?? false,
         ]);
     }
 }
