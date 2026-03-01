@@ -43,6 +43,11 @@ class TutorMessageService
         // Reemplazar los tags en el mensaje
         $formattedMessage = $message->replaceTags($values);
 
+        // Eliminar etiquetas HTML y decodificar entidades
+        $formattedMessage = strip_tags($formattedMessage);
+        $formattedMessage = html_entity_decode($formattedMessage, ENT_QUOTES, 'UTF-8');
+        $formattedMessage = trim($formattedMessage);
+
         // Limpiar el número de teléfono (incluye código de país)
         $phoneNumber = preg_replace('/[^0-9]/', '', $contact->full_phone);
 
@@ -157,7 +162,12 @@ class TutorMessageService
     {
         $phoneNumber = preg_replace('/[^0-9]/', '', $phone);
 
-        return 'https://wa.me/'.$phoneNumber.'?text='.urlencode($message);
+        // Eliminar etiquetas HTML y decodificar entidades
+        $cleanMessage = strip_tags($message);
+        $cleanMessage = html_entity_decode($cleanMessage, ENT_QUOTES, 'UTF-8');
+        $cleanMessage = trim($cleanMessage);
+
+        return 'https://wa.me/'.$phoneNumber.'?text='.urlencode($cleanMessage);
     }
 
     /**
