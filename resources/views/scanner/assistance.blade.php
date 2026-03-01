@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="theme-color" content="#16a34a">
-    <title>Check-in - Entrada</title>
+    <meta name="theme-color" content="#ca8a04">
+    <title>Asistencia - Notificar</title>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
     <style>
         * {
@@ -30,7 +30,7 @@
         }
 
         .header {
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            background: linear-gradient(135deg, #ca8a04 0%, #a16207 100%);
             padding: 16px;
             text-align: center;
             flex-shrink: 0;
@@ -124,15 +124,11 @@
         }
 
         .toast.success {
-            background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+            background: linear-gradient(135deg, #ca8a04 0%, #a16207 100%);
         }
 
         .toast.error {
             background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
-        }
-
-        .toast.assistance {
-            background: linear-gradient(135deg, #ca8a04 0%, #a16207 100%);
         }
 
         .toast-icon {
@@ -180,7 +176,7 @@
             width: 40px;
             height: 40px;
             border: 4px solid rgba(255, 255, 255, 0.2);
-            border-top-color: #16a34a;
+            border-top-color: #ca8a04;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 16px;
@@ -218,29 +214,32 @@
         }
 
         .btn-primary {
-            background: #16a34a;
+            background: #ca8a04;
             color: white;
         }
 
         .btn-primary:active {
-            background: #15803d;
+            background: #a16207;
         }
 
         .mode-switch {
             padding: 16px;
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            gap: 12px;
             flex-shrink: 0;
+            flex-wrap: wrap;
         }
 
         .mode-switch-btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 12px 24px;
+            padding: 12px 20px;
             background: #374151;
             color: white;
             text-decoration: none;
-            font-size: 16px;
+            font-size: 14px;
             font-weight: 600;
             border-radius: 12px;
             transition: background 0.2s;
@@ -251,54 +250,23 @@
         }
 
         .mode-switch-btn svg {
-            width: 20px;
-            height: 20px;
-        }
-
-        .toast-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-
-        .toast-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.2);
-            color: white;
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: 600;
-            border-radius: 6px;
-            border: none;
-            cursor: pointer;
-        }
-
-        .toast-btn:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .toast-btn svg {
-            width: 14px;
-            height: 14px;
-            fill: currentColor;
+            width: 18px;
+            height: 18px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>ENTRADA</h1>
-            <p>Escanea el codigo QR del nino</p>
+            <h1>ASISTENCIA</h1>
+            <p>Escanea para notificar al contacto</p>
         </div>
 
         <div class="scanner-container">
             <div id="reader"></div>
             <div class="loading" id="loading">
                 <div class="spinner"></div>
-                <p>Procesando...</p>
+                <p>Enviando notificacion...</p>
             </div>
             <div class="permission-error" id="permission-error" style="display: none;">
                 <h2>Permiso de camara requerido</h2>
@@ -308,13 +276,13 @@
         </div>
 
         <div class="mode-switch">
+            <a href="{{ route('scanner.check-in') }}" class="mode-switch-btn">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v14z"/></svg>
+                Entrada
+            </a>
             <a href="{{ route('scanner.check-out') }}" class="mode-switch-btn">
                 <svg viewBox="0 0 24 24" fill="currentColor"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
                 Salida
-            </a>
-            <a href="{{ route('scanner.assistance') }}" class="mode-switch-btn" style="background: #ca8a04;">
-                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
-                Asistencia
             </a>
         </div>
     </div>
@@ -354,7 +322,7 @@
 
             document.getElementById('loading').classList.add('show');
 
-            fetch('{{ route("scanner.check-in.process") }}', {
+            fetch('{{ route("scanner.assistance.process") }}', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -372,7 +340,6 @@
                 showToast({
                     success: false,
                     message: 'Error de conexion',
-                    action: null,
                     kid_name: null
                 });
             })
@@ -400,42 +367,17 @@
 
             // Set toast type
             if (data.success) {
-                if (data.action === 'assistance') {
-                    toast.classList.add('assistance');
-                } else {
-                    toast.classList.add('success');
-                }
+                toast.classList.add('success');
             } else {
-                if (data.has_active_attendance) {
-                    toast.classList.add('assistance');
-                } else {
-                    toast.classList.add('error');
-                }
+                toast.classList.add('error');
             }
 
             // Get icon SVG
             let iconSvg = '';
             if (data.success) {
-                if (data.action === 'assistance') {
-                    iconSvg = '<svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-7 12h-2v-2h2v2zm0-4h-2V6h2v4z"/></svg>';
-                } else {
-                    iconSvg = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
-                }
+                iconSvg = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
             } else {
-                if (data.has_active_attendance) {
-                    iconSvg = '<svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>';
-                } else {
-                    iconSvg = '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
-                }
-            }
-
-            // Build actions HTML
-            let actionsHtml = '';
-            if (data.has_active_attendance) {
-                actionsHtml += `<a href="{{ route('scanner.check-out') }}" class="toast-btn">
-                    <svg viewBox="0 0 24 24"><path d="M10.09 15.59L11.5 17l5-5-5-5-1.41 1.41L12.67 11H3v2h9.67l-2.58 2.59zM19 3H5c-1.11 0-2 .9-2 2v4h2V5h14v14H5v-4H3v4c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/></svg>
-                    Ir a Salida
-                </a>`;
+                iconSvg = '<svg viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>';
             }
 
             toast.innerHTML = `
@@ -443,7 +385,6 @@
                 <div class="toast-content">
                     <div class="toast-message">${data.message}</div>
                     ${data.kid_name ? `<div class="toast-name">${data.kid_name}</div>` : ''}
-                    ${actionsHtml ? `<div class="toast-actions">${actionsHtml}</div>` : ''}
                 </div>
             `;
 
@@ -453,20 +394,16 @@
             if (data.success) {
                 playSuccessSound();
             } else {
-                if (data.has_active_attendance) {
-                    playSuccessSound(); // Use success sound for "already registered"
-                } else {
-                    playErrorSound();
-                }
+                playErrorSound();
             }
 
-            // Auto-remove after 6 seconds (longer to allow clicking buttons)
+            // Auto-remove after 4 seconds
             setTimeout(() => {
                 toast.classList.add('hiding');
                 setTimeout(() => {
                     toast.remove();
                 }, 300);
-            }, 6000);
+            }, 4000);
         }
 
         function playSuccessSound() {

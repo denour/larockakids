@@ -66,4 +66,30 @@ class QrScannerController extends Controller
             'no_active_attendance' => $result['no_active_attendance'] ?? false,
         ]);
     }
+
+    /**
+     * Display the assistance scanner page.
+     */
+    public function assistancePage(): View
+    {
+        return view('scanner.assistance');
+    }
+
+    /**
+     * Process assistance scan.
+     */
+    public function processAssistance(Request $request): JsonResponse
+    {
+        $request->validate([
+            'code' => 'required|string',
+        ]);
+
+        $result = $this->scannerService->processAssistance($request->input('code'));
+
+        return response()->json([
+            'success' => $result['success'],
+            'message' => $result['message'],
+            'kid_name' => isset($result['kid']) ? $result['kid']->full_name : null,
+        ]);
+    }
 }

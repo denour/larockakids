@@ -23,4 +23,6 @@ Route::prefix('scanner')->name('scanner.')->group(function () {
     Route::post('/check-in', [QrScannerController::class, 'processCheckIn'])->name('check-in.process');
     Route::get('/check-out', [QrScannerController::class, 'checkOutPage'])->name('check-out');
     Route::post('/check-out', [QrScannerController::class, 'processCheckOut'])->name('check-out.process');
+    Route::get('/assistance', [QrScannerController::class, 'assistancePage'])->name('assistance');
+    Route::post('/assistance', [QrScannerController::class, 'processAssistance'])->name('assistance.process');
 });

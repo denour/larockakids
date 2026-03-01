@@ -294,17 +294,17 @@ class AttendanceResource extends Resource
                                 $availableMessages = \App\Models\TutorMessage::where('is_active', true)
                                     ->pluck('name', 'label')
                                     ->toArray();
-                                
+
                                 if (empty($availableMessages)) {
                                     return ['none' => 'No hay mensajes configurados'];
                                 }
-                                
+
                                 return $availableMessages;
                             })
                             ->required()
                             ->disabled(fn () => \App\Models\TutorMessage::where('is_active', true)->count() === 0)
-                            ->helperText(fn () => \App\Models\TutorMessage::where('is_active', true)->count() === 0 
-                                ? 'Configura mensajes en el panel de administración primero' 
+                            ->helperText(fn () => \App\Models\TutorMessage::where('is_active', true)->count() === 0
+                                ? 'Configura mensajes en el panel de administración primero'
                                 : 'Selecciona el tipo de notificación que deseas enviar'),
                         Forms\Components\Textarea::make('message')
                             ->label('Mensaje Adicional')
@@ -317,19 +317,14 @@ class AttendanceResource extends Resource
                         $contact = $record->contact;
                         $kid = $record->kid;
 
-                        // Generar URL de WhatsApp según la situación
-                        $whatsappUrl = match($data['situation']) {
-                            'bathroom' => $tutorMessageService->getBathroomMessageUrl($contact, $kid),
-                            'diaper' => $tutorMessageService->getDiaperMessageUrl($contact, $kid),
-                            'unconsolable' => $tutorMessageService->getUnconsolableMessageUrl($contact, $kid),
-                            'sick' => $tutorMessageService->getSickMessageUrl($contact, $kid),
-                            'recovered' => $tutorMessageService->getRecoveredMessageUrl($contact, $kid),
-                            'exit' => $tutorMessageService->getExitMessageUrl($contact, $kid),
-                            default => $tutorMessageService->generateWhatsAppUrl($data['situation'], $contact, $kid),
-                        };
+                        // Enviar mensaje por broadcast según la situación
+                        $tutorMessageService->sendMessage($data['situation'], $contact, $kid);
 
-                        // Redirigir a WhatsApp Web
-                        return redirect($whatsappUrl);
+                        \Filament\Notifications\Notification::make()
+                            ->title('Notificación enviada')
+                            ->body("Se ha enviado la notificación a {$contact->full_name}")
+                            ->success()
+                            ->send();
                     }),
                 Tables\Actions\Action::make('exit')
                     ->label('Registrar Salida')
@@ -341,16 +336,13 @@ class AttendanceResource extends Resource
                         ]);
 
                         $tutorMessageService = app(TutorMessageService::class);
-                        $whatsappUrl = $tutorMessageService->getExitMessageUrl($record->contact, $record->kid);
+                        $tutorMessageService->sendExitMessage($record->contact, $record->kid);
 
                         \Filament\Notifications\Notification::make()
                             ->title('Salida registrada')
                             ->body("Se ha registrado la salida de {$record->kid->full_name}")
                             ->success()
                             ->send();
-
-                        // Redirigir a WhatsApp Web
-                        return redirect($whatsappUrl);
                     }),
                 Html2MediaAction::make('print')
                     ->label('Imprimir Sticker')

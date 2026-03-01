@@ -146,6 +146,48 @@ class AttendanceScannerService
     }
 
     /**
+     * Process assistance notification for a QR code.
+     *
+     * @return array{success: bool, message: string, kid?: Kid}
+     */
+    public function processAssistance(string $code): array
+    {
+        $qrCode = QrCode::where('code', $code)->first();
+
+        if (! $qrCode) {
+            return [
+                'success' => false,
+                'message' => 'Código QR no encontrado.',
+            ];
+        }
+
+        if (! $qrCode->isAssigned() || ! $qrCode->kid_id) {
+            return [
+                'success' => false,
+                'message' => 'Este código QR no está asignado a ningún niño.',
+            ];
+        }
+
+        $kid = $qrCode->kid;
+        $primaryContact = $this->getPrimaryContact($kid);
+
+        if (! $primaryContact) {
+            return [
+                'success' => false,
+                'message' => 'No se encontró un contacto para este niño.',
+            ];
+        }
+
+        $this->tutorMessageService->sendAssistanceMessage($primaryContact, $kid);
+
+        return [
+            'success' => true,
+            'message' => 'Notificación de asistencia enviada a '.$primaryContact->full_name.'.',
+            'kid' => $kid,
+        ];
+    }
+
+    /**
      * Get active attendance (no check_out) for today.
      */
     public function getActiveAttendanceToday(Kid $kid): ?Attendance
