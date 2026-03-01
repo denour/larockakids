@@ -124,4 +124,95 @@ class TutorMessageService
     {
         $this->sendMessage('assistance', $contact, $kid);
     }
+
+    /**
+     * Genera una URL de WhatsApp para un mensaje específico
+     */
+    public function generateWhatsAppUrl(string $label, Contact $contact, Kid $kid, array $additionalData = []): string
+    {
+        $message = TutorMessage::findByLabel($label);
+
+        if (! $message) {
+            Log::warning("No se encontró un mensaje activo para el label: {$label}");
+
+            return $this->buildWhatsAppUrl($contact->full_phone, '');
+        }
+
+        $values = [
+            '[tutor]' => $contact->full_name,
+            '[nino]' => $kid->full_name,
+            '[fecha]' => Carbon::now()->format('d/m/Y h:i A'),
+            '[comentario]' => $additionalData['comment'] ?? '',
+        ];
+
+        $formattedMessage = $message->replaceTags($values);
+
+        return $this->buildWhatsAppUrl($contact->full_phone, $formattedMessage);
+    }
+
+    /**
+     * Construye la URL de WhatsApp
+     */
+    protected function buildWhatsAppUrl(string $phone, string $message): string
+    {
+        $phoneNumber = preg_replace('/[^0-9]/', '', $phone);
+
+        return 'https://wa.me/'.$phoneNumber.'?text='.urlencode($message);
+    }
+
+    /**
+     * Genera URL de WhatsApp para mensaje de entrada
+     */
+    public function getEntryMessageUrl(Contact $contact, Kid $kid): string
+    {
+        return $this->generateWhatsAppUrl('entry', $contact, $kid);
+    }
+
+    /**
+     * Genera URL de WhatsApp para mensaje de baño
+     */
+    public function getBathroomMessageUrl(Contact $contact, Kid $kid): string
+    {
+        return $this->generateWhatsAppUrl('bathroom', $contact, $kid);
+    }
+
+    /**
+     * Genera URL de WhatsApp para mensaje de pañal
+     */
+    public function getDiaperMessageUrl(Contact $contact, Kid $kid): string
+    {
+        return $this->generateWhatsAppUrl('diaper', $contact, $kid);
+    }
+
+    /**
+     * Genera URL de WhatsApp para mensaje de niño inconsolable
+     */
+    public function getUnconsolableMessageUrl(Contact $contact, Kid $kid): string
+    {
+        return $this->generateWhatsAppUrl('unconsolable', $contact, $kid);
+    }
+
+    /**
+     * Genera URL de WhatsApp para mensaje de niño enfermo
+     */
+    public function getSickMessageUrl(Contact $contact, Kid $kid): string
+    {
+        return $this->generateWhatsAppUrl('sick', $contact, $kid);
+    }
+
+    /**
+     * Genera URL de WhatsApp para mensaje de niño recuperado
+     */
+    public function getRecoveredMessageUrl(Contact $contact, Kid $kid): string
+    {
+        return $this->generateWhatsAppUrl('recovered', $contact, $kid);
+    }
+
+    /**
+     * Genera URL de WhatsApp para mensaje de salida
+     */
+    public function getExitMessageUrl(Contact $contact, Kid $kid): string
+    {
+        return $this->generateWhatsAppUrl('exit', $contact, $kid);
+    }
 }
