@@ -171,6 +171,14 @@ class TutorMessageService
     }
 
     /**
+     * Genera URL de WhatsApp para mensaje de bienvenida
+     */
+    public function getWelcomeMessageUrl(Contact $contact, Kid $kid): string
+    {
+        return $this->generateWhatsAppUrl('welcome', $contact, $kid);
+    }
+
+    /**
      * Genera URL de WhatsApp para mensaje de entrada
      */
     public function getEntryMessageUrl(Contact $contact, Kid $kid): string

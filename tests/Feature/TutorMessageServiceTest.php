@@ -118,6 +118,14 @@ class TutorMessageServiceTest extends TestCase
 
     // Tests for WhatsApp URL generation methods
 
+    public function test_get_welcome_message_url_returns_valid_whatsapp_url(): void
+    {
+        $url = $this->service->getWelcomeMessageUrl($this->contact, $this->kid);
+
+        $this->assertStringStartsWith('https://wa.me/', $url);
+        $this->assertStringContainsString('?text=', $url);
+    }
+
     public function test_get_entry_message_url_returns_valid_whatsapp_url(): void
     {
         $url = $this->service->getEntryMessageUrl($this->contact, $this->kid);

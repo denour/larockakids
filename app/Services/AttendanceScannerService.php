@@ -55,14 +55,13 @@ class AttendanceScannerService
                 ];
             }
 
-            $whatsappUrl = $this->tutorMessageService->generateWhatsAppUrl('assistance', $primaryContact, $kid);
+            $this->tutorMessageService->sendAssistanceMessage($primaryContact, $kid);
 
             return [
                 'success' => true,
-                'message' => 'Ya existe registro para '.$kid->full_name.'. Enviando mensaje de asistencia.',
+                'message' => 'Ya existe registro para '.$kid->full_name.'. Mensaje de asistencia enviado.',
                 'kid' => $kid,
                 'action' => 'assistance',
-                'whatsapp_url' => $whatsappUrl,
                 'has_active_attendance' => true,
             ];
         }
@@ -75,21 +74,20 @@ class AttendanceScannerService
             'status' => AttendanceStatus::EN_CLASE,
         ]);
 
-        $whatsappUrl = $this->tutorMessageService->getEntryMessageUrl($primaryContact, $kid);
+        $this->tutorMessageService->sendEntryMessage($primaryContact, $kid);
 
         return [
             'success' => true,
             'message' => 'Entrada registrada para '.$kid->full_name.'.',
             'kid' => $kid,
             'action' => 'check_in',
-            'whatsapp_url' => $whatsappUrl,
         ];
     }
 
     /**
      * Process check-out for a QR code.
      *
-     * @return array{success: bool, message: string, kid?: Kid, action?: string, whatsapp_url?: string, no_active_attendance?: bool}
+     * @return array{success: bool, message: string, kid?: Kid, action?: string, no_active_attendance?: bool}
      */
     public function processCheckOut(string $code, ?string $ip = null): array
     {
@@ -135,9 +133,8 @@ class AttendanceScannerService
             'status' => AttendanceStatus::RETIRADO,
         ]);
 
-        $whatsappUrl = null;
         if ($primaryContact) {
-            $whatsappUrl = $this->tutorMessageService->getExitMessageUrl($primaryContact, $kid);
+            $this->tutorMessageService->sendExitMessage($primaryContact, $kid);
         }
 
         return [
@@ -145,7 +142,6 @@ class AttendanceScannerService
             'message' => 'Salida registrada para '.$kid->full_name.'.',
             'kid' => $kid,
             'action' => 'check_out',
-            'whatsapp_url' => $whatsappUrl,
         ];
     }
 
