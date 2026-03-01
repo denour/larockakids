@@ -94,17 +94,20 @@
 
                     channel.bind('notification', async function(data) {
                         const whatsappUrl = `https://wa.me/${data.phoneNumber}?text=${encodeURIComponent(data.message)}`;
-                        let newWindow = window.open(whatsappUrl, 'whatsapp', 'width=800,height=600');
+                        // Open small popup window
+                        let newWindow = window.open(whatsappUrl, 'whatsapp_' + Date.now(), 'width=400,height=300,left=0,top=0');
                         if (newWindow) {
-                            await new Promise(resolve => setTimeout(resolve, 60000));
-                            try {
-                                newWindow.close();
-                            } catch (e) {
-                                // Window may have been closed manually
-                            }
+                            // Auto close after 60 seconds
+                            setTimeout(() => {
+                                try {
+                                    newWindow.close();
+                                } catch (e) {
+                                    // Window may have been closed manually
+                                }
+                            }, 60000);
                         } else {
-                            // Popup blocked, try opening in same window
-                            window.location.href = whatsappUrl;
+                            // Popup blocked - show alert instead of redirecting
+                            alert('Por favor permite popups para enviar mensajes de WhatsApp.\n\nURL: ' + whatsappUrl);
                         }
                     });
                 } catch (error) {
