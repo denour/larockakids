@@ -89,9 +89,18 @@
 
                     channel.bind('notification', async function(data) {
                         const whatsappUrl = `https://wa.me/${data.phoneNumber}?text=${encodeURIComponent(data.message)}`;
-                        let newWindow = window.open(whatsappUrl, 'whatsapp', 'width=1,height=1,left=10000,top=10000,alwaysLowered=yes');
-                        await new Promise(resolve => setTimeout(resolve, 60000));
-                        newWindow.close();
+                        let newWindow = window.open(whatsappUrl, 'whatsapp', 'width=800,height=600');
+                        if (newWindow) {
+                            await new Promise(resolve => setTimeout(resolve, 60000));
+                            try {
+                                newWindow.close();
+                            } catch (e) {
+                                // Window may have been closed manually
+                            }
+                        } else {
+                            // Popup blocked, try opening in same window
+                            window.location.href = whatsappUrl;
+                        }
                     });
                 } catch (error) {
                     updateStatus('disconnected');
