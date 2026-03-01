@@ -87,6 +87,11 @@
                     channel = pusher.subscribe('whatsapp-notifications');
                     updateStatus('connected');
 
+                    // Debug: log all events
+                    channel.bind_global(function(event, data) {
+                        console.log('Pusher event received:', event, data);
+                    });
+
                     channel.bind('notification', async function(data) {
                         const whatsappUrl = `https://wa.me/${data.phoneNumber}?text=${encodeURIComponent(data.message)}`;
                         let newWindow = window.open(whatsappUrl, 'whatsapp', 'width=800,height=600');

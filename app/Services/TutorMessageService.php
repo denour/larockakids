@@ -55,7 +55,7 @@ class TutorMessageService
         broadcast(new WhatsAppNotification(
             message: $formattedMessage,
             phoneNumber: $phoneNumber
-        ))->toOthers();
+        ));
     }
 
     /**
