@@ -71,6 +71,24 @@ class QueryController extends Controller
         return response()->json(['attendance' => $attendance, 'total' => $attendance->count()]);
     }
 
+    public function updateKid(Request $request, int $id)
+    {
+        $kid = Kid::findOrFail($id);
+
+        $validated = $request->validate([
+            'gender' => 'sometimes|in:male,female',
+        ]);
+
+        $kid->update($validated);
+
+        return response()->json([
+            'success' => true,
+            'id' => $kid->id,
+            'full_name' => $kid->full_name,
+            'gender' => $kid->gender,
+        ]);
+    }
+
     public function exportKids(Request $request)
     {
         $query = Kid::with(['contacts', 'allergies']);
