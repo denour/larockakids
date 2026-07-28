@@ -1,0 +1,445 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$first_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/ExportKidsData.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/ExportKidsData.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/ExportKidsData.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\Kid\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Console/Commands/ExportKidsData.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 1
+			path: app/Console/Commands/ExportKidsData.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$code\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/GenerateTopAttendersQrCodes.php
+
+		-
+			message: '#^Parameter \#1 \$qrCode of method App\\Services\\QrCodeService\:\:regenerateImage\(\) expects App\\Models\\QrCode, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/GenerateTopAttendersQrCodes.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: app/Console/Commands/GenerateTopAttendersQrCodes.php
+
+		-
+			message: '#^Relation ''allergies'' is not found in App\\Models\\Kid model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Exports/KidsWithContactsExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>first_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Exports/KidsWithContactsExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>last_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Exports/KidsWithContactsExport.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>phone" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Exports/KidsWithContactsExport.php
+
+		-
+			message: '#^Access to an undefined property App\\Filament\\Pages\\Settings\:\:\$form\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Filament/Pages/Settings.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model&object\{pivot\: Illuminate\\Database\\Eloquent\\Relations\\Pivot\}\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/AttendanceResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Filament/Resources/AttendanceResource.php
+
+		-
+			message: '#^Parameter \#1 \$contact of method App\\Services\\TutorMessageService\:\:sendExitMessage\(\) expects App\\Models\\Contact, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Resources/AttendanceResource.php
+
+		-
+			message: '#^Parameter \#2 \$contact of method App\\Services\\TutorMessageService\:\:sendMessage\(\) expects App\\Models\\Contact, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Resources/AttendanceResource.php
+
+		-
+			message: '#^Parameter \#2 \$kid of method App\\Services\\TutorMessageService\:\:sendExitMessage\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Resources/AttendanceResource.php
+
+		-
+			message: '#^Parameter \#3 \$kid of method App\\Services\\TutorMessageService\:\:sendMessage\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Filament/Resources/AttendanceResource.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$contact\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/AttendanceResource/Pages/CreateAttendance.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$kid\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Resources/AttendanceResource/Pages/CreateAttendance.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:allergies\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/KidResource/RelationManagers/AllergiesRelationManager.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:contacts\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/KidResource/RelationManagers/ContactsRelationManager.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Filament/Resources/QrCodeResource.php
+
+		-
+			message: '#^Call to an undefined method Filament\\Tables\\Contracts\\HasTable\:\:js\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Filament/Resources/QrCodeResource.php
+
+		-
+			message: '#^Called ''count'' on Laravel collection, but could have been retrieved as a query\.$#'
+			identifier: larastan.noUnnecessaryCollectionCall
+			count: 1
+			path: app/Filament/Widgets/AttendanceHistoryStats.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$check_in\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Widgets/RecentAbsencesRanking.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Attendance\:\:\$month\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Widgets/YearlyAttendanceChart.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Attendance\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Widgets/YearlyAttendanceChart.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Attendance\:\:\$year\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Widgets/YearlyAttendanceChart.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>total" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Filament/Widgets/YearlyAttendanceChart.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$check_in\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Filament/Widgets/YoungAbsencesRanking.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\Kid\:\:\$allergies\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Api/QueryController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Api/QueryController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_phone\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Http/Controllers/Api/QueryController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pivot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Http/Controllers/Api/QueryController.php
+
+		-
+			message: '#^Anonymous function should return array\{id\: int, full_name\: string, age\: int, gender\: string, birth_date\: non\-falsy\-string, allergies\: mixed, contacts\: Illuminate\\Support\\Collection\<int, array\{name\: mixed, phone\: mixed, relationship\: mixed\}\>\} but returns array\{id\: int, full_name\: string, age\: int, gender\: string, birth_date\: non\-falsy\-string, allergies\: mixed, contacts\: Illuminate\\Support\\Collection\<int, array\{name\: string, phone\: mixed, relationship\: mixed\}\>\}\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Http/Controllers/Api/QueryController.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: app/Http/Controllers/Api/QueryController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Http/Controllers/Api/QueryController.php
+
+		-
+			message: '#^Relation ''allergies'' is not found in App\\Models\\Kid model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Http/Controllers/Api/QueryController.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Carbon\\Carbon\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Http/Controllers/Api/QueryController.php
+
+		-
+			message: '#^Offset ''has_active…'' on array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid, action\?\: string\} on left side of \?\? does not exist\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Http/Controllers/QrScannerController.php
+
+		-
+			message: '#^Call to an undefined static method Laravel\\Mcp\\Response\:\:success\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: app/Mcp/Tools/createAttendance.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Models\\Allergy\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Models/Allergy.php
+
+		-
+			message: '#^Method App\\Models\\ApiToken\:\:findByPlainToken\(\) should return static\(App\\Models\\ApiToken\)\|null but returns App\\Models\\ApiToken\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Models/ApiToken.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Models\\Contact\:\:\$appends is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$appends\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Models\\Contact\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Models/Contact.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Models\\Kid\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Models/Kid.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Models\\QrCode\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Models/QrCode.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QrCodeStatus\:\:Assigned will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/QrCode.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QrCodeStatus\:\:Available will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/QrCode.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and App\\Enums\\QrCodeStatus\:\:Lost will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Models/QrCode.php
+
+		-
+			message: '#^Class App\\Models\\TwoFactorType not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Models/User.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Filament\\Panel\:\:registration\(\) expects array\<class\-string, string\>\|Closure\|string\|null, false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Providers/Filament/AdminPanelProvider.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pivot\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Method App\\Services\\AttendanceScannerService\:\:getPrimaryContact\(\) should return App\\Models\\Contact\|null but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Method App\\Services\\AttendanceScannerService\:\:getPrimaryContact\(\) should return App\\Models\\Contact\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Method App\\Services\\AttendanceScannerService\:\:processAssistance\(\) should return array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid\} but returns array\{success\: true, message\: non\-falsy\-string, kid\: Illuminate\\Database\\Eloquent\\Model\|null\}\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Method App\\Services\\AttendanceScannerService\:\:processCheckIn\(\) should return array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid, action\?\: string\} but returns array\{success\: true, message\: non\-falsy\-string, kid\: Illuminate\\Database\\Eloquent\\Model\|null, action\: ''assistance'', has_active_attendance\: true\}\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Method App\\Services\\AttendanceScannerService\:\:processCheckIn\(\) should return array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid, action\?\: string\} but returns array\{success\: true, message\: non\-falsy\-string, kid\: Illuminate\\Database\\Eloquent\\Model\|null, action\: ''check_in''\}\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Method App\\Services\\AttendanceScannerService\:\:processCheckOut\(\) should return array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid, action\?\: string, no_active_attendance\?\: bool\} but returns array\{success\: false, message\: non\-falsy\-string, kid\: Illuminate\\Database\\Eloquent\\Model\|null, no_active_attendance\: true\}\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Method App\\Services\\AttendanceScannerService\:\:processCheckOut\(\) should return array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid, action\?\: string, no_active_attendance\?\: bool\} but returns array\{success\: true, message\: non\-falsy\-string, kid\: Illuminate\\Database\\Eloquent\\Model\|null, action\: ''check_out''\}\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Parameter \#1 \$kid of method App\\Services\\AttendanceScannerService\:\:getActiveAttendanceToday\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Parameter \#1 \$kid of method App\\Services\\AttendanceScannerService\:\:getPrimaryContact\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Parameter \#2 \$kid of method App\\Services\\TutorMessageService\:\:sendAssistanceMessage\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Parameter \#2 \$kid of method App\\Services\\TutorMessageService\:\:sendEntryMessage\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^Parameter \#2 \$kid of method App\\Services\\TutorMessageService\:\:sendExitMessage\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/AttendanceScannerService.php
+
+		-
+			message: '#^PHPDoc type string of property Database\\Factories\\AllergyFactory\:\:\$model is not covariant with PHPDoc type class\-string\<App\\Models\\Allergy\> of overridden property Illuminate\\Database\\Eloquent\\Factories\\Factory\<App\\Models\\Allergy\>\:\:\$model\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: database/factories/AllergyFactory.php
+
+		-
+			message: '#^PHPDoc type string of property Database\\Factories\\ContactFactory\:\:\$model is not covariant with PHPDoc type class\-string\<App\\Models\\Contact\> of overridden property Illuminate\\Database\\Eloquent\\Factories\\Factory\<App\\Models\\Contact\>\:\:\$model\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: database/factories/ContactFactory.php
+
+		-
+			message: '#^PHPDoc type string of property Database\\Factories\\KidFactory\:\:\$model is not covariant with PHPDoc type class\-string\<App\\Models\\Kid\> of overridden property Illuminate\\Database\\Eloquent\\Factories\\Factory\<App\\Models\\Kid\>\:\:\$model\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: database/factories/KidFactory.php
+
+		-
+			message: '#^PHPDoc type string of property Database\\Factories\\QrCodeFactory\:\:\$model is not covariant with PHPDoc type class\-string\<App\\Models\\QrCode\> of overridden property Illuminate\\Database\\Eloquent\\Factories\\Factory\<App\\Models\\QrCode\>\:\:\$model\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: database/factories/QrCodeFactory.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>id" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: database/factories/QrCodeFactory.php
