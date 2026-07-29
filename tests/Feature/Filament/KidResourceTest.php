@@ -3,7 +3,6 @@
 use App\Filament\Resources\KidResource\Pages\CreateKid;
 use App\Filament\Resources\KidResource\Pages\EditKid;
 use App\Filament\Resources\KidResource\Pages\ListKids;
-use App\Models\Allergy;
 use App\Models\Kid;
 use App\Models\User;
 use Livewire\Livewire;
@@ -117,7 +116,7 @@ test('kid can be deleted from list', function () {
     Livewire::test(ListKids::class)
         ->callTableAction('delete', $kid);
 
-    $this->assertDatabaseMissing('kids', ['id' => $kid->id]);
+    $this->assertSoftDeleted('kids', ['id' => $kid->id]);
 });
 
 test('kid list shows age column', function () {

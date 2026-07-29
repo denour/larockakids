@@ -41,10 +41,30 @@ test('it can update a kid', function () {
     expect($kid->fresh()->first_name)->toBe($newFirstName);
 });
 
-test('it can delete a kid', function () {
+test('it soft deletes a kid', function () {
     $kid = Kid::factory()->create();
 
     $kid->delete();
+
+    $this->assertSoftDeleted('kids', ['id' => $kid->id]);
+    expect(Kid::query()->find($kid->id))->toBeNull()
+        ->and(Kid::withTrashed()->find($kid->id))->not->toBeNull();
+});
+
+test('a soft deleted kid can be restored', function () {
+    $kid = Kid::factory()->create();
+    $kid->delete();
+
+    $kid->restore();
+
+    $this->assertDatabaseHas('kids', ['id' => $kid->id, 'deleted_at' => null]);
+    expect(Kid::query()->find($kid->id))->not->toBeNull();
+});
+
+test('it can force delete a kid', function () {
+    $kid = Kid::factory()->create();
+
+    $kid->forceDelete();
 
     $this->assertDatabaseMissing('kids', ['id' => $kid->id]);
 });

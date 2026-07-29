@@ -2,7 +2,6 @@
 
 use App\Enums\Country;
 use App\Models\Allergy;
-use App\Models\Attendance;
 use App\Models\Contact;
 use App\Models\Kid;
 use App\Services\AttendanceScannerService;
@@ -282,8 +281,12 @@ test('deleting kid cascades to pivot table', function () {
     $kid->contacts()->attach($contact->id, ['relationship_type' => 'parent']);
     $kidId = $kid->id;
 
+    // Soft delete keeps the pivot so the kid can be restored.
     $kid->delete();
+    $this->assertDatabaseHas('contact_kid', ['kid_id' => $kidId]);
 
+    // Force delete cascades and removes the pivot.
+    $kid->forceDelete();
     $this->assertDatabaseMissing('contact_kid', ['kid_id' => $kidId]);
 });
 
