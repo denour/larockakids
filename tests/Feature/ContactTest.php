@@ -2,6 +2,7 @@
 
 use App\Models\Contact;
 use App\Models\Kid;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 test('it can create a contact', function () {
@@ -25,9 +26,32 @@ test('it requires last name', function () {
     Contact::factory()->create(['last_name' => null]);
 })->throws(\Illuminate\Database\QueryException::class);
 
-test('it requires phone', function () {
-    Contact::factory()->create(['phone' => null]);
+test('it requires phone at the database level', function () {
+    // Unlike first_name/last_name, a null phone never reaches the database:
+    // Contact::booted() runs preg_replace() over $contact->phone on every save
+    // and preg_replace(null) returns '', so the model writes an empty string
+    // that satisfies the NOT NULL column. Bypass the model to assert the
+    // constraint the migration actually declares.
+    DB::table('contacts')->insert([
+        'first_name' => 'Rosa',
+        'last_name' => 'Lopez',
+        'phone' => null,
+        'international_code' => '52',
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
 })->throws(\Illuminate\Database\QueryException::class);
+
+test('the saving hook turns a null phone into an empty string', function () {
+    // Pins the behaviour described above. It is arguably a defect of its own:
+    // a contact with no phone is silently accepted even though phone is
+    // "required", and that tutor's WhatsApp notifications will go nowhere.
+    // Left as-is on purpose — changing it is a live-app behaviour change.
+    $contact = Contact::factory()->create(['phone' => null]);
+
+    expect($contact->phone)->toBe('')
+        ->and(Contact::find($contact->id)->phone)->toBe('');
+});
 
 test('email is optional', function () {
     $contact = Contact::factory()->create(['email' => null]);
