@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Enums\AttendanceStatus;
+use App\Enums\ServiceTime;
 use App\Models\Attendance;
 use App\Models\Contact;
 use App\Models\Kid;
@@ -11,6 +12,16 @@ use Illuminate\Support\Carbon;
 
 class AttendanceScannerService
 {
+    /**
+     * Age (in years) at which a kid must move to Chicos Gigantes.
+     */
+    private const GIANTS_AGE = 4;
+
+    /**
+     * Weeks before reaching the Giants age when a graduation warning is shown.
+     */
+    private const GRADUATION_WARNING_WEEKS = 4;
+
     public function __construct(protected TutorMessageService $tutorMessageService) {}
 
     /**
@@ -37,7 +48,6 @@ class AttendanceScannerService
         }
 
         $kid = $qrCode->kid;
-        $activeAttendance = $this->getActiveAttendanceToday($kid);
         $primaryContact = $this->getPrimaryContact($kid);
 
         if (! $primaryContact) {
@@ -47,31 +57,45 @@ class AttendanceScannerService
             ];
         }
 
-        if ($activeAttendance) {
-            if ($activeAttendance->check_in_ip && $activeAttendance->check_in_ip !== $ip) {
+        $now = Carbon::now();
+        $giantsBirthday = $kid->birth_date->copy()->addYears(self::GIANTS_AGE);
+        $requiresGraduation = $now->greaterThanOrEqualTo($giantsBirthday);
+        $graduationWarning = $this->graduationAlert($kid, $now, $giantsBirthday);
+        $service = ServiceTime::fromHour($now->hour);
+        $serviceAttendance = $this->getServiceAttendanceToday($kid, $service);
+
+        if ($serviceAttendance) {
+            if ($serviceAttendance->check_in_ip && $serviceAttendance->check_in_ip !== $ip) {
                 return [
                     'success' => false,
                     'message' => 'Error de autenticación: esta acción debe realizarse desde el dispositivo original.',
                 ];
             }
 
+            $isInside = $serviceAttendance->check_out === null;
+
             $this->tutorMessageService->sendAssistanceMessage($primaryContact, $kid);
 
             return [
                 'success' => true,
-                'message' => 'Ya existe registro para '.$kid->full_name.'. Mensaje de asistencia enviado.',
+                'message' => $isInside
+                    ? 'Ya existe registro para '.$kid->full_name.'. Mensaje de asistencia enviado.'
+                    : $kid->full_name.' ya asistió a '.$service->getLabel().'. Mensaje de asistencia enviado.',
                 'kid' => $kid,
                 'action' => 'assistance',
-                'has_active_attendance' => true,
+                'has_active_attendance' => $isInside,
+                'warning' => $graduationWarning,
+                'requires_graduation' => $requiresGraduation,
             ];
         }
 
         Attendance::create([
             'kid_id' => $kid->id,
             'contact_id' => $primaryContact->id,
-            'check_in' => Carbon::now(),
+            'check_in' => $now,
             'check_in_ip' => $ip,
             'status' => AttendanceStatus::EN_CLASE,
+            'service' => $service,
         ]);
 
         $this->tutorMessageService->sendEntryMessage($primaryContact, $kid);
@@ -81,6 +105,8 @@ class AttendanceScannerService
             'message' => 'Entrada registrada para '.$kid->full_name.'.',
             'kid' => $kid,
             'action' => 'check_in',
+            'warning' => $graduationWarning,
+            'requires_graduation' => $requiresGraduation,
         ];
     }
 
@@ -196,6 +222,41 @@ class AttendanceScannerService
             ->whereDate('check_in', Carbon::today())
             ->whereNull('check_out')
             ->first();
+    }
+
+    /**
+     * Get today's attendance for a kid in a given service, whether the kid is
+     * still inside or already checked out. Used to prevent a second attendance
+     * in the same service.
+     */
+    public function getServiceAttendanceToday(Kid $kid, ServiceTime $service): ?Attendance
+    {
+        return Attendance::where('kid_id', $kid->id)
+            ->whereDate('check_in', Carbon::today())
+            ->where('service', $service)
+            ->first();
+    }
+
+    /**
+     * Build a graduation alert for a kid: a firm notice once the Chicos
+     * Gigantes age is reached, or a heads-up within the warning window before
+     * it. Returns null when the kid is still far from the age.
+     */
+    public function graduationAlert(Kid $kid, Carbon $now, Carbon $giantsBirthday): ?string
+    {
+        if ($now->greaterThanOrEqualTo($giantsBirthday)) {
+            return $kid->full_name.' ya cumplió '.self::GIANTS_AGE.' años y debe pasar a Chicos Gigantes.';
+        }
+
+        $warningStart = $giantsBirthday->copy()->subWeeks(self::GRADUATION_WARNING_WEEKS);
+
+        if ($now->lessThan($warningStart)) {
+            return null;
+        }
+
+        $weeksLeft = max(1, (int) ceil($now->diffInDays($giantsBirthday) / 7));
+
+        return "Faltan {$weeksLeft} semana(s) para que {$kid->full_name} deba pasar a Chicos Gigantes.";
     }
 
     /**

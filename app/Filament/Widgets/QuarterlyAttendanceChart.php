@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ServiceTime;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
@@ -34,22 +35,36 @@ class QuarterlyAttendanceChart extends ChartWidget
         }
 
         $labels = [];
-        $data = [];
+        $firstData = [];
+        $secondData = [];
 
         foreach ($sundays as $sunday) {
             $labels[] = $sunday->format('d/m');
 
-            $count = Attendance::whereDate('check_in', $sunday)->count();
-            $data[] = $count;
+            $firstData[] = Attendance::whereDate('check_in', $sunday)
+                ->where('service', ServiceTime::First)
+                ->count();
+
+            $secondData[] = Attendance::whereDate('check_in', $sunday)
+                ->where('service', ServiceTime::Second)
+                ->count();
         }
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Asistencias por Domingo',
-                    'data' => $data,
-                    'borderColor' => '#4BC0C0',
-                    'backgroundColor' => 'rgba(75, 192, 192, 0.2)',
+                    'label' => '1ra Reunión (11 AM)',
+                    'data' => $firstData,
+                    'borderColor' => '#36A2EB',
+                    'backgroundColor' => 'rgba(54, 162, 235, 0.2)',
+                    'fill' => true,
+                    'tension' => 0.3,
+                ],
+                [
+                    'label' => '2da Reunión (1 PM)',
+                    'data' => $secondData,
+                    'borderColor' => '#FF9F40',
+                    'backgroundColor' => 'rgba(255, 159, 64, 0.2)',
                     'fill' => true,
                     'tension' => 0.3,
                 ],

@@ -36,6 +36,8 @@ class QrScannerController extends Controller
             'action' => $result['action'] ?? null,
             'kid_name' => isset($result['kid']) ? $result['kid']->full_name : null,
             'has_active_attendance' => $result['has_active_attendance'] ?? false,
+            'warning' => $result['warning'] ?? null,
+            'requires_graduation' => $result['requires_graduation'] ?? false,
         ]);
     }
 

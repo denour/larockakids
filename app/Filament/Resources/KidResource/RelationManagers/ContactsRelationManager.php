@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\KidResource\RelationManagers;
 
+use App\Enums\Country;
 use App\Models\Contact;
 use Filament\Forms;
 use Filament\Forms\Form;
@@ -10,7 +11,6 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Model;
 use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
-use App\Enums\Country;
 
 class ContactsRelationManager extends RelationManager
 {
@@ -33,11 +33,7 @@ class ContactsRelationManager extends RelationManager
                 PhoneInput::make('phone')
                     ->label('Teléfono')
                     ->required()
-                    ->defaultCountry(Country::getDefaultCountry()->value)
-                    ->live()
-                    ->afterStateUpdated(function ($state, Forms\Set $set) {
-                        $set('international_code', Country::getDefaultCountry()->getCode());
-                    }),
+                    ->defaultCountry(Country::getDefaultCountry()->value),
                 Forms\Components\TextInput::make('email')
                     ->label('Correo Electrónico')
                     ->email()
@@ -92,10 +88,11 @@ class ContactsRelationManager extends RelationManager
                             'international_code' => Country::getDefaultCountry()->getCode(),
                             'email' => $data['email'],
                         ]);
-                        
+
                         $this->getOwnerRecord()->contacts()->attach($contact->id, [
-                            'relationship_type' => $data['relationship_type']
+                            'relationship_type' => $data['relationship_type'],
                         ]);
+
                         return $contact;
                     }),
             ])
@@ -109,4 +106,4 @@ class ContactsRelationManager extends RelationManager
                 ]),
             ]);
     }
-} 
+}

@@ -41,8 +41,9 @@ test('attendance stats widget renders', function () {
 
     Livewire::test(AttendanceStats::class)
         ->assertSee('Total Asistencias')
-        ->assertSee('Presentes')
-        ->assertSee('Salidas');
+        ->assertSee('1ra Reunión (11 AM)')
+        ->assertSee('2da Reunión (1 PM)')
+        ->assertSee('Presentes');
 });
 
 test('weekly attendance chart renders', function () {

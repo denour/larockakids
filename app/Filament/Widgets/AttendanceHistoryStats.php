@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ServiceTime;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
@@ -34,6 +35,13 @@ class AttendanceHistoryStats extends BaseWidget
             ? round($totalCount / $sundaysWithAttendance, 1)
             : 0;
 
+        // Per-service averages
+        $firstServiceTotal = Attendance::where('service', ServiceTime::First)->count();
+        $secondServiceTotal = Attendance::where('service', ServiceTime::Second)->count();
+
+        $avgFirst = $sundaysWithAttendance > 0 ? round($firstServiceTotal / $sundaysWithAttendance, 1) : 0;
+        $avgSecond = $sundaysWithAttendance > 0 ? round($secondServiceTotal / $sundaysWithAttendance, 1) : 0;
+
         return [
             Stat::make('Este Mes', $thisMonthCount)
                 ->description($now->translatedFormat('F Y'))
@@ -51,7 +59,7 @@ class AttendanceHistoryStats extends BaseWidget
                 ->color('primary'),
 
             Stat::make('Promedio por Domingo', $averagePerSunday)
-                ->description('Niños por servicio')
+                ->description("1ra: {$avgFirst} | 2da: {$avgSecond}")
                 ->descriptionIcon('heroicon-m-users')
                 ->color('warning'),
         ];

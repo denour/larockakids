@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ServiceTime;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
@@ -39,14 +40,14 @@ class YearlyAttendanceChart extends ChartWidget
 
         $monthlyData = Attendance::query()
             ->whereBetween('check_in', [$startDate, $endDate])
-            ->selectRaw("{$yearExpr} as year, {$monthExpr} as month, COUNT(*) as total")
-            ->groupByRaw("{$yearExpr}, {$monthExpr}")
+            ->selectRaw("{$yearExpr} as year, {$monthExpr} as month, service, COUNT(*) as total")
+            ->groupByRaw("{$yearExpr}, {$monthExpr}, service")
             ->orderByRaw("{$yearExpr}, {$monthExpr}")
-            ->get()
-            ->keyBy(fn ($item) => $item->year.'-'.str_pad($item->month, 2, '0', STR_PAD_LEFT));
+            ->get();
 
         $labels = [];
-        $data = [];
+        $firstData = [];
+        $secondData = [];
         $current = $startDate->copy();
 
         $monthNames = [
@@ -56,19 +57,38 @@ class YearlyAttendanceChart extends ChartWidget
         ];
 
         while ($current->lte($endDate)) {
-            $key = $current->format('Y-m');
-            $labels[] = $monthNames[$current->month].' '.$current->format('y');
-            $data[] = $monthlyData->get($key)?->total ?? 0;
+            $year = $current->year;
+            $month = $current->month;
+            $labels[] = $monthNames[$month].' '.$current->format('y');
+
+            $firstData[] = $monthlyData
+                ->where('year', $year)
+                ->where('month', $month)
+                ->where('service', ServiceTime::First->value)
+                ->first()?->total ?? 0;
+
+            $secondData[] = $monthlyData
+                ->where('year', $year)
+                ->where('month', $month)
+                ->where('service', ServiceTime::Second->value)
+                ->first()?->total ?? 0;
+
             $current->addMonth();
         }
 
         return [
             'datasets' => [
                 [
-                    'label' => 'Total Asistencias',
-                    'data' => $data,
-                    'backgroundColor' => '#9966FF',
-                    'borderColor' => '#9966FF',
+                    'label' => '1ra Reunión (11 AM)',
+                    'data' => $firstData,
+                    'backgroundColor' => '#36A2EB',
+                    'borderColor' => '#36A2EB',
+                ],
+                [
+                    'label' => '2da Reunión (1 PM)',
+                    'data' => $secondData,
+                    'backgroundColor' => '#FF9F40',
+                    'borderColor' => '#FF9F40',
                 ],
             ],
             'labels' => $labels,

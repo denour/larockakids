@@ -51,7 +51,7 @@ test('check out page loads successfully', function () {
 test('check in creates attendance for assigned qr', function () {
     Event::fake([WhatsAppNotification::class]);
 
-    ['kid' => $kid, 'contact' => $contact] = createKidWithContact();
+    ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0001');
 
     $response = $this->postJson(route('scanner.check-in.process'), ['code' => 'TEST-0001']);
@@ -75,7 +75,7 @@ test('check in creates attendance for assigned qr', function () {
 test('check in sends assistance when already checked in', function () {
     Event::fake([WhatsAppNotification::class]);
 
-    ['kid' => $kid, 'contact' => $contact] = createKidWithContact();
+    ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0002');
 
     Attendance::create([
@@ -125,7 +125,7 @@ test('check in fails for invalid qr code', function () {
 test('check out updates attendance', function () {
     Event::fake([WhatsAppNotification::class]);
 
-    ['kid' => $kid, 'contact' => $contact] = createKidWithContact();
+    ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0004');
 
     $attendance = Attendance::create([
@@ -153,7 +153,7 @@ test('check out updates attendance', function () {
 test('check out fails when not checked in', function () {
     Event::fake([WhatsAppNotification::class]);
 
-    ['kid' => $kid, 'contact' => $contact] = createKidWithContact();
+    ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0005');
 
     $this->postJson(route('scanner.check-out.process'), ['code' => 'TEST-0005'])
@@ -181,7 +181,7 @@ test('check in prioritizes parent contact', function () {
 
     $parentContact = Contact::factory()->create();
     $guardianContact = Contact::factory()->create();
-    $kid = Kid::factory()->create();
+    $kid = Kid::factory()->create(['birth_date' => now()->subYears(3)]);
     $kid->contacts()->sync([]);
     $kid->contacts()->attach($guardianContact->id, ['relationship_type' => 'guardian']);
     $kid->contacts()->attach($parentContact->id, ['relationship_type' => 'parent']);
@@ -201,7 +201,7 @@ test('check in prioritizes parent contact', function () {
 test('check in stores client ip', function () {
     Event::fake([WhatsAppNotification::class]);
 
-    ['kid' => $kid] = createKidWithContact();
+    ['kid' => $kid] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0007');
 
     $this->postJson(route('scanner.check-in.process'), [
@@ -219,7 +219,7 @@ test('check in stores client ip', function () {
 test('check out fails when ip does not match', function () {
     Event::fake([WhatsAppNotification::class]);
 
-    ['kid' => $kid, 'contact' => $contact] = createKidWithContact();
+    ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0008');
 
     Attendance::create([
@@ -243,7 +243,7 @@ test('check out fails when ip does not match', function () {
 test('check out succeeds when ip matches', function () {
     Event::fake([WhatsAppNotification::class]);
 
-    ['kid' => $kid, 'contact' => $contact] = createKidWithContact();
+    ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0009');
 
     Attendance::create([
@@ -266,7 +266,7 @@ test('check out succeeds when ip matches', function () {
 test('assistance message fails when ip does not match', function () {
     Event::fake([WhatsAppNotification::class]);
 
-    ['kid' => $kid, 'contact' => $contact] = createKidWithContact();
+    ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0010');
 
     Attendance::create([
@@ -290,7 +290,7 @@ test('assistance message fails when ip does not match', function () {
 test('assistance message succeeds when ip matches', function () {
     Event::fake([WhatsAppNotification::class]);
 
-    ['kid' => $kid, 'contact' => $contact] = createKidWithContact();
+    ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0011');
 
     Attendance::create([

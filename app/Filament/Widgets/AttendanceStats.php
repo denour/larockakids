@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ServiceTime;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
@@ -14,11 +15,16 @@ class AttendanceStats extends BaseWidget
     protected function getStats(): array
     {
         $today = Carbon::today();
-        $totalAttendances = Attendance::whereDate('check_in', $today)->count();
-        $checkedOut = Attendance::whereDate('check_in', $today)
-            ->whereNotNull('check_out')
+
+        $firstService = Attendance::whereDate('check_in', $today)->where('service', ServiceTime::First)->count();
+        $secondService = Attendance::whereDate('check_in', $today)->where('service', ServiceTime::Second)->count();
+        $totalAttendances = $firstService + $secondService;
+
+        $stillPresent = Attendance::whereDate('check_in', $today)
+            ->whereNull('check_out')
             ->count();
-        $stillPresent = $totalAttendances - $checkedOut;
+
+        $checkedOut = $totalAttendances - $stillPresent;
 
         return [
             Stat::make('Total Asistencias', $totalAttendances)
@@ -26,15 +32,20 @@ class AttendanceStats extends BaseWidget
                 ->descriptionIcon('heroicon-m-users')
                 ->color('success'),
 
+            Stat::make('1ra Reunión (11 AM)', $firstService)
+                ->description('Hoy')
+                ->descriptionIcon('heroicon-m-sun')
+                ->color('info'),
+
+            Stat::make('2da Reunión (1 PM)', $secondService)
+                ->description('Hoy')
+                ->descriptionIcon('heroicon-m-clock')
+                ->color('warning'),
+
             Stat::make('Presentes', $stillPresent)
                 ->description('En el centro')
                 ->descriptionIcon('heroicon-m-user-group')
-                ->color('warning'),
-
-            Stat::make('Salidas', $checkedOut)
-                ->description('Registradas')
-                ->descriptionIcon('heroicon-m-arrow-right')
-                ->color('info'),
+                ->color('primary'),
         ];
     }
-} 
+}
