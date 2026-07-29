@@ -2,15 +2,15 @@
 
 namespace App\Mcp\Tools;
 
-use Illuminate\JsonSchema\JsonSchema;
+use App\Models\Attendance;
+use App\Models\Contact;
+use App\Models\Kid;
+use App\Services\TutorMessageService;
+use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
-use App\Models\Attendance;
-use App\Models\Kid;
-use App\Models\Contact;
-use App\Services\TutorMessageService;
-use Illuminate\Validation\ValidationException;
 
 class createAttendance extends Tool
 {
@@ -23,7 +23,7 @@ class createAttendance extends Tool
         It also handles the creation of new kids and contacts if they don't exist in the system.
     MARKDOWN;
 
-    public function handle(Request $request): Response
+    public function handle(Request $request): ResponseFactory
     {
         // ✅ Validación de los datos
         $validated = $request->validate([
@@ -38,12 +38,12 @@ class createAttendance extends Tool
             'contact.email' => 'nullable|email|max:150',
             'contact.international_code' => 'nullable|string|max:5',
 
-            'observations' => 'nullable|string|max:500'
+            'observations' => 'nullable|string|max:500',
         ], [
             'kid.first_name.required' => 'El nombre del niño es obligatorio.',
             'kid.last_name.required' => 'El apellido del niño es obligatorio.',
             'contact.phone.required' => 'El número de teléfono del tutor es obligatorio.',
-            'contact.email.email' => 'El correo electrónico no tiene un formato válido.'
+            'contact.email.email' => 'El correo electrónico no tiene un formato válido.',
         ]);
 
         // Extraer datos ya validados
@@ -56,7 +56,7 @@ class createAttendance extends Tool
             ['first_name' => $kidData['first_name'], 'last_name' => $kidData['last_name']],
             [
                 'birth_date' => $kidData['birth_date'] ?? null,
-                'gender' => $kidData['gender'] ?? 'not_specified'
+                'gender' => $kidData['gender'] ?? 'not_specified',
             ]
         );
 
@@ -66,11 +66,11 @@ class createAttendance extends Tool
                 'first_name' => $contactData['first_name'],
                 'last_name' => $contactData['last_name'],
                 'email' => $contactData['email'] ?? null,
-                'international_code' => $contactData['international_code'] ?? '+52'
+                'international_code' => $contactData['international_code'] ?? '+52',
             ]
         );
 
-        if (!$kid->contacts()->where('contact_id', $contact->id)->exists()) {
+        if (! $kid->contacts()->where('contact_id', $contact->id)->exists()) {
             $kid->contacts()->attach($contact->id, ['relationship_type' => 'parent']);
         }
 
@@ -78,7 +78,7 @@ class createAttendance extends Tool
             'kid_id' => $kid->id,
             'contact_id' => $contact->id,
             'check_in' => now(),
-            'observations' => $observations
+            'observations' => $observations,
         ]);
 
         $tutorMessageService = app(TutorMessageService::class);
@@ -89,11 +89,11 @@ class createAttendance extends Tool
             $tutorMessageService->sendEntryMessage($contact, $kid);
         }
 
-        return Response::success([
+        return Response::structured([
             'message' => 'Asistencia registrada exitosamente',
             'attendance_id' => $attendance->id,
-            'kid' => $kid,
-            'contact' => $contact
+            'kid' => $kid->toArray(),
+            'contact' => $contact->toArray(),
         ]);
     }
 
@@ -109,16 +109,16 @@ class createAttendance extends Tool
                 'first_name' => $schema->string()->required()->description('Nombre del niño'),
                 'last_name' => $schema->string()->required()->description('Apellidos del niño'),
                 'birth_date' => $schema->string()->format('date')->description('Fecha de nacimiento'),
-                'gender' => $schema->enum(['male', 'female', 'not_specified'])->description('Género del niño')
+                'gender' => $schema->string()->enum(['male', 'female', 'not_specified'])->description('Género del niño'),
             ]),
             'contact' => $schema->object([
                 'first_name' => $schema->string()->required()->description('Nombre del contacto'),
                 'last_name' => $schema->string()->required()->description('Apellidos del contacto'),
                 'phone' => $schema->string()->required()->description('Teléfono del contacto'),
                 'email' => $schema->string()->format('email')->description('Correo electrónico del contacto'),
-                'international_code' => $schema->string()->description('Código internacional del teléfono')
+                'international_code' => $schema->string()->description('Código internacional del teléfono'),
             ]),
-            'observations' => $schema->string()->description('Observaciones adicionales de la asistencia')
+            'observations' => $schema->string()->description('Observaciones adicionales de la asistencia'),
         ];
     }
 }
