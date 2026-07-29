@@ -9,6 +9,7 @@ use App\Services\TutorMessageService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
 use Laravel\Mcp\Response;
+use Laravel\Mcp\ResponseFactory;
 use Laravel\Mcp\Server\Tool;
 
 class createAttendance extends Tool
@@ -22,7 +23,7 @@ class createAttendance extends Tool
         It also handles the creation of new kids and contacts if they don't exist in the system.
     MARKDOWN;
 
-    public function handle(Request $request): Response
+    public function handle(Request $request): ResponseFactory
     {
         // ✅ Validación de los datos
         $validated = $request->validate([
@@ -88,11 +89,11 @@ class createAttendance extends Tool
             $tutorMessageService->sendEntryMessage($contact, $kid);
         }
 
-        return Response::success([
+        return Response::structured([
             'message' => 'Asistencia registrada exitosamente',
             'attendance_id' => $attendance->id,
-            'kid' => $kid,
-            'contact' => $contact,
+            'kid' => $kid->toArray(),
+            'contact' => $contact->toArray(),
         ]);
     }
 

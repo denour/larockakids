@@ -253,12 +253,6 @@ parameters:
 			path: app/Http/Controllers/QrScannerController.php
 
 		-
-			message: '#^Call to an undefined static method Laravel\\Mcp\\Response\:\:success\(\)\.$#'
-			identifier: staticMethod.notFound
-			count: 1
-			path: app/Mcp/Tools/createAttendance.php
-
-		-
 			message: '#^PHPDoc type array\<int, string\> of property App\\Models\\Allergy\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
 			identifier: property.phpDocType
 			count: 1

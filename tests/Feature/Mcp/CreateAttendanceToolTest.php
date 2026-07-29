@@ -9,6 +9,7 @@ use App\Services\TutorMessageService;
 use Illuminate\Contracts\JsonSchema\JsonSchema as JsonSchemaContract;
 use Illuminate\Database\QueryException;
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;
+use Laravel\Mcp\Server\Testing\TestResponse;
 use Tests\Fixtures\CreateAttendanceTestServer;
 
 /*
@@ -33,17 +34,13 @@ use Tests\Fixtures\CreateAttendanceTestServer;
 | the defects cannot be forgotten, and so they turn red the moment someone
 | fixes them (at which point they should be rewritten, not deleted).
 |
-| Coverage: 70/70 statements, 2/2 methods.
-| Mutation: 55/60 killed (91.67%) via
+| Mutation: run with
 |   vendor/bin/pest tests/Feature/Mcp/CreateAttendanceToolTest.php \
 |     --mutate --class="App\Mcp\Tools\createAttendance"
-| The 5 survivors are not killable as the code stands:
-|   - line 73, dropping ['relationship_type' => 'parent'] from attach(): the
-|     contact_kid.relationship_type column defaults to 'parent', so the mutant
-|     is behaviourally equivalent.
-|   - lines 92-95, dropping any key from the Response::success() payload: that
-|     array is never read, because the call itself throws (KNOWN DEFECT #1).
-|     Fixing #1 makes all four killable.
+| One survivor is not killable as the code stands: dropping
+| ['relationship_type' => 'parent'] from attach(), because the
+| contact_kid.relationship_type column defaults to 'parent', so the mutant is
+| behaviourally equivalent.
 |
 */
 
@@ -74,18 +71,45 @@ function attendancePayload(array $overrides = []): array
 }
 
 /**
- * Calls the tool through the MCP server and returns whatever it died with.
- *
- * handle() currently always dies on `Response::success()` (see KNOWN DEFECT #1),
- * but every side effect before that line has already happened, so the callers
- * below can still assert on the database.
+ * Calls the tool through the MCP server. Anything it throws propagates.
  *
  * @param  array<string, mixed>  $arguments
  */
-function runCreateAttendance(array $arguments): ?Throwable
+function runCreateAttendance(array $arguments): TestResponse
+{
+    return CreateAttendanceTestServer::tool(createAttendance::class, $arguments);
+}
+
+/**
+ * The JSON-RPC `result` object an MCP client actually receives.
+ *
+ * TestResponse only exposes assertions, so the raw envelope is read off its
+ * protected JsonRpcResponse. Worth the reflection: it is the only way to assert
+ * on the wire format (content block + structuredContent) instead of trusting
+ * the tool's own return value.
+ *
+ * @param  array<string, mixed>  $arguments
+ * @return array<string, mixed>
+ */
+function createAttendanceResult(array $arguments): array
+{
+    $testResponse = runCreateAttendance($arguments);
+
+    return (new ReflectionProperty($testResponse, 'response'))
+        ->getValue($testResponse)
+        ->toArray()['result'];
+}
+
+/**
+ * Calls the tool and returns whatever it died with, for the defects below that
+ * still blow up mid-flight.
+ *
+ * @param  array<string, mixed>  $arguments
+ */
+function catchCreateAttendance(array $arguments): ?Throwable
 {
     try {
-        CreateAttendanceTestServer::tool(createAttendance::class, $arguments);
+        runCreateAttendance($arguments);
 
         return null;
     } catch (Throwable $throwable) {
@@ -438,34 +462,80 @@ describe('handle notifications', function () {
 });
 
 // ---------------------------------------------------------------------------
+// handle() — response
+// ---------------------------------------------------------------------------
+
+describe('handle response', function () {
+    // REGRESSION GUARD: handle() used to call `Response::success()`, which does
+    // not exist on Laravel\Mcp\Response (^0.5) and is registered by no macro, so
+    // Macroable::__callStatic threw BadMethodCallException *after* the
+    // attendance had been written and the tutor notified. PHPStan caught it
+    // (staticMethod.notFound) and it was baselined instead of fixed.
+
+    it('answers a successful, non-error MCP result', function () {
+        mockTutorMessages()->shouldReceive('sendWelcomeMessage')->once();
+
+        runCreateAttendance(attendancePayload())
+            ->assertOk()
+            ->assertSee('Asistencia registrada exitosamente');
+    });
+
+    it('does not flag the result as an MCP error', function () {
+        mockTutorMessages()->shouldReceive('sendWelcomeMessage')->once();
+
+        expect(createAttendanceResult(attendancePayload())['isError'])->toBeFalse();
+    });
+
+    it('carries the message, the attendance id and both records', function () {
+        mockTutorMessages()->shouldReceive('sendWelcomeMessage')->once();
+
+        $structured = createAttendanceResult(attendancePayload())['structuredContent'];
+
+        expect($structured)->toHaveKeys(['message', 'attendance_id', 'kid', 'contact'])
+            ->and($structured['message'])->toBe('Asistencia registrada exitosamente')
+            ->and($structured['attendance_id'])->toBe(Attendance::sole()->id)
+            ->and($structured['kid']['id'])->toBe(Kid::sole()->id)
+            ->and($structured['kid']['first_name'])->toBe('Ana')
+            ->and($structured['kid']['last_name'])->toBe('Lopez')
+            ->and($structured['contact']['id'])->toBe(Contact::sole()->id)
+            ->and($structured['contact']['phone'])->toBe('5512345678');
+    });
+
+    it('mirrors the structured content as a JSON text block', function () {
+        // MCP requires a tool returning structuredContent to also serialise it
+        // into a text content block, for clients that only read `content`.
+        // Response::structured() does both; Response::json() would only do the
+        // text half.
+        mockTutorMessages()->shouldReceive('sendWelcomeMessage')->once();
+
+        $result = createAttendanceResult(attendancePayload());
+
+        expect($result['content'])->toHaveCount(1)
+            ->and($result['content'][0]['type'])->toBe('text')
+            ->and(json_decode($result['content'][0]['text'], true))
+            ->toBe($result['structuredContent']);
+    });
+
+    it('answers the same shape when the kid and contact already existed', function () {
+        mockTutorMessages()->shouldReceive('sendEntryMessage')->once();
+
+        $kid = Kid::factory()->create(['first_name' => 'Ana', 'last_name' => 'Lopez']);
+        $contact = Contact::factory()->create(['phone' => '5512345678']);
+
+        $structured = createAttendanceResult(attendancePayload())['structuredContent'];
+
+        expect($structured['message'])->toBe('Asistencia registrada exitosamente')
+            ->and($structured['attendance_id'])->toBe(Attendance::sole()->id)
+            ->and($structured['kid']['id'])->toBe($kid->id)
+            ->and($structured['contact']['id'])->toBe($contact->id);
+    });
+});
+
+// ---------------------------------------------------------------------------
 // KNOWN DEFECTS — these pin behaviour that is wrong today.
 // ---------------------------------------------------------------------------
 
 describe('known defects', function () {
-    it('KNOWN DEFECT #1: dies on Response::success(), which does not exist', function () {
-        // `Laravel\Mcp\Response` has no success() method (laravel/mcp ^0.5) and
-        // no macro registers one, so Macroable::__callStatic throws. Every
-        // successful call to this tool dies AFTER writing to the database —
-        // the attendance is saved and the tutor is notified, but the MCP client
-        // gets a 500. PHPStan found this (staticMethod.notFound) and it was
-        // baselined instead of fixed; the tool is also not registered in
-        // AttendanceServer::$tools, which is why nobody has hit it yet.
-        //
-        // EXPECTED: return a real Response (e.g. Response::text(...)) carrying
-        // the message, attendance_id, kid and contact. When that lands, replace
-        // this test with an assertion on the response payload.
-        mockTutorMessages()->shouldReceive('sendWelcomeMessage')->once();
-
-        $throwable = runCreateAttendance(attendancePayload());
-
-        expect($throwable)->toBeInstanceOf(BadMethodCallException::class)
-            ->and($throwable->getMessage())
-            ->toBe('Method Laravel\Mcp\Response::success does not exist.');
-
-        // The side effects were already committed before the throw.
-        expect(Attendance::count())->toBe(1);
-    });
-
     it('KNOWN DEFECT #2: a new kid without birth_date violates the NOT NULL column', function () {
         // The tool declares kid.birth_date as optional ('nullable|date' and
         // `?? null`), but kids.birth_date is `$table->date('birth_date')` —
@@ -477,7 +547,7 @@ describe('known defects', function () {
         $payload = attendancePayload();
         unset($payload['kid']['birth_date']);
 
-        $throwable = runCreateAttendance($payload);
+        $throwable = catchCreateAttendance($payload);
 
         expect($throwable)->toBeInstanceOf(QueryException::class)
             ->and($throwable->getMessage())->toContain('NOT NULL constraint failed: kids.birth_date');
@@ -489,8 +559,8 @@ describe('known defects', function () {
     it('KNOWN DEFECT #5: AttendanceServer does not register the tool at all', function () {
         // routes/ai.php exposes AttendanceServer at /mcp/attendance, but its
         // $tools array is still the scaffolded empty stub, so no MCP client can
-        // reach createAttendance. That is why defects #1-#3 have never been hit
-        // in production, and why these tests need a fixture server.
+        // reach createAttendance. That is why defects #2 and #3 have never been
+        // hit in production, and why these tests need a fixture server.
         //
         // EXPECTED: createAttendance::class listed in AttendanceServer::$tools.
         // When that lands, point this test (and the fixture) at AttendanceServer.
@@ -515,7 +585,7 @@ describe('known defects', function () {
         $payload = attendancePayload();
         unset($payload['kid']['gender']);
 
-        $throwable = runCreateAttendance($payload);
+        $throwable = catchCreateAttendance($payload);
 
         expect($throwable)->toBeInstanceOf(QueryException::class)
             ->and($throwable->getMessage())->toContain('gender');
