@@ -42,6 +42,8 @@ class QrCode extends Model
 
     /**
      * The kid that this QR code is assigned to.
+     *
+     * @return BelongsTo<Kid, $this>
      */
     public function kid(): BelongsTo
     {

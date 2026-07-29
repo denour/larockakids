@@ -139,12 +139,6 @@ parameters:
 			path: app/Filament/Resources/KidResource/RelationManagers/ContactsRelationManager.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Filament/Resources/QrCodeResource.php
-
-		-
 			message: '#^Call to an undefined method Filament\\Tables\\Contracts\\HasTable\:\:js\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -161,30 +155,6 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: app/Filament/Widgets/RecentAbsencesRanking.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Attendance\:\:\$month\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Filament/Widgets/YearlyAttendanceChart.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Attendance\:\:\$total\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Filament/Widgets/YearlyAttendanceChart.php
-
-		-
-			message: '#^Access to an undefined property App\\Models\\Attendance\:\:\$year\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Filament/Widgets/YearlyAttendanceChart.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>total" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Filament/Widgets/YearlyAttendanceChart.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$check_in\.$#'
@@ -245,12 +215,6 @@ parameters:
 			identifier: nullsafe.neverNull
 			count: 1
 			path: app/Http/Controllers/Api/QueryController.php
-
-		-
-			message: '#^Offset ''has_active…'' on array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid, action\?\: string\} on left side of \?\? does not exist\.$#'
-			identifier: nullCoalesce.offset
-			count: 1
-			path: app/Http/Controllers/QrScannerController.php
 
 		-
 			message: '#^PHPDoc type array\<int, string\> of property App\\Models\\Allergy\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
@@ -319,18 +283,6 @@ parameters:
 			path: app/Providers/Filament/AdminPanelProvider.php
 
 		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Services/AttendanceScannerService.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Services/AttendanceScannerService.php
-
-		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$pivot\.$#'
 			identifier: property.notFound
 			count: 1
@@ -345,66 +297,6 @@ parameters:
 		-
 			message: '#^Method App\\Services\\AttendanceScannerService\:\:getPrimaryContact\(\) should return App\\Models\\Contact\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
 			identifier: return.type
-			count: 1
-			path: app/Services/AttendanceScannerService.php
-
-		-
-			message: '#^Method App\\Services\\AttendanceScannerService\:\:processAssistance\(\) should return array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid\} but returns array\{success\: true, message\: non\-falsy\-string, kid\: Illuminate\\Database\\Eloquent\\Model\|null\}\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Services/AttendanceScannerService.php
-
-		-
-			message: '#^Method App\\Services\\AttendanceScannerService\:\:processCheckIn\(\) should return array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid, action\?\: string\} but returns array\{success\: true, message\: non\-falsy\-string, kid\: Illuminate\\Database\\Eloquent\\Model\|null, action\: ''assistance'', has_active_attendance\: true\}\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Services/AttendanceScannerService.php
-
-		-
-			message: '#^Method App\\Services\\AttendanceScannerService\:\:processCheckIn\(\) should return array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid, action\?\: string\} but returns array\{success\: true, message\: non\-falsy\-string, kid\: Illuminate\\Database\\Eloquent\\Model\|null, action\: ''check_in''\}\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Services/AttendanceScannerService.php
-
-		-
-			message: '#^Method App\\Services\\AttendanceScannerService\:\:processCheckOut\(\) should return array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid, action\?\: string, no_active_attendance\?\: bool\} but returns array\{success\: false, message\: non\-falsy\-string, kid\: Illuminate\\Database\\Eloquent\\Model\|null, no_active_attendance\: true\}\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Services/AttendanceScannerService.php
-
-		-
-			message: '#^Method App\\Services\\AttendanceScannerService\:\:processCheckOut\(\) should return array\{success\: bool, message\: string, kid\?\: App\\Models\\Kid, action\?\: string, no_active_attendance\?\: bool\} but returns array\{success\: true, message\: non\-falsy\-string, kid\: Illuminate\\Database\\Eloquent\\Model\|null, action\: ''check_out''\}\.$#'
-			identifier: return.type
-			count: 1
-			path: app/Services/AttendanceScannerService.php
-
-		-
-			message: '#^Parameter \#1 \$kid of method App\\Services\\AttendanceScannerService\:\:getActiveAttendanceToday\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Services/AttendanceScannerService.php
-
-		-
-			message: '#^Parameter \#1 \$kid of method App\\Services\\AttendanceScannerService\:\:getPrimaryContact\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
-			count: 3
-			path: app/Services/AttendanceScannerService.php
-
-		-
-			message: '#^Parameter \#2 \$kid of method App\\Services\\TutorMessageService\:\:sendAssistanceMessage\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Services/AttendanceScannerService.php
-
-		-
-			message: '#^Parameter \#2 \$kid of method App\\Services\\TutorMessageService\:\:sendEntryMessage\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Services/AttendanceScannerService.php
-
-		-
-			message: '#^Parameter \#2 \$kid of method App\\Services\\TutorMessageService\:\:sendExitMessage\(\) expects App\\Models\\Kid, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: app/Services/AttendanceScannerService.php
 
