@@ -223,3 +223,43 @@ test('get active attendance today returns null for checked out', function () {
 
     expect($this->service->getActiveAttendanceToday($kid))->toBeNull();
 });
+
+test('process check in fails gracefully when the assigned kid was soft deleted', function () {
+    ['kid' => $kid] = createKidWithContact(['birth_date' => now()->subYears(3)]);
+    $qr = createAssignedQr($kid, 'SVC-DEL1');
+
+    $kid->delete();
+
+    $result = $this->service->processCheckIn('SVC-DEL1');
+
+    expect($result['success'])->toBeFalse()
+        ->and($result['message'])->toBe('Este código QR no está asignado a ningún niño.');
+
+    expect($qr->fresh()->kid_id)->toBe($kid->id);
+    $this->assertDatabaseMissing('attendances', ['kid_id' => $kid->id]);
+});
+
+test('process check out fails gracefully when the assigned kid was soft deleted', function () {
+    ['kid' => $kid] = createKidWithContact(['birth_date' => now()->subYears(3)]);
+    createAssignedQr($kid, 'SVC-DEL2');
+
+    $this->service->processCheckIn('SVC-DEL2');
+    $kid->delete();
+
+    $result = $this->service->processCheckOut('SVC-DEL2');
+
+    expect($result['success'])->toBeFalse()
+        ->and($result['message'])->toBe('Este código QR no está asignado a ningún niño.');
+});
+
+test('process assistance fails gracefully when the assigned kid was soft deleted', function () {
+    ['kid' => $kid] = createKidWithContact(['birth_date' => now()->subYears(3)]);
+    createAssignedQr($kid, 'SVC-DEL3');
+
+    $kid->delete();
+
+    $result = $this->service->processAssistance('SVC-DEL3');
+
+    expect($result['success'])->toBeFalse()
+        ->and($result['message'])->toBe('Este código QR no está asignado a ningún niño.');
+});

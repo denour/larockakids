@@ -61,17 +61,17 @@ class YearlyAttendanceChart extends ChartWidget
             $month = $current->month;
             $labels[] = $monthNames[$month].' '.$current->format('y');
 
-            $firstData[] = $monthlyData
+            $firstData[] = (int) ($monthlyData
                 ->where('year', $year)
                 ->where('month', $month)
                 ->where('service', ServiceTime::First->value)
-                ->first()?->total ?? 0;
+                ->value('total') ?? 0);
 
-            $secondData[] = $monthlyData
+            $secondData[] = (int) ($monthlyData
                 ->where('year', $year)
                 ->where('month', $month)
                 ->where('service', ServiceTime::Second->value)
-                ->first()?->total ?? 0;
+                ->value('total') ?? 0);
 
             $current->addMonth();
         }

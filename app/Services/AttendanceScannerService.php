@@ -8,7 +8,7 @@ use App\Models\Attendance;
 use App\Models\Contact;
 use App\Models\Kid;
 use App\Models\QrCode;
-use Illuminate\Support\Carbon;
+use Carbon\Carbon;
 
 class AttendanceScannerService
 {
@@ -27,7 +27,15 @@ class AttendanceScannerService
     /**
      * Process check-in for a QR code.
      *
-     * @return array{success: bool, message: string, kid?: Kid, action?: string}
+     * @return array{
+     *     success: bool,
+     *     message: string,
+     *     kid?: Kid,
+     *     action?: string,
+     *     has_active_attendance?: bool,
+     *     warning?: string|null,
+     *     requires_graduation?: bool
+     * }
      */
     public function processCheckIn(string $code, ?string $ip = null): array
     {
@@ -40,14 +48,15 @@ class AttendanceScannerService
             ];
         }
 
-        if (! $qrCode->isAssigned() || ! $qrCode->kid_id) {
+        $kid = $qrCode->kid;
+
+        if (! $qrCode->isAssigned() || ! $kid) {
             return [
                 'success' => false,
                 'message' => 'Este código QR no está asignado a ningún niño.',
             ];
         }
 
-        $kid = $qrCode->kid;
         $primaryContact = $this->getPrimaryContact($kid);
 
         if (! $primaryContact) {
@@ -126,14 +135,15 @@ class AttendanceScannerService
             ];
         }
 
-        if (! $qrCode->isAssigned() || ! $qrCode->kid_id) {
+        $kid = $qrCode->kid;
+
+        if (! $qrCode->isAssigned() || ! $kid) {
             return [
                 'success' => false,
                 'message' => 'Este código QR no está asignado a ningún niño.',
             ];
         }
 
-        $kid = $qrCode->kid;
         $activeAttendance = $this->getActiveAttendanceToday($kid);
 
         if (! $activeAttendance) {
@@ -187,14 +197,15 @@ class AttendanceScannerService
             ];
         }
 
-        if (! $qrCode->isAssigned() || ! $qrCode->kid_id) {
+        $kid = $qrCode->kid;
+
+        if (! $qrCode->isAssigned() || ! $kid) {
             return [
                 'success' => false,
                 'message' => 'Este código QR no está asignado a ningún niño.',
             ];
         }
 
-        $kid = $qrCode->kid;
         $primaryContact = $this->getPrimaryContact($kid);
 
         if (! $primaryContact) {
