@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AttendanceResource\Pages;
 
+use App\Enums\ServiceTime;
 use App\Filament\Resources\AttendanceResource;
 use App\Services\TutorMessageService;
 use Filament\Resources\Pages\CreateRecord;
@@ -12,8 +13,10 @@ class CreateAttendance extends CreateRecord
 
     protected function mutateFormDataBeforeCreate(array $data): array
     {
-        $data['check_in'] = now();
+        $now = now();
+        $data['check_in'] = $now;
         $data['check_out'] = null;
+        $data['service'] = ServiceTime::fromHour($now->hour);
 
         return $data;
     }

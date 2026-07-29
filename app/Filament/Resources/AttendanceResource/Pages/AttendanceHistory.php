@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\AttendanceResource\Pages;
 
+use App\Enums\ServiceTime;
 use App\Filament\Resources\AttendanceResource;
 use App\Filament\Widgets\AttendanceHistoryStats;
 use App\Filament\Widgets\BestStreakRanking;
@@ -73,6 +74,12 @@ class AttendanceHistory extends ListRecords
                         });
                     })
                     ->sortable(),
+                Tables\Columns\TextColumn::make('service')
+                    ->label('Reunión')
+                    ->badge()
+                    ->formatStateUsing(fn (ServiceTime $state) => $state->getShortLabel())
+                    ->color(fn (ServiceTime $state) => $state->getColor())
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('check_in')
                     ->label('Entrada')
                     ->dateTime('d M Y H:i')
@@ -84,6 +91,12 @@ class AttendanceHistory extends ListRecords
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('service')
+                    ->label('Reunión')
+                    ->options([
+                        'first' => '1ra Reunión (11 AM)',
+                        'second' => '2da Reunión (1 PM)',
+                    ]),
                 Tables\Filters\SelectFilter::make('date')
                     ->label('Fecha')
                     ->options([

@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Enums\Country;
+use App\Enums\ServiceTime;
 use App\Filament\Resources\AttendanceResource\Pages;
 use App\Filament\Widgets\AttendanceStats;
 use App\Models\Allergy;
@@ -167,11 +168,7 @@ class AttendanceResource extends Resource
                         PhoneInput::make('phone')
                             ->label('Teléfono')
                             ->required()
-                            ->defaultCountry(Country::getDefaultCountry()->value)
-                            ->live()
-                            ->afterStateUpdated(function ($state, Forms\Set $set) {
-                                $set('international_code', Country::getDefaultCountry()->getCode());
-                            }),
+                            ->defaultCountry(Country::getDefaultCountry()->value),
                         Forms\Components\TextInput::make('email')
                             ->label('Correo Electrónico')
                             ->email()
@@ -232,12 +229,24 @@ class AttendanceResource extends Resource
                         });
                     })
                     ->sortable(),
+                Tables\Columns\TextColumn::make('service')
+                    ->label('Reunión')
+                    ->badge()
+                    ->formatStateUsing(fn (ServiceTime $state) => $state->getShortLabel())
+                    ->color(fn (ServiceTime $state) => $state->getColor())
+                    ->alignCenter(),
                 Tables\Columns\TextColumn::make('check_in')
                     ->label('Hora de entrada')
                     ->formatStateUsing(fn ($state) => $state ? $state->diffForHumans() : '')
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('service')
+                    ->label('Reunión')
+                    ->options([
+                        'first' => '1ra Reunión (11 AM)',
+                        'second' => '2da Reunión (1 PM)',
+                    ]),
                 Tables\Filters\SelectFilter::make('date')
                     ->label('Fecha')
                     ->options([

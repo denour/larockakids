@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Enums\AttendanceStatus;
+use App\Enums\ServiceTime;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,12 +21,14 @@ class Attendance extends Model
         'check_out',
         'observations',
         'status',
+        'service',
     ];
 
     protected $casts = [
         'check_in' => 'datetime',
         'check_out' => 'datetime',
         'status' => AttendanceStatus::class,
+        'service' => ServiceTime::class,
         'deleted_at' => 'datetime',
     ];
 

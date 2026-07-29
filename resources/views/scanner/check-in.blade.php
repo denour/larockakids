@@ -166,6 +166,21 @@
             text-overflow: ellipsis;
         }
 
+        .toast-warning {
+            margin-top: 6px;
+            padding: 6px 10px;
+            border-radius: 8px;
+            background: #fef3c7;
+            color: #92400e;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .toast-warning-strong {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
         .loading {
             display: none;
             text-align: center;
@@ -443,6 +458,7 @@
                 <div class="toast-content">
                     <div class="toast-message">${data.message}</div>
                     ${data.kid_name ? `<div class="toast-name">${data.kid_name}</div>` : ''}
+                    ${data.warning ? `<div class="toast-warning${data.requires_graduation ? ' toast-warning-strong' : ''}">${data.warning}</div>` : ''}
                     ${actionsHtml ? `<div class="toast-actions">${actionsHtml}</div>` : ''}
                 </div>
             `;

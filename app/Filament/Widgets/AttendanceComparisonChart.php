@@ -2,6 +2,7 @@
 
 namespace App\Filament\Widgets;
 
+use App\Enums\ServiceTime;
 use App\Models\Attendance;
 use Carbon\Carbon;
 use Filament\Widgets\ChartWidget;
@@ -20,31 +21,25 @@ class AttendanceComparisonChart extends ChartWidget
 
     protected function getData(): array
     {
-        $thisMonthStart = Carbon::now()->startOfMonth();
-        $thisMonthEnd = Carbon::now()->endOfMonth();
         $lastMonthStart = Carbon::now()->subMonth()->startOfMonth();
         $lastMonthEnd = Carbon::now()->subMonth()->endOfMonth();
 
-        $thisMonthSundays = $this->getSundaysInRange($thisMonthStart, Carbon::now());
+        $thisMonthSundays = $this->getSundaysInRange(Carbon::now()->startOfMonth(), Carbon::now());
         $lastMonthSundays = $this->getSundaysInRange($lastMonthStart, $lastMonthEnd);
 
-        $thisMonthTotal = 0;
+        $thisFirst = 0;
+        $thisSecond = 0;
         foreach ($thisMonthSundays as $sunday) {
-            $thisMonthTotal += Attendance::whereDate('check_in', $sunday)->count();
+            $thisFirst += Attendance::whereDate('check_in', $sunday)->where('service', ServiceTime::First)->count();
+            $thisSecond += Attendance::whereDate('check_in', $sunday)->where('service', ServiceTime::Second)->count();
         }
 
-        $lastMonthTotal = 0;
+        $lastFirst = 0;
+        $lastSecond = 0;
         foreach ($lastMonthSundays as $sunday) {
-            $lastMonthTotal += Attendance::whereDate('check_in', $sunday)->count();
+            $lastFirst += Attendance::whereDate('check_in', $sunday)->where('service', ServiceTime::First)->count();
+            $lastSecond += Attendance::whereDate('check_in', $sunday)->where('service', ServiceTime::Second)->count();
         }
-
-        $thisMonthAvg = count($thisMonthSundays) > 0
-            ? round($thisMonthTotal / count($thisMonthSundays))
-            : 0;
-
-        $lastMonthAvg = count($lastMonthSundays) > 0
-            ? round($lastMonthTotal / count($lastMonthSundays))
-            : 0;
 
         $monthNames = [
             1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo', 4 => 'Abril',
@@ -55,14 +50,14 @@ class AttendanceComparisonChart extends ChartWidget
         return [
             'datasets' => [
                 [
-                    'label' => 'Total Asistencias',
-                    'data' => [$lastMonthTotal, $thisMonthTotal],
-                    'backgroundColor' => ['#FF6384', '#36A2EB'],
+                    'label' => '1ra Reunión (11 AM)',
+                    'data' => [$lastFirst, $thisFirst],
+                    'backgroundColor' => ['#36A2EB', '#36A2EB'],
                 ],
                 [
-                    'label' => 'Promedio por Domingo',
-                    'data' => [$lastMonthAvg, $thisMonthAvg],
-                    'backgroundColor' => ['#FF9F40', '#4BC0C0'],
+                    'label' => '2da Reunión (1 PM)',
+                    'data' => [$lastSecond, $thisSecond],
+                    'backgroundColor' => ['#FF9F40', '#FF9F40'],
                 ],
             ],
             'labels' => [
