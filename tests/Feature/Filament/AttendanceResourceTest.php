@@ -135,3 +135,46 @@ test('attendance has navigation badge', function () {
 
     expect(\App\Filament\Resources\AttendanceResource::getNavigationBadge())->toBe('1');
 });
+
+/**
+ * El botón "Notificar" abría un modal para elegir el tipo de mensaje. En el
+ * salón eso sobra: cuando se aprieta es porque el niño necesita a su tutor.
+ */
+test('the notify action sends the assistance message straight away, with no modal', function () {
+    Event::fake([WhatsAppNotification::class]);
+
+    $contact = Contact::factory()->create(['phone' => '6641234567', 'international_code' => '52']);
+    $kid = Kid::factory()->create();
+    $attendance = Attendance::factory()->create([
+        'kid_id' => $kid->id,
+        'contact_id' => $contact->id,
+        'check_out' => null,
+    ]);
+
+    Livewire::test(ListAttendances::class)
+        ->callTableAction('whatsapp', $attendance)
+        ->assertHasNoTableActionErrors()
+        ->assertNotified();
+
+    Event::assertDispatched(WhatsAppNotification::class);
+});
+
+test('the notify action warns instead of lying when the assistance message is off', function () {
+    Event::fake([WhatsAppNotification::class]);
+
+    TutorMessage::where('label', 'assistance')->update(['is_active' => false]);
+
+    $contact = Contact::factory()->create(['phone' => '6641234567', 'international_code' => '52']);
+    $kid = Kid::factory()->create();
+    $attendance = Attendance::factory()->create([
+        'kid_id' => $kid->id,
+        'contact_id' => $contact->id,
+        'check_out' => null,
+    ]);
+
+    Livewire::test(ListAttendances::class)
+        ->callTableAction('whatsapp', $attendance)
+        ->assertNotified();
+
+    Event::assertNotDispatched(WhatsAppNotification::class);
+});

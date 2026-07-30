@@ -4,18 +4,21 @@ namespace App\Filament\Resources;
 
 use App\Enums\Country;
 use App\Enums\ServiceTime;
+use App\Enums\TutorMessageType;
 use App\Filament\Resources\AttendanceResource\Pages;
 use App\Filament\Widgets\AttendanceStats;
 use App\Models\Allergy;
 use App\Models\Attendance;
 use App\Models\Contact;
 use App\Models\Kid;
+use App\Models\TutorMessage;
 use App\Services\TutorMessageService;
 use Carbon\Carbon;
 use Filament\Forms;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -291,47 +294,30 @@ class AttendanceResource extends Resource
                     ->label('Notificar')
                     ->icon('heroicon-o-chat-bubble-left-right')
                     ->color('primary')
-                    ->modalHeading(fn (Attendance $record) => "📱 Notificar a {$record->contact->full_name}")
-                    ->modalDescription(fn (Attendance $record) => "Vas a enviar una notificación al responsable de {$record->kid->full_name}")
-                    ->modalIcon('heroicon-o-chat-bubble-left-right')
-                    ->modalIconColor('primary')
-                    ->form([
-                        Forms\Components\Select::make('situation')
-                            ->label('Tipo de Notificación')
-                            ->options(function () {
-                                // Solo mostrar tipos de mensaje que existen en la base de datos
-                                $availableMessages = \App\Models\TutorMessage::where('is_active', true)
-                                    ->pluck('name', 'label')
-                                    ->toArray();
-
-                                if (empty($availableMessages)) {
-                                    return ['none' => 'No hay mensajes configurados'];
-                                }
-
-                                return $availableMessages;
-                            })
-                            ->required()
-                            ->disabled(fn () => \App\Models\TutorMessage::where('is_active', true)->count() === 0)
-                            ->helperText(fn () => \App\Models\TutorMessage::where('is_active', true)->count() === 0
-                                ? 'Configura mensajes en el panel de administración primero'
-                                : 'Selecciona el tipo de notificación que deseas enviar'),
-                        Forms\Components\Textarea::make('message')
-                            ->label('Mensaje Adicional')
-                            ->placeholder('Escribe un mensaje adicional si lo deseas...')
-                            ->maxLength(255)
-                            ->helperText('Este mensaje se agregará al final de la notificación'),
-                    ])
-                    ->action(function (Attendance $record, array $data) {
-                        $tutorMessageService = app(TutorMessageService::class);
+                    // Un solo clic manda la notificación de asistencia: en el salón no
+                    // hay tiempo de elegir en un modal cuando se necesita al tutor.
+                    ->action(function (Attendance $record) {
                         $contact = $record->contact;
                         $kid = $record->kid;
 
-                        // Enviar mensaje por broadcast según la situación
-                        $tutorMessageService->sendMessage($data['situation'], $contact, $kid);
+                        // El servicio solo deja un aviso en el log si el mensaje está
+                        // inactivo, así que se comprueba antes para no decirle al
+                        // servidor que se envió algo que nunca salió.
+                        if (! TutorMessage::findByLabel(TutorMessageType::ASSISTANCE->value)) {
+                            Notification::make()
+                                ->title('No hay mensaje de asistencia activo')
+                                ->body('Actívalo en Mensajes al Tutor para poder notificar.')
+                                ->warning()
+                                ->send();
 
-                        \Filament\Notifications\Notification::make()
+                            return;
+                        }
+
+                        app(TutorMessageService::class)->sendAssistanceMessage($contact, $kid);
+
+                        Notification::make()
                             ->title('Notificación enviada')
-                            ->body("Se ha enviado la notificación a {$contact->full_name}")
+                            ->body("Se avisó a {$contact->full_name} que {$kid->full_name} necesita asistencia")
                             ->success()
                             ->send();
                     }),
