@@ -52,6 +52,7 @@ class CreateAttendance extends CreateRecord
                 printContent.innerHTML = `".view('components.sticker', [
                 'kid' => $kid,
                 'contact' => $contact,
+                'attendance' => $this->record,
             ])->render()."`;
                 printContent.style.display = 'none';
                 document.body.appendChild(printContent);

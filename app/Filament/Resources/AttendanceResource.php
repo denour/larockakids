@@ -358,10 +358,11 @@ class AttendanceResource extends Resource
                     ->icon('heroicon-o-printer')
                     ->format([62, 62], 'mm')
                     ->margin([0, 0, 0, 0]) // Set custom margins
-
+                    ->scale(4)
                     ->content(fn (Attendance $record) => view('components.sticker', [
                         'kid' => $record->kid,
                         'contact' => $record->contact,
+                        'attendance' => $record,
                     ]))
                     ->print(),
             ])
