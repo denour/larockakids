@@ -62,3 +62,37 @@ test('the sticker shows one given name and one surname, never the full legal nam
         ->and($html)->not->toContain('Andrés')
         ->and($html)->not->toContain('López');
 });
+
+/**
+ * "MAVI CASTRO" salía a 30px, medía 202px de los 216 útiles y en la máquina
+ * del salón la fuente rendía apenas más ancha: se partía en dos renglones y
+ * empujaba el resto de la etiqueta. El tamaño ahora se calcula con margen.
+ */
+test('the name shrinks enough to stay on one line, even for the case that failed in print', function (string $first, string $last, int $maxPx) {
+    $kid = Kid::factory()->make(['first_name' => $first, 'last_name' => $last]);
+
+    $html = view('components.sticker', ['kid' => $kid])->render();
+
+    preg_match('/class="nombre" style="font-size: (\d+)px"/', $html, $m);
+    $px = (int) ($m[1] ?? 0);
+
+    $nombre = trim(strtok($first, ' ').' '.strtok($last, ' '));
+    // 0.61 es el ancho por carácter medido en Arial 800 mayúsculas
+    $anchoEstimado = mb_strlen($nombre) * $px * 0.61;
+
+    expect($px)->toBeGreaterThan(0)
+        ->and($px)->toBeLessThanOrEqual($maxPx)
+        ->and($anchoEstimado)->toBeLessThan(216.0);
+})->with([
+    'el que falló impreso' => ['Mavi', 'Castro', 28],
+    'corto, usa el máximo' => ['Ana', 'Gil', 30],
+    'largo' => ['Maximiliano', 'Hernández', 16],
+    'muy largo' => ['Juan Pablo', 'Villavicencio', 18],
+]);
+
+test('the name never wraps to a second line', function () {
+    $kid = Kid::factory()->make(['first_name' => 'Mavi', 'last_name' => 'Castro']);
+
+    expect(view('components.sticker', ['kid' => $kid])->render())
+        ->toContain('white-space: nowrap');
+});

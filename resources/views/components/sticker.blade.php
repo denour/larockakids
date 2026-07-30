@@ -7,8 +7,16 @@
     $primerApellido = trim(strtok(trim($kid->last_name ?? ''), ' ') ?: '');
 
     $corto = trim($primerNombre . ' ' . $primerApellido);
-    $n = mb_strlen($corto);
-    $tamNombre = $n <= 11 ? 30 : ($n <= 14 ? 24 : ($n <= 17 ? 20 : 17));
+    $n = max(mb_strlen($corto), 1);
+
+    // El nombre debe caber en UN renglón dentro de los 216px útiles (234 menos
+    // el padding). Medido en Arial 800 mayúsculas, cada carácter ocupa como
+    // mucho 0.61 x el tamaño de fuente; usamos 0.75 para absorber la variación
+    // entre la fuente del servidor y la que tenga el navegador que imprime.
+    // Una escalera de escalones fijos ya falló: "MAVI CASTRO" a 30px medía
+    // 202px aquí y se partía en dos en la máquina del salón.
+    $anchoUtil = 216;
+    $tamNombre = (int) max(11, min(30, floor($anchoUtil / ($n * 0.75))));
 
     // El contacto que hizo el check-in es el "responsable" del sticker. Si por
     // alguna razón no viene (defensivo), se cae al contacto principal del niño.
@@ -57,8 +65,11 @@
         font-family: Arial, Helvetica, sans-serif; color: #000; background: #fff;
     }
     .sticker > * { flex: none; }
+    /* nowrap es la garantía dura de un solo renglón: si alguna fuente rinde
+       más ancha de lo previsto, prefiero que el nombre se acerque al borde
+       antes que partirse en dos y empujar el resto de la etiqueta. */
     .nombre  { font-weight: 800; line-height: 1.0; text-transform: uppercase;
-               letter-spacing: -.5px; width: 100%; }
+               letter-spacing: -.5px; width: 100%; white-space: nowrap; }
     .datos   { font-size: 15px; font-weight: 600; line-height: 1.25; margin-top: 3px; }
     .telbox  { margin-top: 4px; background: #000; color: #fff;
                border-radius: 4px; padding: 2px 8px; }
