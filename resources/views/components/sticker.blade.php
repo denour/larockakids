@@ -17,7 +17,9 @@
         ?? optional($kid)->contacts?->first();
 
     $telefono = optional($contactoPrincipal)->full_phone;
-    $responsable = optional($contactoPrincipal)->full_name;
+    // Solo el nombre de pila: el apellido completo parte la línea en dos y
+    // se come el alto de la etiqueta. Quien recoge se identifica de viva voz.
+    $responsable = trim(strtok(trim(optional($contactoPrincipal)->first_name ?? ''), ' ') ?: '');
 
     $alergias = optional($kid)->allergies?->pluck('name')->join(', ');
 @endphp

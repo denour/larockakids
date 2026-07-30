@@ -26,7 +26,10 @@ test('sticker view renders name, phone and reunion for a kid with contact', func
         ->toContain('Sofía Ramírez')
         ->toContain($contact->full_phone)
         ->toContain(ServiceTime::First->getShortLabel())
-        ->toContain('Resp. Laura Ramírez');
+        ->toContain('Resp. Laura')
+        // El apellido del responsable partiría la línea en dos y se comería
+        // el alto útil de la etiqueta de 62 mm.
+        ->not->toContain('Resp. Laura Ramírez');
 });
 
 test('sticker view renders without breaking when kid has no phone, allergies or attendance', function () {
