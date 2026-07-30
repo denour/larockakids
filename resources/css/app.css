@@ -5,9 +5,45 @@
 @source '../**/*.blade.php';
 @source '../**/*.js';
 
+/*
+ * Baloo 2 (variable, 400-800) self-hosted from /public/fonts.
+ * Never load it from a CDN: the kiosk has to render without external network.
+ */
+@font-face {
+    font-family: 'Baloo 2';
+    font-style: normal;
+    font-weight: 400 800;
+    font-display: swap;
+    src: url('/fonts/baloo2-latin-ext.woff2') format('woff2');
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329,
+        U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+    font-family: 'Baloo 2';
+    font-style: normal;
+    font-weight: 400 800;
+    font-display: swap;
+    src: url('/fonts/baloo2-latin.woff2') format('woff2');
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+        U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-display: 'Baloo 2', 'Nunito', ui-rounded, 'Segoe UI', system-ui, sans-serif;
+}
+
+/*
+ * Onboarding kiosk typography. `.font-display` comes from the --font-display
+ * theme token; `.onboarding-scope` (set on <body> by the onboarding layout)
+ * opts every heading in automatically, so screen authors only add
+ * `font-display` on one-off elements such as buttons or big numbers.
+ */
+.onboarding-scope :is(h1, h2, h3, .font-display) {
+    font-family: var(--font-display);
+    letter-spacing: -0.01em;
 }
 
 /* Estilos para las menciones en el editor Tiptap */

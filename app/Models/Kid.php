@@ -2,7 +2,11 @@
 
 namespace App\Models;
 
+use App\Enums\GradeLevel;
+use App\Enums\NapPreference;
+use App\Enums\NotificationChannel;
 use App\Enums\QrCodeStatus;
+use App\Enums\SphincterControl;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -24,7 +28,17 @@ class Kid extends Model
         'last_name',
         'birth_date',
         'gender',
+        'grade_level',
+        'classroom',
+        'school_cycle',
         'medical_notes',
+        'medical_conditions',
+        'medications',
+        'sphincter_control',
+        'nap',
+        'routine_notes',
+        'wants_parents_group',
+        'notification_channel',
         'is_active',
     ];
 
@@ -40,6 +54,11 @@ class Kid extends Model
     protected $casts = [
         'birth_date' => 'date',
         'gender' => 'string',
+        'grade_level' => GradeLevel::class,
+        'sphincter_control' => SphincterControl::class,
+        'nap' => NapPreference::class,
+        'notification_channel' => NotificationChannel::class,
+        'wants_parents_group' => 'boolean',
     ];
 
     protected $appends = [
@@ -53,6 +72,14 @@ class Kid extends Model
     public function getAgeAttribute(): int
     {
         return $this->birth_date->age;
+    }
+
+    /**
+     * Whether the kid is in the final grade and about to graduate from Piedritas.
+     */
+    public function isGraduating(): bool
+    {
+        return $this->grade_level instanceof GradeLevel && $this->grade_level->isFinal();
     }
 
     /**

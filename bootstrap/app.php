@@ -15,6 +15,16 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'api.auth' => \App\Http\Middleware\ApiKeyAuth::class,
         ]);
+
+        $middleware->appendToGroup('web', [
+            \App\Http\Middleware\SetLocale::class,
+        ]);
+
+        $middleware->validateCsrfTokens(except: [
+            'webhooks/whatsapp',
+        ]);
+
+        $middleware->redirectGuestsTo(fn () => route('filament.admin.auth.login'));
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
