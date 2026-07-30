@@ -56,8 +56,11 @@
 
 <style>
     /* 234px = 62mm exactos a 96 dpi. NO CAMBIAR este ancho. */
+    /* El contenido va centrado, así que el relleno inferior lo empuja hacia
+       arriba LA MITAD de su valor: 32px abajo contra 9px arriba sube el
+       bloque unos 3mm, que es lo que se pidió para el teléfono y la reunión. */
     .sticker {
-        width: 234px; height: 234px; padding: 9px; box-sizing: border-box;
+        width: 234px; height: 234px; padding: 9px 9px 32px; box-sizing: border-box;
         display: flex; flex-direction: column;
         justify-content: center; align-items: center; text-align: center;
         overflow: hidden;
