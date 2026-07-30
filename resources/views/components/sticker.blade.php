@@ -42,7 +42,6 @@
     </div>
     @if($telefono)
         <div class="telbox">
-            <div class="telcap">TELÉFONO</div>
             <div class="tel">{{ $telefono }}</div>
         </div>
     @endif
@@ -70,14 +69,17 @@
        antes que partirse en dos y empujar el resto de la etiqueta. */
     .nombre  { font-weight: 800; line-height: 1.0; text-transform: uppercase;
                letter-spacing: -.5px; width: 100%; white-space: nowrap; }
+    /* El responsable respira antes del bloque del teléfono. */
     .datos   { font-size: 15px; font-weight: 600; line-height: 1.25; margin-top: 3px; }
-    .telbox  { margin-top: 4px; background: #000; color: #fff;
-               border-radius: 4px; padding: 2px 8px; }
-    .telcap  { font-size: 9px;  font-weight: 600; letter-spacing: .5px; }
-    .tel     { font-size: 18px; font-weight: 800; letter-spacing: .3px; line-height: 1.15; }
-    .reunion { margin-top: 4px; font-size: 21px; font-weight: 800;
+    .telbox  { margin-top: 9px; background: #000; color: #fff;
+               border-radius: 5px; padding: 3px 10px; }
+    .tel     { font-size: 19px; font-weight: 800; letter-spacing: .3px; line-height: 1.2; }
+    /* Pegado al teléfono: la reunión se lee como parte del mismo bloque. */
+    .reunion { margin-top: 5px; font-size: 21px; font-weight: 800;
                border: 2px solid #000; border-radius: 5px; padding: 1px 8px; line-height: 1.15; }
-    .alerta  { margin-top: 4px; font-size: 13px; font-weight: 800;
+    .alerta  { margin-top: 5px; font-size: 13px; font-weight: 800;
                background: #000; color: #fff; border-radius: 3px; padding: 1px 7px; }
-    .pie     { margin-top: 4px; font-size: 11px; font-weight: 500; color: #333; }
+    /* La fecha no queda pegada al borde inferior de la etiqueta. */
+    .pie     { margin-top: 9px; margin-bottom: 6px; font-size: 11px;
+               font-weight: 500; color: #333; }
 </style>

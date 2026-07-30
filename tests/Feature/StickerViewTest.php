@@ -2,6 +2,7 @@
 
 use App\Enums\ServiceTime;
 use App\Models\Attendance;
+use App\Models\Contact;
 use App\Models\Kid;
 
 test('sticker view renders name, phone and reunion for a kid with contact', function () {
@@ -95,4 +96,15 @@ test('the name never wraps to a second line', function () {
 
     expect(view('components.sticker', ['kid' => $kid])->render())
         ->toContain('white-space: nowrap');
+});
+
+test('the phone box shows the number alone, without a caption', function () {
+    $kid = Kid::factory()->create();
+    $contact = Contact::factory()->create(['phone' => '6863668511', 'international_code' => '52']);
+    $kid->contacts()->sync([$contact->id => ['relationship_type' => 'parent']]);
+
+    $html = view('components.sticker', ['kid' => $kid->fresh('contacts'), 'contact' => $contact])->render();
+
+    expect($html)->toContain($contact->full_phone)
+        ->and($html)->not->toContain('TELÉFONO');
 });
