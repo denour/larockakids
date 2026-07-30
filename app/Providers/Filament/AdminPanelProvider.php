@@ -4,6 +4,7 @@ namespace App\Providers\Filament;
 
 use App\Filament\Widgets\AttendanceStats;
 use App\Filament\Widgets\BirthdaysThisMonth;
+use App\Models\Setting;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -11,6 +12,7 @@ use Filament\Pages;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -19,7 +21,6 @@ use Illuminate\Session\Middleware\AuthenticateSession;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Vormkracht10\TwoFactorAuth\TwoFactorAuthPlugin;
-use App\Models\Setting;
 
 class AdminPanelProvider extends PanelProvider
 {
@@ -72,6 +73,19 @@ class AdminPanelProvider extends PanelProvider
             ->renderHook(
                 'panels::body.end',
                 fn () => view('filament.scripts.sticker')
+            )
+            // El kiosco de onboarding y el login deben verse de la misma familia.
+            // Va en body.start y no dentro de la vista de la página porque el
+            // fondo tiene que ser hermano de la tarjeta, no descendiente: si
+            // cuelga de ella, su z-index queda atrapado en ese contexto y en
+            // móvil las manchas se pintan encima del formulario.
+            ->renderHook(
+                PanelsRenderHook::BODY_START,
+                fn () => view('filament.auth.branding'),
+                scopes: [
+                    \Vormkracht10\TwoFactorAuth\Http\Livewire\Auth\Login::class,
+                    \Vormkracht10\TwoFactorAuth\Http\Livewire\Auth\LoginTwoFactor::class,
+                ],
             );
     }
 }
