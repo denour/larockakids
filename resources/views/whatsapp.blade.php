@@ -93,10 +93,11 @@
                     });
 
                     channel.bind('notification', async function(data) {
-                        // Los avisos ya NO se envían desde aquí: los manda el servidor por
-                        // el bridge (App\Listeners\SendTutorNotification). Antes esto abría
-                        // wa.me con el texto precargado y alguien le daba enviar a mano.
-                        // Si volviera a abrir el popup, el papá recibiría el mensaje dos veces.
+                        // Los avisos ya NO se envían desde aquí: los manda el servidor por el
+                        // bridge (App\Listeners\SendTutorNotification). Antes esto abría wa.me
+                        // con el texto precargado y alguien le daba enviar a mano. Además el
+                        // evento dejó de ser ShouldBroadcast, así que este canal ya no recibe
+                        // nada. Si volviera el popup, el papá recibiría el mensaje dos veces.
                         console.log('Aviso enviado por el servidor (solo monitoreo):', data);
                     });
                 } catch (error) {

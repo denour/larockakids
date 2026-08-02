@@ -53,7 +53,7 @@ class TutorMessageService
 
         // El evento es la señal de dominio; quien lo entrega es SendTutorNotification
         // (antes lo entregaba una pestaña del navegador con WhatsApp Web).
-        broadcast(new WhatsAppNotification(
+        event(new WhatsAppNotification(
             message: $formattedMessage,
             phoneNumber: $phoneNumber
         ));

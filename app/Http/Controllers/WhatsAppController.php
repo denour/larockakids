@@ -14,7 +14,7 @@ class WhatsAppController extends Controller
 
     public function testNotification(Request $request)
     {
-        broadcast(new WhatsAppNotification(
+        event(new WhatsAppNotification(
             'Este es un mensaje de prueba de La Roca Kids', // Mensaje genérico
             '526861729522' // Número fijo
         ));
