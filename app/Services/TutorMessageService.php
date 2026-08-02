@@ -51,7 +51,8 @@ class TutorMessageService
         // Limpiar el número de teléfono (incluye código de país)
         $phoneNumber = preg_replace('/[^0-9]/', '', $contact->full_phone);
 
-        // Disparar el evento de WhatsApp
+        // El evento es la señal de dominio; quien lo entrega es SendTutorNotification
+        // (antes lo entregaba una pestaña del navegador con WhatsApp Web).
         broadcast(new WhatsAppNotification(
             message: $formattedMessage,
             phoneNumber: $phoneNumber

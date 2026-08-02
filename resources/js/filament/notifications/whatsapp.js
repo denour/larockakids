@@ -9,14 +9,10 @@ window.Echo = new Echo({
     forceTLS: true
 });
 
-// Variable global para mantener la referencia de la pestaña
-let whatsappTab = null;
-
+// Los avisos ya NO se envían desde el navegador: los manda el servidor por el
+// bridge (App\Listeners\SendTutorNotification). Este listener queda solo para
+// monitoreo; si volviera a abrir wa.me, el papá recibiría el mensaje dos veces.
 window.Echo.channel('whatsapp-notifications')
     .listen('whatsapp.notification', (data) => {
-        const { message, phoneNumber } = data;
-        const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-        
-        // Abrir WhatsApp en una nueva pestaña
-        window.open(whatsappUrl, '_blank');
-    }); 
+        console.log('Aviso enviado por el servidor (solo monitoreo):', data);
+    });

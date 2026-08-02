@@ -93,22 +93,11 @@
                     });
 
                     channel.bind('notification', async function(data) {
-                        const whatsappUrl = `https://wa.me/${data.phoneNumber}?text=${encodeURIComponent(data.message)}`;
-                        // Open small popup window
-                        let newWindow = window.open(whatsappUrl, 'whatsapp_' + Date.now(), 'width=400,height=300,left=0,top=0');
-                        if (newWindow) {
-                            // Auto close after 60 seconds
-                            setTimeout(() => {
-                                try {
-                                    newWindow.close();
-                                } catch (e) {
-                                    // Window may have been closed manually
-                                }
-                            }, 60000);
-                        } else {
-                            // Popup blocked - show alert instead of redirecting
-                            alert('Por favor permite popups para enviar mensajes de WhatsApp.\n\nURL: ' + whatsappUrl);
-                        }
+                        // Los avisos ya NO se envían desde aquí: los manda el servidor por
+                        // el bridge (App\Listeners\SendTutorNotification). Antes esto abría
+                        // wa.me con el texto precargado y alguien le daba enviar a mano.
+                        // Si volviera a abrir el popup, el papá recibiría el mensaje dos veces.
+                        console.log('Aviso enviado por el servidor (solo monitoreo):', data);
                     });
                 } catch (error) {
                     updateStatus('disconnected');
