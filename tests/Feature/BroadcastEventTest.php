@@ -8,10 +8,12 @@ use Illuminate\Support\Facades\Event;
 // WhatsAppNotification Event Structure
 // =============================================================
 
-test('whatsapp notification event implements ShouldBroadcast', function () {
+test('whatsapp notification event NO se difunde por Pusher', function () {
     $event = new WhatsAppNotification('Test message', '525551234567');
 
-    expect($event)->toBeInstanceOf(\Illuminate\Contracts\Broadcasting\ShouldBroadcast::class);
+    // Lo entrega SendTutorNotification por el bridge. Si volviera a ser ShouldBroadcast,
+    // una caída de Pusher lanzaría BroadcastException dentro del pase de asistencia.
+    expect($event)->not->toBeInstanceOf(\Illuminate\Contracts\Broadcasting\ShouldBroadcast::class);
 });
 
 test('whatsapp notification event stores message and phone number', function () {

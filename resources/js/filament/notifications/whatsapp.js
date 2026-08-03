@@ -9,9 +9,11 @@ window.Echo = new Echo({
     forceTLS: true
 });
 
-// Los avisos ya NO se envían desde el navegador: los manda el servidor por el
-// bridge (App\Listeners\SendTutorNotification). Este listener queda solo para
-// monitoreo; si volviera a abrir wa.me, el papá recibiría el mensaje dos veces.
+// Los avisos ya NO se envían desde el navegador: los manda el servidor por el bridge
+// (App\Listeners\SendTutorNotification). Además el evento dejó de ser ShouldBroadcast,
+// así que este canal YA NO RECIBE NADA y este listener nunca se dispara. Se conserva
+// por si algún día se quiere volver a difundir el aviso para monitoreo en vivo; lo que
+// no debe volver es abrir wa.me desde aquí, o el papá recibiría el mensaje dos veces.
 window.Echo.channel('whatsapp-notifications')
     .listen('whatsapp.notification', (data) => {
         console.log('Aviso enviado por el servidor (solo monitoreo):', data);
