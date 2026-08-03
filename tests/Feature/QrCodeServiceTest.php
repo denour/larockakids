@@ -21,25 +21,25 @@ test('generate batch creates correct count', function () {
 test('generate batch uses sequential numbering', function () {
     $codes = $this->service->generateBatch(3, 'NUM');
 
-    expect($codes[0]->code)->toBe('NUM-0001')
-        ->and($codes[1]->code)->toBe('NUM-0002')
-        ->and($codes[2]->code)->toBe('NUM-0003');
+    expect($codes[0]->code)->toStartWith('NUM-0001-')
+        ->and($codes[1]->code)->toStartWith('NUM-0002-')
+        ->and($codes[2]->code)->toStartWith('NUM-0003-');
 });
 
 test('generate batch continues from last sequence', function () {
     $this->service->generateBatch(5, 'CNT');
     $batch2 = $this->service->generateBatch(3, 'CNT');
 
-    expect($batch2->first()->code)->toBe('CNT-0006')
-        ->and($batch2->last()->code)->toBe('CNT-0008');
+    expect($batch2->first()->code)->toStartWith('CNT-0006-')
+        ->and($batch2->last()->code)->toStartWith('CNT-0008-');
 });
 
 test('generate batch uses different prefix sequences independently', function () {
     $this->service->generateBatch(3, 'AAA');
     $this->service->generateBatch(2, 'BBB');
 
-    expect(QrCode::where('code', 'AAA-0001')->exists())->toBeTrue()
-        ->and(QrCode::where('code', 'BBB-0001')->exists())->toBeTrue();
+    expect(QrCode::where('code', 'like', 'AAA-0001-%')->exists())->toBeTrue()
+        ->and(QrCode::where('code', 'like', 'BBB-0001-%')->exists())->toBeTrue();
 });
 
 test('create qr code stores image path', function () {

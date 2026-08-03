@@ -9,7 +9,8 @@ use App\Models\User;
 test('print single qr code returns view', function () {
     $qrCode = QrCode::factory()->create();
 
-    $this->get(route('qr-codes.print', $qrCode))
+    $this->actingAs(User::factory()->create())
+        ->get(route('qr-codes.print', $qrCode))
         ->assertStatus(200)
         ->assertSee($qrCode->code);
 });
@@ -18,7 +19,8 @@ test('print batch qr codes returns view', function () {
     $qrCodes = QrCode::factory()->count(3)->create();
     $ids = $qrCodes->pluck('id')->join(',');
 
-    $response = $this->get(route('qr-codes.print-batch', ['ids' => $ids]));
+    $response = $this->actingAs(User::factory()->create())
+        ->get(route('qr-codes.print-batch', ['ids' => $ids]));
 
     $response->assertStatus(200);
     foreach ($qrCodes as $qrCode) {
@@ -27,14 +29,16 @@ test('print batch qr codes returns view', function () {
 });
 
 test('print batch with invalid ids handles gracefully', function () {
-    $response = $this->get(route('qr-codes.print-batch', ['ids' => '99999']));
+    $response = $this->actingAs(User::factory()->create())
+        ->get(route('qr-codes.print-batch', ['ids' => '99999']));
 
     $response->assertStatus(200);
 });
 
 // WhatsAppController
 test('whatsapp page loads', function () {
-    $this->get('/whatsapp')
+    $this->actingAs(User::factory()->create())
+        ->get('/whatsapp')
         ->assertStatus(200);
 });
 

@@ -12,6 +12,8 @@ use App\Models\TutorMessage;
 use Illuminate\Support\Facades\Event;
 
 beforeEach(function () {
+    authorizeKiosk($this);
+
     TutorMessage::create([
         'label' => 'entry',
         'name' => 'Entrada',

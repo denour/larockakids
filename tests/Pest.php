@@ -26,6 +26,18 @@ expect()->extend('toBeOne', function () {
 |--------------------------------------------------------------------------
 */
 
+/**
+ * Autoriza la tablet del kiosco para las rutas de scanner.
+ */
+function authorizeKiosk(\Illuminate\Testing\TestCase|\Tests\TestCase $test): void
+{
+    config(['kiosk.token' => 'kiosk-testing-token']);
+
+    // withCredentials: las peticiones JSON de los tests no mandan cookies sin él,
+    // aunque el fetch del navegador sí las manda (credentials same-origin).
+    $test->withCredentials()->withCookie(config('kiosk.cookie'), 'kiosk-testing-token');
+}
+
 function createKidWithContact(array $kidData = [], array $contactData = [], string $relationship = 'parent'): array
 {
     $contact = \App\Models\Contact::factory()->create($contactData);
