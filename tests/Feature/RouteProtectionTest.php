@@ -4,6 +4,7 @@ use App\Models\Kid;
 use App\Models\QrCode;
 use App\Models\User;
 use App\Services\QrCodeService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 beforeEach(function () {
@@ -61,6 +62,10 @@ test('el escáner rechaza un token del kiosco incorrecto', function () {
 
 test('el escáner queda cerrado si no hay token configurado', function () {
     config(['kiosk.token' => null]);
+
+    Log::shouldReceive('warning')
+        ->once()
+        ->with('Kiosk access denied: KIOSK_TOKEN no está configurado.');
 
     $this->withCookie(config('kiosk.cookie'), 'kiosk-testing-token')
         ->get(route('scanner.check-in'))
