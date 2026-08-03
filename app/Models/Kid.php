@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Enums\QrCodeStatus;
+use App\Support\PersonName;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -46,6 +48,20 @@ class Kid extends Model
         'full_name',
         'age',
     ];
+
+    /**
+     * Normaliza el nombre al guardar, venga de donde venga (panel, import, seeder).
+     * Sin esto los nombres se vuelven a ensuciar con cada captura.
+     */
+    protected function firstName(): Attribute
+    {
+        return Attribute::set(fn (?string $value) => PersonName::firstName($value));
+    }
+
+    protected function lastName(): Attribute
+    {
+        return Attribute::set(fn (?string $value) => PersonName::lastName($value));
+    }
 
     /**
      * Get the kid's age in years.

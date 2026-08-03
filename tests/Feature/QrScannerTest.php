@@ -2,6 +2,7 @@
 
 use App\Enums\AttendanceStatus;
 use App\Enums\QrCodeStatus;
+use App\Enums\ServiceTime;
 use App\Events\WhatsAppNotification;
 use App\Models\Attendance;
 use App\Models\Contact;
@@ -75,6 +76,11 @@ test('check in creates attendance for assigned qr', function () {
 test('check in sends assistance when already checked in', function () {
     Event::fake([WhatsAppNotification::class]);
 
+    // La rama de "asistencia" busca un registro del MISMO bloque de servicio, así que
+    // el tiempo se congela: si no, un test corriendo a las 12:59:59 cae en First y el
+    // servicio lo resuelve en Second (fromHour corta a las 13:00) y se vuelve inestable.
+    $this->travelTo(now()->startOfDay()->setHour(9));
+
     ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0002');
 
@@ -83,11 +89,77 @@ test('check in sends assistance when already checked in', function () {
         'contact_id' => $contact->id,
         'check_in' => now(),
         'status' => AttendanceStatus::EN_CLASE,
+        'service' => ServiceTime::First,
     ]);
 
     $this->postJson(route('scanner.check-in.process'), ['code' => 'TEST-0002'])
         ->assertStatus(200)
-        ->assertJson(['success' => true, 'action' => 'assistance']);
+        ->assertJson([
+            'success' => true,
+            'action' => 'assistance',
+            'kid_name' => $kid->full_name,
+            'has_active_attendance' => true, // sigue dentro: no ha salido
+            'message' => 'Ya existe registro para '.$kid->full_name.'. Mensaje de asistencia enviado.',
+        ]);
+
+    $this->assertDatabaseCount('attendances', 1);
+    Event::assertDispatched(WhatsAppNotification::class);
+});
+
+test('la rama de asistencia también arrastra el aviso de graduación', function () {
+    Event::fake([WhatsAppNotification::class]);
+
+    $this->travelTo(now()->startOfDay()->setHour(9));
+
+    // Ya cumplió los 4: el resultado debe traer warning y requires_graduation.
+    // Sin este caso, quitar esas llaves del arreglo pasa desapercibido, porque el
+    // controlador las rellena con `?? null` / `?? false`.
+    ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(4)->subDay()]);
+    createAssignedQr($kid, 'TEST-0002C');
+
+    Attendance::create([
+        'kid_id' => $kid->id,
+        'contact_id' => $contact->id,
+        'check_in' => now(),
+        'status' => AttendanceStatus::EN_CLASE,
+        'service' => ServiceTime::First,
+    ]);
+
+    $this->postJson(route('scanner.check-in.process'), ['code' => 'TEST-0002C'])
+        ->assertStatus(200)
+        ->assertJson([
+            'action' => 'assistance',
+            'requires_graduation' => true,
+            'warning' => $kid->full_name.' ya cumplió 4 años y debe pasar a Chicos Gigantes.',
+        ]);
+});
+
+test('check in avisa que ya asistió cuando el niño YA SALIÓ de ese servicio', function () {
+    Event::fake([WhatsAppNotification::class]);
+
+    $this->travelTo(now()->startOfDay()->setHour(9));
+
+    ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
+    createAssignedQr($kid, 'TEST-0002B');
+
+    // Mismo servicio, pero ya con salida registrada: el otro lado del ternario.
+    Attendance::create([
+        'kid_id' => $kid->id,
+        'contact_id' => $contact->id,
+        'check_in' => now()->subHour(),
+        'check_out' => now()->subMinutes(10),
+        'status' => AttendanceStatus::RETIRADO,
+        'service' => ServiceTime::First,
+    ]);
+
+    $this->postJson(route('scanner.check-in.process'), ['code' => 'TEST-0002B'])
+        ->assertStatus(200)
+        ->assertJson([
+            'success' => true,
+            'action' => 'assistance',
+            'has_active_attendance' => false, // ya salió
+            'message' => $kid->full_name.' ya asistió a '.ServiceTime::First->getLabel().'. Mensaje de asistencia enviado.',
+        ]);
 
     $this->assertDatabaseCount('attendances', 1);
     Event::assertDispatched(WhatsAppNotification::class);
@@ -266,6 +338,8 @@ test('check out succeeds when ip matches', function () {
 test('assistance message fails when ip does not match', function () {
     Event::fake([WhatsAppNotification::class]);
 
+    $this->travelTo(now()->startOfDay()->setHour(9));
+
     ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0010');
 
@@ -275,6 +349,7 @@ test('assistance message fails when ip does not match', function () {
         'check_in' => now(),
         'check_in_ip' => '192.168.1.100',
         'status' => AttendanceStatus::EN_CLASE,
+        'service' => ServiceTime::First,
     ]);
 
     $this->postJson(route('scanner.check-in.process'), [
@@ -290,6 +365,8 @@ test('assistance message fails when ip does not match', function () {
 test('assistance message succeeds when ip matches', function () {
     Event::fake([WhatsAppNotification::class]);
 
+    $this->travelTo(now()->startOfDay()->setHour(9));
+
     ['kid' => $kid, 'contact' => $contact] = createKidWithContact(['birth_date' => now()->subYears(3)]);
     createAssignedQr($kid, 'TEST-0011');
 
@@ -299,6 +376,7 @@ test('assistance message succeeds when ip matches', function () {
         'check_in' => now(),
         'check_in_ip' => '192.168.1.100',
         'status' => AttendanceStatus::EN_CLASE,
+        'service' => ServiceTime::First,
     ]);
 
     $this->postJson(route('scanner.check-in.process'), [
