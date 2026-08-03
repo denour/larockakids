@@ -40,8 +40,8 @@ test('kid create page renders', function () {
 test('kid can be created via form', function () {
     Livewire::test(CreateKid::class)
         ->fillForm([
-            'first_name' => 'TestKid',
-            'last_name' => 'TestLast',
+            'first_name' => 'Test Kid',
+            'last_name' => 'Test Last',
             'birth_date' => now()->subYears(3)->format('Y-m-d'),
             'gender' => 'male',
         ])
@@ -49,8 +49,8 @@ test('kid can be created via form', function () {
         ->assertHasNoFormErrors();
 
     $this->assertDatabaseHas('kids', [
-        'first_name' => 'TestKid',
-        'last_name' => 'TestLast',
+        'first_name' => 'Test Kid',
+        'last_name' => 'Test Last',
     ]);
 });
 
@@ -58,7 +58,7 @@ test('kid create requires first name', function () {
     Livewire::test(CreateKid::class)
         ->fillForm([
             'first_name' => '',
-            'last_name' => 'TestLast',
+            'last_name' => 'Test Last',
             'birth_date' => now()->subYears(3)->format('Y-m-d'),
             'gender' => 'male',
         ])
@@ -69,7 +69,7 @@ test('kid create requires first name', function () {
 test('kid create requires last name', function () {
     Livewire::test(CreateKid::class)
         ->fillForm([
-            'first_name' => 'TestKid',
+            'first_name' => 'Test Kid',
             'last_name' => '',
             'birth_date' => now()->subYears(3)->format('Y-m-d'),
             'gender' => 'male',
@@ -81,8 +81,8 @@ test('kid create requires last name', function () {
 test('kid create requires birth date', function () {
     Livewire::test(CreateKid::class)
         ->fillForm([
-            'first_name' => 'TestKid',
-            'last_name' => 'TestLast',
+            'first_name' => 'Test Kid',
+            'last_name' => 'Test Last',
             'birth_date' => null,
             'gender' => 'male',
         ])
@@ -102,12 +102,12 @@ test('kid can be updated via form', function () {
 
     Livewire::test(EditKid::class, ['record' => $kid->id])
         ->fillForm([
-            'first_name' => 'UpdatedName',
+            'first_name' => 'Updated Name',
         ])
         ->call('save')
         ->assertHasNoFormErrors();
 
-    expect($kid->fresh()->first_name)->toBe('UpdatedName');
+    expect($kid->fresh()->first_name)->toBe('Updated Name');
 });
 
 test('kid can be deleted from list', function () {
