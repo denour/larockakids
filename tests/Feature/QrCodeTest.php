@@ -25,8 +25,8 @@ test('it can generate a batch of qr codes', function () {
     $qrCodes = $service->generateBatch(5, 'TEST');
 
     expect($qrCodes)->toHaveCount(5)
-        ->and($qrCodes->first()->code)->toBe('TEST-0001')
-        ->and($qrCodes->last()->code)->toBe('TEST-0005');
+        ->and($qrCodes->first()->code)->toMatch('/^TEST-0001-[A-Z2-9]{6}$/')
+        ->and($qrCodes->last()->code)->toMatch('/^TEST-0005-[A-Z2-9]{6}$/');
 
     foreach ($qrCodes as $qrCode) {
         $this->assertDatabaseHas('qr_codes', [
@@ -43,8 +43,8 @@ test('it continues sequence when generating more codes', function () {
     $service->generateBatch(3, 'SEQ');
     $secondBatch = $service->generateBatch(2, 'SEQ');
 
-    expect($secondBatch->first()->code)->toBe('SEQ-0004')
-        ->and($secondBatch->last()->code)->toBe('SEQ-0005');
+    expect($secondBatch->first()->code)->toStartWith('SEQ-0004-')
+        ->and($secondBatch->last()->code)->toStartWith('SEQ-0005-');
 });
 
 test('it can assign qr code to kid', function () {
@@ -134,7 +134,8 @@ test('qr code status enum has correct colors', function () {
 test('it can print single qr code', function () {
     $qrCode = QrCode::factory()->create();
 
-    $this->get(route('qr-codes.print', $qrCode))
+    $this->actingAs(\App\Models\User::factory()->create())
+        ->get(route('qr-codes.print', $qrCode))
         ->assertStatus(200)
         ->assertSee($qrCode->code);
 });
@@ -143,7 +144,8 @@ test('it can print batch of qr codes', function () {
     $qrCodes = QrCode::factory()->count(3)->create();
     $ids = $qrCodes->pluck('id')->join(',');
 
-    $response = $this->get(route('qr-codes.print-batch', ['ids' => $ids]));
+    $response = $this->actingAs(\App\Models\User::factory()->create())
+        ->get(route('qr-codes.print-batch', ['ids' => $ids]));
 
     $response->assertStatus(200);
     foreach ($qrCodes as $qrCode) {

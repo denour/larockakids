@@ -1,6 +1,7 @@
 <?php
 
 use App\Events\WhatsAppNotification;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Support\Facades\Event;
 
@@ -93,7 +94,7 @@ test('whatsapp notification dispatched with correct payload data', function () {
 test('test notification endpoint dispatches broadcast event', function () {
     Event::fake([WhatsAppNotification::class]);
 
-    $response = $this->post('/test-notification');
+    $response = $this->actingAs(User::factory()->create())->post('/test-notification');
 
     $response->assertOk()
         ->assertJson([
@@ -110,7 +111,7 @@ test('test notification endpoint dispatches broadcast event', function () {
 test('test notification endpoint returns json response', function () {
     Event::fake([WhatsAppNotification::class]);
 
-    $response = $this->post('/test-notification');
+    $response = $this->actingAs(User::factory()->create())->post('/test-notification');
 
     $response->assertOk()
         ->assertJsonStructure(['status', 'message']);

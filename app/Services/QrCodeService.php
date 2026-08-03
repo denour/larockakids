@@ -10,7 +10,6 @@ use chillerlan\QRCode\QROptions;
 use chillerlan\QRCode\Data\QRMatrix;
 use chillerlan\QRCode\Common\EccLevel;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 class QrCodeService
@@ -187,35 +186,45 @@ SVG;
      */
     protected function getNextSequenceNumber(string $prefix): int
     {
-        $position = strlen($prefix) + 2;
+        // El número se extrae en PHP, no en SQL: los códigos nuevos llevan un
+        // sufijo aleatorio (LRK-0007-K7M2X9) y un CAST en Postgres reventaría.
+        $lastNumber = QrCode::query()
+            ->where('code', 'like', "{$prefix}-%")
+            ->pluck('code')
+            ->map(fn (string $code) => (int) substr($code, strlen($prefix) + 1))
+            ->max();
 
-        $query = QrCode::query()
-            ->where('code', 'like', "{$prefix}-%");
-
-        $driver = DB::connection()->getDriverName();
-        if ($driver === 'pgsql') {
-            $query->orderByRaw("CAST(SUBSTRING(code, {$position}) AS INTEGER) DESC");
-        } else {
-            $query->orderByRaw("CAST(SUBSTRING(code, {$position}) AS UNSIGNED) DESC");
-        }
-
-        $lastCode = $query->value('code');
-
-        if (! $lastCode) {
-            return 1;
-        }
-
-        $lastNumber = (int) substr($lastCode, strlen($prefix) + 1);
-
-        return $lastNumber + 1;
+        return ($lastNumber ?? 0) + 1;
     }
 
     /**
-     * Format a code with prefix and padded number.
+     * Format a code with prefix, padded number and a random suffix.
+     *
+     * El sufijo evita que los gafetes se puedan adivinar contando (LRK-0001,
+     * LRK-0002...). Los códigos viejos sin sufijo siguen siendo válidos.
      */
     protected function formatCode(string $prefix, int $number): string
     {
-        return sprintf('%s-%04d', $prefix, $number);
+        do {
+            $code = sprintf('%s-%04d-%s', $prefix, $number, $this->randomSuffix());
+        } while (QrCode::where('code', $code)->exists());
+
+        return $code;
+    }
+
+    /**
+     * Random suffix without characters that se confunden al leerlos a mano.
+     */
+    protected function randomSuffix(int $length = 6): string
+    {
+        $alphabet = '23456789ABCDEFGHJKLMNPQRSTUVWXYZ';
+        $suffix = '';
+
+        for ($i = 0; $i < $length; $i++) {
+            $suffix .= $alphabet[random_int(0, strlen($alphabet) - 1)];
+        }
+
+        return $suffix;
     }
 
     /**

@@ -14,7 +14,10 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
             'api.auth' => \App\Http\Middleware\ApiKeyAuth::class,
+            'kiosk' => \App\Http\Middleware\KioskGuard::class,
         ]);
+
+        $middleware->redirectGuestsTo('/admin/login');
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
