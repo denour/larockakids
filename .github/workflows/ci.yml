@@ -1,0 +1,39 @@
+name: CI
+
+# Corre en el runner self-hosted de CT100 (contenedor Docker local), no en
+# runners de GitHub — así dejamos de correr las pruebas a mano.
+#
+# Repo PÚBLICO + self-hosted runner en el mismo host que otra infra: NUNCA
+# dispares esto en `pull_request` — cualquiera podría abrir un PR y correr
+# código arbitrario en CT100. Solo `push`, que exige acceso de escritura
+# (nadie puede pushear desde un fork).
+on:
+  push:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: [self-hosted, ct100]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Prepare environment
+        run: |
+          cp .env.testing.example .env.testing
+          php artisan key:generate --env=testing
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Run tests
+        run: composer test
