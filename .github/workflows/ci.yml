@@ -2,10 +2,13 @@ name: CI
 
 # Corre en el runner self-hosted de CT100 (contenedor Docker local), no en
 # runners de GitHub — así dejamos de correr las pruebas a mano.
+#
+# Repo PÚBLICO + self-hosted runner en el mismo host que otra infra: NUNCA
+# dispares esto en `pull_request` — cualquiera podría abrir un PR y correr
+# código arbitrario en CT100. Solo `push`, que exige acceso de escritura
+# (nadie puede pushear desde un fork).
 on:
   push:
-    branches: [main]
-  pull_request:
 
 concurrency:
   group: ci-${{ github.ref }}
