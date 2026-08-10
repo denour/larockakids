@@ -1,0 +1,36 @@
+name: CI
+
+# Corre en el runner self-hosted de CT100 (contenedor Docker local), no en
+# runners de GitHub — así dejamos de correr las pruebas a mano.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: [self-hosted, ct100]
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist
+
+      - name: Install JS dependencies
+        run: npm ci
+
+      - name: Prepare environment
+        run: |
+          cp .env.testing.example .env.testing
+          php artisan key:generate --env=testing
+
+      - name: Build assets
+        run: npm run build
+
+      - name: Run tests
+        run: composer test
