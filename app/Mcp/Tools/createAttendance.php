@@ -29,8 +29,8 @@ class createAttendance extends Tool
         $validated = $request->validate([
             'kid.first_name' => 'required|string|max:100',
             'kid.last_name' => 'required|string|max:100',
-            'kid.birth_date' => 'nullable|date',
-            'kid.gender' => 'nullable|in:male,female,not_specified',
+            'kid.birth_date' => 'required|date',
+            'kid.gender' => 'required|in:male,female',
 
             'contact.first_name' => 'required|string|max:100',
             'contact.last_name' => 'required|string|max:100',
@@ -42,6 +42,8 @@ class createAttendance extends Tool
         ], [
             'kid.first_name.required' => 'El nombre del niño es obligatorio.',
             'kid.last_name.required' => 'El apellido del niño es obligatorio.',
+            'kid.birth_date.required' => 'La fecha de nacimiento del niño es obligatoria.',
+            'kid.gender.required' => 'El género del niño es obligatorio.',
             'contact.phone.required' => 'El número de teléfono del tutor es obligatorio.',
             'contact.email.email' => 'El correo electrónico no tiene un formato válido.',
         ]);
@@ -55,8 +57,8 @@ class createAttendance extends Tool
         $kid = Kid::firstOrCreate(
             ['first_name' => $kidData['first_name'], 'last_name' => $kidData['last_name']],
             [
-                'birth_date' => $kidData['birth_date'] ?? null,
-                'gender' => $kidData['gender'] ?? 'not_specified',
+                'birth_date' => $kidData['birth_date'],
+                'gender' => $kidData['gender'],
             ]
         );
 
@@ -108,8 +110,8 @@ class createAttendance extends Tool
             'kid' => $schema->object([
                 'first_name' => $schema->string()->required()->description('Nombre del niño'),
                 'last_name' => $schema->string()->required()->description('Apellidos del niño'),
-                'birth_date' => $schema->string()->format('date')->description('Fecha de nacimiento'),
-                'gender' => $schema->string()->enum(['male', 'female', 'not_specified'])->description('Género del niño'),
+                'birth_date' => $schema->string()->format('date')->required()->description('Fecha de nacimiento'),
+                'gender' => $schema->string()->enum(['male', 'female'])->required()->description('Género del niño'),
             ]),
             'contact' => $schema->object([
                 'first_name' => $schema->string()->required()->description('Nombre del contacto'),

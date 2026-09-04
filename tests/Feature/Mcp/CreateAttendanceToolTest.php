@@ -7,7 +7,6 @@ use App\Models\Contact;
 use App\Models\Kid;
 use App\Services\TutorMessageService;
 use Illuminate\Contracts\JsonSchema\JsonSchema as JsonSchemaContract;
-use Illuminate\Database\QueryException;
 use Illuminate\JsonSchema\JsonSchemaTypeFactory;
 use Laravel\Mcp\Server\Testing\TestResponse;
 use Tests\Fixtures\CreateAttendanceTestServer;
@@ -100,23 +99,6 @@ function createAttendanceResult(array $arguments): array
         ->toArray()['result'];
 }
 
-/**
- * Calls the tool and returns whatever it died with, for the defects below that
- * still blow up mid-flight.
- *
- * @param  array<string, mixed>  $arguments
- */
-function catchCreateAttendance(array $arguments): ?Throwable
-{
-    try {
-        runCreateAttendance($arguments);
-
-        return null;
-    } catch (Throwable $throwable) {
-        return $throwable;
-    }
-}
-
 /** Silences the WhatsApp side of the tool and lets us assert which message was sent. */
 function mockTutorMessages(): Mockery\MockInterface
 {
@@ -147,15 +129,15 @@ describe('schema', function () {
         $gender = (new createAttendance)->toArray()['inputSchema']['properties']['kid']['properties']['gender'];
 
         expect($gender['type'])->toBe('string')
-            ->and($gender['enum'])->toBe(['male', 'female', 'not_specified'])
+            ->and($gender['enum'])->toBe(['male', 'female'])
             ->and($gender['description'])->toBe('Género del niño');
     });
 
-    it('marks the kid name fields as required and the rest as optional', function () {
+    it('marks first name, last name, birth date and gender as required on the kid', function () {
         $kid = (new createAttendance)->toArray()['inputSchema']['properties']['kid'];
 
         expect($kid['type'])->toBe('object')
-            ->and($kid['required'])->toBe(['first_name', 'last_name'])
+            ->and($kid['required'])->toBe(['first_name', 'last_name', 'birth_date', 'gender'])
             ->and($kid['properties'])
             ->toHaveKeys(['first_name', 'last_name', 'birth_date', 'gender']);
     });
@@ -536,60 +518,98 @@ describe('handle response', function () {
 // ---------------------------------------------------------------------------
 
 describe('known defects', function () {
-    it('KNOWN DEFECT #2: a new kid without birth_date violates the NOT NULL column', function () {
-        // The tool declares kid.birth_date as optional ('nullable|date' and
-        // `?? null`), but kids.birth_date is `$table->date('birth_date')` —
-        // NOT NULL. Any MCP client that trusts the schema and omits the birth
-        // date gets an integrity constraint violation.
+    it('KNOWN DEFECT #2: a new kid without birth_date is rejected with a validation error', function () {
+        // kids.birth_date is `$table->date('birth_date')` — NOT NULL — and
+        // getAgeAttribute, the graduation logic and the sticker age all depend
+        // on it, so the fix makes birth_date REQUIRED in the tool (validation
+        // `required` + schema `required()`), NOT the column nullable.
         //
-        // EXPECTED: either require birth_date in the tool, or make the column
-        // nullable. That is a live-schema decision, not a test decision.
+        // Today the tool declares it 'nullable|date' with `?? null`, so an MCP
+        // client that trusts the schema and omits the birth date gets a NOT NULL
+        // QueryException mid-insert. This test pins the DESIRED behaviour: a
+        // clean validation error and nothing written. It stays RED until the
+        // tool requires birth_date.
         $payload = attendancePayload();
         unset($payload['kid']['birth_date']);
 
-        $throwable = catchCreateAttendance($payload);
-
-        expect($throwable)->toBeInstanceOf(QueryException::class)
-            ->and($throwable->getMessage())->toContain('NOT NULL constraint failed: kids.birth_date');
+        CreateAttendanceTestServer::tool(createAttendance::class, $payload)
+            ->assertHasErrors(['La fecha de nacimiento del niño es obligatoria.']);
 
         expect(Kid::count())->toBe(0)
+            ->and(Contact::count())->toBe(0)
             ->and(Attendance::count())->toBe(0);
     });
 
-    it('KNOWN DEFECT #5: AttendanceServer does not register the tool at all', function () {
-        // routes/ai.php exposes AttendanceServer at /mcp/attendance, but its
-        // $tools array is still the scaffolded empty stub, so no MCP client can
-        // reach createAttendance. That is why defects #2 and #3 have never been
-        // hit in production, and why these tests need a fixture server.
+    it('rejects an empty birth_date with the same validation error', function () {
+        // Z of Z-O-M-B-I-E: an empty string must be rejected exactly as hard as
+        // a missing key — same Spanish message — and must not fall through to a
+        // NOT NULL insert. Distinguishes `required` from a laxer `nullable`.
+        CreateAttendanceTestServer::tool(createAttendance::class, attendancePayload([
+            'kid' => ['birth_date' => ''],
+        ]))->assertHasErrors(['La fecha de nacimiento del niño es obligatoria.']);
+
+        expect(Kid::count())->toBe(0)
+            ->and(Contact::count())->toBe(0)
+            ->and(Attendance::count())->toBe(0);
+    });
+
+    it('KNOWN DEFECT #5: createAttendance is registered on AttendanceServer and reachable', function () {
+        // routes/ai.php exposes AttendanceServer at /mcp/attendance. Its $tools
+        // array now lists the four real tools, so createAttendance is reachable
+        // through it (not the scaffolded empty stub it used to be).
         //
-        // EXPECTED: createAttendance::class listed in AttendanceServer::$tools.
-        // When that lands, point this test (and the fixture) at AttendanceServer.
+        // Reachability is proven with an empty payload: a registered tool answers
+        // with its own validation errors, whereas an unregistered one answers
+        // 'not found'. The empty payload also keeps the WhatsApp side effect from
+        // firing, since handle() never runs.
         $tools = (new ReflectionProperty(AttendanceServer::class, 'tools'))->getDefaultValue();
 
-        expect($tools)->toBe([]);
+        expect($tools)->toContain(createAttendance::class);
 
-        AttendanceServer::tool(createAttendance::class, attendancePayload())
-            ->assertHasErrors(['not found']);
+        AttendanceServer::tool(createAttendance::class, [])
+            ->assertHasErrors(['El nombre del niño es obligatorio.']);
 
         expect(Attendance::count())->toBe(0);
     });
 
-    it('KNOWN DEFECT #3: the not_specified gender default is not a valid column value', function () {
-        // The tool validates gender against male|female|not_specified and
-        // defaults to 'not_specified', but kids.gender is
-        // `$table->enum('gender', ['male', 'female'])`. Omitting gender for a
-        // new kid violates the enum/check constraint.
+    it('KNOWN DEFECT #3: a new kid without gender is rejected with a validation error', function () {
+        // kids.gender is `$table->enum('gender', ['male', 'female'])` — NOT NULL
+        // and only two legal values — but the tool declared gender optional with
+        // an extra invalid member ('not_specified') and defaulted to it, so
+        // omitting gender used to violate the enum/check constraint mid-insert
+        // with a QueryException.
         //
-        // EXPECTED: align the tool with the column (default 'male') or widen
-        // the column. Again a live-schema decision.
+        // Twin of KNOWN DEFECT #2: the fix aligns the tool with the column ->
+        // gender becomes `required|in:male,female`, schema enum(['male','female'])
+        // + required(), and the 'not_specified' default is dropped. This test
+        // pins the DESIRED behaviour: a clean validation error and nothing
+        // written. It stays RED until the tool requires gender.
         $payload = attendancePayload();
         unset($payload['kid']['gender']);
 
-        $throwable = catchCreateAttendance($payload);
+        CreateAttendanceTestServer::tool(createAttendance::class, $payload)
+            ->assertHasErrors(['El género del niño es obligatorio.']);
 
-        expect($throwable)->toBeInstanceOf(QueryException::class)
-            ->and($throwable->getMessage())->toContain('gender');
+        expect(Kid::count())->toBe(0)
+            ->and(Contact::count())->toBe(0)
+            ->and(Attendance::count())->toBe(0);
+    });
 
-        expect(Kid::count())->toBe(0);
+    it('rejects an explicit not_specified gender, which is no longer a legal value', function () {
+        // M/Boundary of Z-O-M-B-I-E: 'not_specified' used to be an accepted enum
+        // member; after the fix the column's two values (male|female) are the
+        // only legal ones, so an explicit 'not_specified' must be rejected just
+        // like the 'alien' case above — and must not reach a NOT NULL/enum insert.
+        //
+        // The app runs on locale 'es' with no lang/es/validation.php (KNOWN
+        // DEFECT #6), so the `in` rule leaks the raw translation key; assert it,
+        // consistently with 'rejects a gender outside the declared enum'.
+        CreateAttendanceTestServer::tool(createAttendance::class, attendancePayload([
+            'kid' => ['gender' => 'not_specified'],
+        ]))->assertHasErrors(['validation.in']);
+
+        expect(Kid::count())->toBe(0)
+            ->and(Contact::count())->toBe(0)
+            ->and(Attendance::count())->toBe(0);
     });
 });
