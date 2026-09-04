@@ -5,7 +5,7 @@ use App\Models\Attendance;
 use App\Models\Contact;
 use App\Models\Kid;
 
-test('sticker view renders name, phone and reunion for a kid with contact', function () {
+test('sticker view renders name and reunion for a kid with contact', function () {
     ['kid' => $kid, 'contact' => $contact] = createKidWithContact(
         kidData: ['first_name' => 'Sofía', 'last_name' => 'Ramírez'],
         contactData: ['first_name' => 'Laura', 'last_name' => 'Ramírez', 'phone' => '5512345678', 'international_code' => '52'],
@@ -25,12 +25,15 @@ test('sticker view renders name, phone and reunion for a kid with contact', func
 
     expect($html)
         ->toContain('Sofía Ramírez')
-        ->toContain($contact->full_phone)
         ->toContain(ServiceTime::First->getShortLabel())
         ->toContain('Resp. Laura')
         // El apellido del responsable partiría la línea en dos y se comería
         // el alto útil de la etiqueta de 62 mm.
-        ->not->toContain('Resp. Laura Ramírez');
+        ->not->toContain('Resp. Laura Ramírez')
+        // El bloque del teléfono se retiró de la etiqueta a propósito
+        // (petición del dueño): el número ya no se renderiza.
+        ->not->toContain($contact->full_phone)
+        ->not->toContain('telbox');
 });
 
 test('sticker view renders without breaking when kid has no phone, allergies or attendance', function () {
@@ -98,13 +101,17 @@ test('the name never wraps to a second line', function () {
         ->toContain('white-space: nowrap');
 });
 
-test('the phone box shows the number alone, without a caption', function () {
+test('the sticker never renders the contact phone', function () {
+    // El bloque del teléfono se eliminó de la etiqueta a propósito (petición
+    // del dueño). Aunque el niño tenga un contacto con teléfono, ni el número
+    // ni el contenedor telbox deben aparecer en el sticker.
     $kid = Kid::factory()->create();
     $contact = Contact::factory()->create(['phone' => '6863668511', 'international_code' => '52']);
     $kid->contacts()->sync([$contact->id => ['relationship_type' => 'parent']]);
 
     $html = view('components.sticker', ['kid' => $kid->fresh('contacts'), 'contact' => $contact])->render();
 
-    expect($html)->toContain($contact->full_phone)
+    expect($html)->not->toContain($contact->full_phone)
+        ->and($html)->not->toContain('telbox')
         ->and($html)->not->toContain('TELÉFONO');
 });

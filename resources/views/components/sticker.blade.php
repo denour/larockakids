@@ -24,7 +24,6 @@
         ?? optional($kid)->contacts?->firstWhere('pivot.relationship_type', 'parent')
         ?? optional($kid)->contacts?->first();
 
-    $telefono = optional($contactoPrincipal)->full_phone;
     // Solo el nombre de pila: el apellido completo parte la línea en dos y
     // se come el alto de la etiqueta. Quien recoge se identifica de viva voz.
     $responsable = trim(strtok(trim(optional($contactoPrincipal)->first_name ?? ''), ' ') ?: '');
@@ -40,11 +39,6 @@
             &middot; Resp. {{ $responsable }}
         @endif
     </div>
-    @if($telefono)
-        <div class="telbox">
-            <div class="tel">{{ $telefono }}</div>
-        </div>
-    @endif
     @if($attendance?->service)
         <div class="reunion">{{ $attendance->service->getShortLabel() }}</div>
     @endif
@@ -72,13 +66,8 @@
        antes que partirse en dos y empujar el resto de la etiqueta. */
     .nombre  { font-weight: 800; line-height: 1.0; text-transform: uppercase;
                letter-spacing: -.5px; width: 100%; white-space: nowrap; }
-    /* El responsable respira antes del bloque del teléfono. */
     .datos   { font-size: 15px; font-weight: 600; line-height: 1.25; margin-top: 3px; }
-    .telbox  { margin-top: 9px; background: #000; color: #fff;
-               border-radius: 5px; padding: 3px 10px; }
-    .tel     { font-size: 19px; font-weight: 800; letter-spacing: .3px; line-height: 1.2; }
-    /* Pegado al teléfono: la reunión se lee como parte del mismo bloque. */
-    .reunion { margin-top: 5px; font-size: 21px; font-weight: 800;
+    .reunion { margin-top: 9px; font-size: 21px; font-weight: 800;
                border: 2px solid #000; border-radius: 5px; padding: 1px 8px; line-height: 1.15; }
     .alerta  { margin-top: 5px; font-size: 13px; font-weight: 800;
                background: #000; color: #fff; border-radius: 3px; padding: 1px 7px; }
