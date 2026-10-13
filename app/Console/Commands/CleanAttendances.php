@@ -4,23 +4,27 @@ namespace App\Console\Commands;
 
 use App\Enums\AttendanceStatus;
 use App\Models\Attendance;
-use Carbon\Carbon;
 use Illuminate\Console\Command;
 
 class CleanAttendances extends Command
 {
     protected $signature = 'attendances:clean';
-    protected $description = 'Actualiza el estado de las asistencias del día que ya tienen registrada su hora de salida';
 
-    public function handle()
+    protected $description = 'Marca como RETIRADO toda asistencia que ya tiene hora de salida';
+
+    /**
+     * No se limita al día de hoy: el cron no corría (ver routes/console.php) y dejó asistencias
+     * viejas en "En Clase" aunque ya tenían salida. Así una sola corrida las repara.
+     */
+    public function handle(): int
     {
-        $today = Carbon::today();
-        
-        $count = Attendance::whereDate('check_in', $today)
+        $count = Attendance::query()
             ->whereNotNull('check_out')
             ->where('status', '!=', AttendanceStatus::RETIRADO)
             ->update(['status' => AttendanceStatus::RETIRADO]);
 
-        $this->info("Se han actualizado {$count} registros de asistencia del día {$today->format('d/m/Y')} a estado RETIRADO");
+        $this->info("Se marcaron {$count} asistencias como RETIRADO.");
+
+        return self::SUCCESS;
     }
-} 
+}

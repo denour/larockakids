@@ -134,7 +134,8 @@ class AttendanceHistory extends ListRecords
                                     ->whereYear('check_in', $now->year);
                                 break;
                             case 'last_month':
-                                $lastMonth = $now->copy()->subMonth();
+                                // NoOverflow: un 31 de marzo menos un mes da 3 de marzo, no febrero.
+                                $lastMonth = $now->copy()->subMonthNoOverflow();
                                 $query->whereMonth('check_in', $lastMonth->month)
                                     ->whereYear('check_in', $lastMonth->year);
                                 break;

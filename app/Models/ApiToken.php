@@ -7,6 +7,21 @@ use Illuminate\Support\Str;
 
 class ApiToken extends Model
 {
+    /**
+     * Permisos que puede llevar un token. Cada ruta de la API y el servidor MCP
+     * exigen uno; '*' los cubre todos.
+     *
+     * @var array<string, string>
+     */
+    public const ABILITIES = [
+        '*' => 'Full Access',
+        'kids:read' => 'Read Kids',
+        'kids:write' => 'Edit Kids',
+        'attendance:read' => 'Read Attendance',
+        'attendance:write' => 'Attendance MCP (check-in/out, notify tutors)',
+        'export' => 'Export Data',
+    ];
+
     protected $fillable = ['name', 'token', 'abilities', 'expires_at'];
 
     protected $casts = [
@@ -20,7 +35,7 @@ class ApiToken extends Model
     public static function generate(string $name, ?array $abilities = ['*'], ?\DateTime $expiresAt = null): array
     {
         $plainToken = Str::random(48);
-        
+
         $token = static::create([
             'name' => $name,
             'token' => hash('sha256', $plainToken),

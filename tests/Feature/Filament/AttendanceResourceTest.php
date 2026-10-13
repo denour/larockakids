@@ -119,7 +119,69 @@ test('attendance has exit action', function () {
         ->callTableAction('exit', $attendance);
 
     $attendance->refresh();
-    expect($attendance->check_out)->not->toBeNull();
+    expect($attendance->check_out)->not->toBeNull()
+        ->and($attendance->status)->toBe(AttendanceStatus::RETIRADO);
+});
+
+/**
+ * Crea una asistencia SIN salida (la lista solo muestra niños dentro) en la fecha dada.
+ */
+function attendanceInsideAt(string $checkIn): Attendance
+{
+    $kid = Kid::factory()->create();
+
+    return Attendance::create([
+        'kid_id' => $kid->id,
+        'contact_id' => $kid->contacts->first()->id,
+        'check_in' => $checkIn,
+        'status' => AttendanceStatus::EN_CLASE,
+    ]);
+}
+
+test('the date filters return the right attendances', function (string $filter, array $expectedDates) {
+    // Miércoles 15 de octubre de 2025, mediodía.
+    $this->travelTo('2025-10-15 12:00:00');
+
+    $dates = [
+        '2025-10-15 11:00:00', // hoy
+        '2025-10-14 11:00:00', // ayer (martes, misma semana)
+        '2025-10-13 00:30:00', // lunes, inicio de esta semana
+        '2025-10-12 11:00:00', // domingo, semana pasada
+        '2025-10-06 11:00:00', // lunes de la semana pasada
+        '2025-10-05 11:00:00', // hace dos semanas
+        '2025-09-30 11:00:00', // mes pasado
+        '2024-10-15 11:00:00', // mismo mes, año pasado
+        '2024-09-15 11:00:00', // mismo "mes pasado", año pasado
+    ];
+
+    $attendances = collect($dates)->mapWithKeys(fn (string $date) => [$date => attendanceInsideAt($date)]);
+
+    $expected = $attendances->only($expectedDates);
+
+    Livewire::test(ListAttendances::class)
+        ->filterTable('date', $filter)
+        ->assertCanSeeTableRecords($expected)
+        ->assertCanNotSeeTableRecords($attendances->except($expectedDates))
+        ->assertCountTableRecords($expected->count());
+})->with([
+    'hoy' => ['today', ['2025-10-15 11:00:00']],
+    'ayer' => ['yesterday', ['2025-10-14 11:00:00']],
+    'esta semana' => ['this_week', ['2025-10-15 11:00:00', '2025-10-14 11:00:00', '2025-10-13 00:30:00']],
+    'semana pasada' => ['last_week', ['2025-10-12 11:00:00', '2025-10-06 11:00:00']],
+    'este mes' => ['this_month', ['2025-10-15 11:00:00', '2025-10-14 11:00:00', '2025-10-13 00:30:00', '2025-10-12 11:00:00', '2025-10-06 11:00:00', '2025-10-05 11:00:00']],
+    'mes pasado' => ['last_month', ['2025-09-30 11:00:00']],
+]);
+
+test('the last month filter does not skip february on the 31st', function () {
+    $this->travelTo('2025-03-31 12:00:00');
+
+    $february = attendanceInsideAt('2025-02-10 11:00:00');
+    $march = attendanceInsideAt('2025-03-03 11:00:00');
+
+    Livewire::test(ListAttendances::class)
+        ->filterTable('date', 'last_month')
+        ->assertCanSeeTableRecords([$february])
+        ->assertCanNotSeeTableRecords([$march]);
 });
 
 test('attendance has navigation badge', function () {
