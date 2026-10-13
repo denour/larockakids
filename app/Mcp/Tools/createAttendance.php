@@ -5,6 +5,7 @@ namespace App\Mcp\Tools;
 use App\Models\Attendance;
 use App\Models\Contact;
 use App\Models\Kid;
+use App\Services\BirthdayGreetingService;
 use App\Services\TutorMessageService;
 use Illuminate\Contracts\JsonSchema\JsonSchema;
 use Laravel\Mcp\Request;
@@ -90,6 +91,8 @@ class createAttendance extends Tool
         } else {
             $tutorMessageService->sendEntryMessage($contact, $kid);
         }
+
+        app(BirthdayGreetingService::class)->greetIfDue($kid, $contact);
 
         return Response::structured([
             'message' => 'Asistencia registrada exitosamente',

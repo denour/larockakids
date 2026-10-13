@@ -41,6 +41,7 @@ class Kid extends Model
      */
     protected $casts = [
         'birth_date' => 'date',
+        'birthday_greeted_on' => 'date',
         'gender' => 'string',
     ];
 

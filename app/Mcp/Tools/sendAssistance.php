@@ -41,6 +41,7 @@ class sendAssistance extends Tool
         }
 
         $messages->sendAssistanceMessage($contact, $kid);
+        $scanner->getActiveAttendanceToday($kid)?->recordAssistanceRequest();
 
         return Response::structured([
             'message' => "Notificación de asistencia enviada a {$contact->full_name}.",

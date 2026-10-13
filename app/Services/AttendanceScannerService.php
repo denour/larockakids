@@ -22,7 +22,10 @@ class AttendanceScannerService
      */
     private const GRADUATION_WARNING_WEEKS = 4;
 
-    public function __construct(protected TutorMessageService $tutorMessageService) {}
+    public function __construct(
+        protected TutorMessageService $tutorMessageService,
+        protected BirthdayGreetingService $birthdayGreetingService,
+    ) {}
 
     /**
      * Process check-in for a QR code.
@@ -84,6 +87,7 @@ class AttendanceScannerService
             $isInside = $serviceAttendance->check_out === null;
 
             $this->tutorMessageService->sendAssistanceMessage($primaryContact, $kid);
+            $serviceAttendance->recordAssistanceRequest();
 
             return [
                 'success' => true,
@@ -109,9 +113,12 @@ class AttendanceScannerService
 
         $this->tutorMessageService->sendEntryMessage($primaryContact, $kid);
 
+        $birthdayGreeted = $this->birthdayGreetingService->greetIfDue($kid, $primaryContact);
+
         return [
             'success' => true,
-            'message' => 'Entrada registrada para '.$kid->full_name.'.',
+            'message' => 'Entrada registrada para '.$kid->full_name.'.'
+                .($birthdayGreeted ? ' 🎂 ¡Se felicitó a su familia por su cumpleaños!' : ''),
             'kid' => $kid,
             'action' => 'check_in',
             'warning' => $graduationWarning,
@@ -216,6 +223,7 @@ class AttendanceScannerService
         }
 
         $this->tutorMessageService->sendAssistanceMessage($primaryContact, $kid);
+        $this->getActiveAttendanceToday($kid)?->recordAssistanceRequest();
 
         return [
             'success' => true,

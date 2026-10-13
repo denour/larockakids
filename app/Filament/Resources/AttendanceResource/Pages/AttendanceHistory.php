@@ -80,6 +80,13 @@ class AttendanceHistory extends ListRecords
                     ->formatStateUsing(fn (ServiceTime $state) => $state->getShortLabel())
                     ->color(fn (ServiceTime $state) => $state->getColor())
                     ->alignCenter(),
+                Tables\Columns\TextColumn::make('assistance_requests')
+                    ->label('Avisos')
+                    ->tooltip('Veces que se pidió asistencia al tutor en esta reunión')
+                    ->badge()
+                    ->color(fn (int $state) => $state > 0 ? 'warning' : 'gray')
+                    ->alignCenter()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('check_in')
                     ->label('Entrada')
                     ->dateTime('d M Y H:i')

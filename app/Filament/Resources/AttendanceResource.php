@@ -239,6 +239,13 @@ class AttendanceResource extends Resource
                     ->formatStateUsing(fn (ServiceTime $state) => $state->getShortLabel())
                     ->color(fn (ServiceTime $state) => $state->getColor())
                     ->alignCenter(),
+                Tables\Columns\TextColumn::make('assistance_requests')
+                    ->label('Avisos')
+                    ->tooltip('Veces que se pidió asistencia al tutor en esta reunión')
+                    ->badge()
+                    ->color(fn (int $state) => $state > 0 ? 'warning' : 'gray')
+                    ->alignCenter()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('check_in')
                     ->label('Hora de entrada')
                     ->formatStateUsing(fn ($state) => $state ? $state->diffForHumans() : '')
@@ -322,6 +329,7 @@ class AttendanceResource extends Resource
                         }
 
                         app(TutorMessageService::class)->sendAssistanceMessage($contact, $kid);
+                        $record->recordAssistanceRequest();
 
                         Notification::make()
                             ->title('Notificación enviada')
