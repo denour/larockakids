@@ -29,8 +29,17 @@ class Attendance extends Model
         'check_out' => 'datetime',
         'status' => AttendanceStatus::class,
         'service' => ServiceTime::class,
+        'assistance_requests' => 'integer',
         'deleted_at' => 'datetime',
     ];
+
+    /**
+     * Cuenta una petición de asistencia al tutor durante esta reunión.
+     */
+    public function recordAssistanceRequest(): void
+    {
+        $this->increment('assistance_requests');
+    }
 
     public function kid(): BelongsTo
     {

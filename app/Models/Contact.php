@@ -13,6 +13,19 @@ class Contact extends Model
     use HasFactory;
 
     /**
+     * Parentescos posibles con un niño (columna contact_kid.relationship_type).
+     *
+     * @var array<string, string>
+     */
+    public const RELATIONSHIP_TYPES = [
+        'parent' => 'Padre/Madre',
+        'family' => 'Familiar',
+        'friend of parent' => 'Amigo de los Padres',
+        'guardian' => 'Tutor',
+        'other' => 'Otro',
+    ];
+
+    /**
      * Normaliza el nombre al guardar, venga de donde venga (panel, import, seeder).
      * Sin esto los nombres se vuelven a ensuciar con cada captura.
      */

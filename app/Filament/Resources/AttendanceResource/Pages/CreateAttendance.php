@@ -4,6 +4,7 @@ namespace App\Filament\Resources\AttendanceResource\Pages;
 
 use App\Enums\ServiceTime;
 use App\Filament\Resources\AttendanceResource;
+use App\Services\BirthdayGreetingService;
 use App\Services\TutorMessageService;
 use Filament\Resources\Pages\CreateRecord;
 
@@ -45,6 +46,8 @@ class CreateAttendance extends CreateRecord
                 // Enviar mensaje de entrada normal
                 $tutorMessageService->sendEntryMessage($contact, $kid);
             }
+
+            app(BirthdayGreetingService::class)->greetIfDue($kid, $contact);
 
             // Abrir el diálogo de impresión en la misma página
             $this->js("

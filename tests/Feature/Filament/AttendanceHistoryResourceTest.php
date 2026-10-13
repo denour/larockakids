@@ -43,6 +43,30 @@ test('attendance history has date filter', function () {
         ->assertTableFilterExists('date');
 });
 
+test('the history last month filter does not skip february on the 31st', function () {
+    $this->travelTo('2025-03-31 12:00:00');
+
+    $kid = Kid::factory()->create();
+    $contact = $kid->contacts->first();
+
+    $february = Attendance::create([
+        'kid_id' => $kid->id,
+        'contact_id' => $contact->id,
+        'check_in' => '2025-02-10 11:00:00',
+    ]);
+
+    $march = Attendance::create([
+        'kid_id' => $kid->id,
+        'contact_id' => $contact->id,
+        'check_in' => '2025-03-03 11:00:00',
+    ]);
+
+    Livewire::test(AttendanceHistory::class)
+        ->filterTable('date', 'last_month')
+        ->assertCanSeeTableRecords([$february])
+        ->assertCanNotSeeTableRecords([$march]);
+});
+
 test('attendance history is read only', function () {
     $kid = Kid::factory()->create();
     $contact = $kid->contacts->first();

@@ -13,6 +13,7 @@ enum TutorMessageType: string
     case RECOVERED = 'recovered';
     case EXIT = 'exit';
     case ASSISTANCE = 'assistance';
+    case BIRTHDAY = 'birthday';
 
     public function getLabel(): string
     {
@@ -26,6 +27,7 @@ enum TutorMessageType: string
             self::RECOVERED => 'Recuperado',
             self::EXIT => 'Salida',
             self::ASSISTANCE => 'Asistencia',
+            self::BIRTHDAY => 'Cumpleaños',
         };
     }
 
@@ -41,6 +43,7 @@ enum TutorMessageType: string
             self::RECOVERED => 'Se envía cuando un niño se ha recuperado.',
             self::EXIT => 'Se envía cuando se registra la salida de un niño.',
             self::ASSISTANCE => 'Se envía cuando un niño necesita asistencia y ya tiene entrada registrada.',
+            self::BIRTHDAY => 'Se envía al registrar la entrada de un niño cuyo cumpleaños fue en los últimos 7 días.',
         };
     }
 

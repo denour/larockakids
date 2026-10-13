@@ -13,8 +13,11 @@ use Filament\Tables\Table;
 class ApiTokenResource extends Resource
 {
     protected static ?string $model = ApiToken::class;
+
     protected static ?string $navigationIcon = 'heroicon-o-key';
+
     protected static ?string $navigationGroup = 'Settings';
+
     protected static ?string $navigationLabel = 'API Tokens';
 
     public static function form(Form $form): Form
@@ -24,14 +27,9 @@ class ApiTokenResource extends Resource
                 ->required()
                 ->maxLength(255)
                 ->helperText('Nombre descriptivo (ej: "Denour Bot")'),
-            
+
             Forms\Components\CheckboxList::make('abilities')
-                ->options([
-                    '*' => 'Full Access',
-                    'kids:read' => 'Read Kids',
-                    'attendance:read' => 'Read Attendance',
-                    'export' => 'Export Data',
-                ])
+                ->options(ApiToken::ABILITIES)
                 ->default(['*'])
                 ->columns(2),
 

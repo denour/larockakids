@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\AttendanceStatus;
 use App\Enums\Country;
 use App\Enums\ServiceTime;
 use App\Enums\TutorMessageType;
@@ -238,6 +239,13 @@ class AttendanceResource extends Resource
                     ->formatStateUsing(fn (ServiceTime $state) => $state->getShortLabel())
                     ->color(fn (ServiceTime $state) => $state->getColor())
                     ->alignCenter(),
+                Tables\Columns\TextColumn::make('assistance_requests')
+                    ->label('Avisos')
+                    ->tooltip('Veces que se pidió asistencia al tutor en esta reunión')
+                    ->badge()
+                    ->color(fn (int $state) => $state > 0 ? 'warning' : 'gray')
+                    ->alignCenter()
+                    ->sortable(),
                 Tables\Columns\TextColumn::make('check_in')
                     ->label('Hora de entrada')
                     ->formatStateUsing(fn ($state) => $state ? $state->diffForHumans() : '')
@@ -266,25 +274,32 @@ class AttendanceResource extends Resource
                             return;
                         }
 
+                        // copy() en cada cálculo: Carbon es mutable, y sin él los dos
+                        // extremos del rango terminaban siendo el mismo instante.
                         $now = now();
                         switch ($value) {
                             case 'today':
                                 $query->whereDate('check_in', $now);
                                 break;
                             case 'yesterday':
-                                $query->whereDate('check_in', $now->subDay());
+                                $query->whereDate('check_in', $now->copy()->subDay());
                                 break;
                             case 'this_week':
-                                $query->whereBetween('check_in', [$now->startOfWeek(), $now->endOfWeek()]);
+                                $query->whereBetween('check_in', [$now->copy()->startOfWeek(), $now->copy()->endOfWeek()]);
                                 break;
                             case 'last_week':
-                                $query->whereBetween('check_in', [$now->subWeek()->startOfWeek(), $now->subWeek()->endOfWeek()]);
+                                $start = $now->copy()->subWeek()->startOfWeek();
+                                $end = $now->copy()->subWeek()->endOfWeek();
+                                $query->whereBetween('check_in', [$start, $end]);
                                 break;
                             case 'this_month':
-                                $query->whereMonth('check_in', $now->month);
+                                $query->whereMonth('check_in', $now->month)
+                                    ->whereYear('check_in', $now->year);
                                 break;
                             case 'last_month':
-                                $query->whereMonth('check_in', $now->subMonth()->month);
+                                $lastMonth = $now->copy()->subMonthNoOverflow();
+                                $query->whereMonth('check_in', $lastMonth->month)
+                                    ->whereYear('check_in', $lastMonth->year);
                                 break;
                         }
                     }),
@@ -314,6 +329,7 @@ class AttendanceResource extends Resource
                         }
 
                         app(TutorMessageService::class)->sendAssistanceMessage($contact, $kid);
+                        $record->recordAssistanceRequest();
 
                         Notification::make()
                             ->title('Notificación enviada')
@@ -328,6 +344,7 @@ class AttendanceResource extends Resource
                     ->action(function (Attendance $record) {
                         $record->update([
                             'check_out' => now(),
+                            'status' => AttendanceStatus::RETIRADO,
                         ]);
 
                         $tutorMessageService = app(TutorMessageService::class);

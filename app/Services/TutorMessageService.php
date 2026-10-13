@@ -19,9 +19,11 @@ class TutorMessageService
     }
 
     /**
-     * Envía un mensaje a WhatsApp basado en el tipo de mensaje
+     * Envía un mensaje a WhatsApp basado en el tipo de mensaje.
+     *
+     * Devuelve false si no hay plantilla activa para ese tipo (no se envía nada).
      */
-    public function sendMessage(string $label, Contact $contact, Kid $kid, array $additionalData = []): void
+    public function sendMessage(string $label, Contact $contact, Kid $kid, array $additionalData = []): bool
     {
         // Obtener el mensaje base
         $message = TutorMessage::findByLabel($label);
@@ -29,7 +31,7 @@ class TutorMessageService
         if (! $message) {
             Log::warning("No se encontró un mensaje activo para el label: {$label}");
 
-            return;
+            return false;
         }
 
         // Preparar los valores para reemplazar
@@ -57,6 +59,8 @@ class TutorMessageService
             message: $formattedMessage,
             phoneNumber: $phoneNumber
         ));
+
+        return true;
     }
 
     /**
@@ -129,6 +133,14 @@ class TutorMessageService
     public function sendAssistanceMessage(Contact $contact, Kid $kid): void
     {
         $this->sendMessage('assistance', $contact, $kid);
+    }
+
+    /**
+     * Envía la felicitación de cumpleaños.
+     */
+    public function sendBirthdayMessage(Contact $contact, Kid $kid): bool
+    {
+        return $this->sendMessage('birthday', $contact, $kid);
     }
 
     /**
