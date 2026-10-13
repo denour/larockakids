@@ -3,9 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\KidResource\Pages;
-use App\Filament\Resources\KidResource\RelationManagers\ContactsRelationManager;
 use App\Filament\Resources\KidResource\RelationManagers\AllergiesRelationManager;
-use App\Models\Contact;
+use App\Filament\Resources\KidResource\RelationManagers\ContactsRelationManager;
 use App\Models\Allergy;
 use App\Models\Kid;
 use Filament\Forms;
@@ -13,14 +12,8 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
-use Ysfkaya\FilamentPhoneInput\Forms\PhoneInput;
-use App\Enums\Country;
+use Illuminate\Support\HtmlString;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use pxlrbt\FilamentExcel\Columns\Column;
-use App\Exports\KidsWithContactsExport;
 
 class KidResource extends Resource
 {
@@ -91,7 +84,39 @@ class KidResource extends Resource
                 ->columnSpanFull();
         }
 
+        if ($form->getOperation() === 'edit') {
+            $schema[] = Forms\Components\Section::make('Hermanos')
+                ->description('Niños que comparten papá, mamá o tutor con este niño.')
+                ->schema([
+                    Forms\Components\Placeholder::make('siblings')
+                        ->hiddenLabel()
+                        ->content(fn (?Kid $record): HtmlString => static::siblingsList($record)),
+                ])
+                ->collapsible();
+        }
+
         return $form->schema($schema);
+    }
+
+    /**
+     * Lista de hermanos con liga a su ficha.
+     */
+    public static function siblingsList(?Kid $kid): HtmlString
+    {
+        $siblings = $kid?->siblings() ?? collect();
+
+        if ($siblings->isEmpty()) {
+            return new HtmlString('Sin hermanos registrados.');
+        }
+
+        $items = $siblings->map(fn (Kid $sibling): string => sprintf(
+            '<li><a href="%s" class="text-primary-600 hover:underline">%s</a> · %d años</li>',
+            e(static::getUrl('edit', ['record' => $sibling])),
+            e($sibling->full_name),
+            $sibling->age,
+        ));
+
+        return new HtmlString('<ul class="space-y-1">'.$items->implode('').'</ul>');
     }
 
     public static function table(Table $table): Table
@@ -118,7 +143,7 @@ class KidResource extends Resource
                     ->sortable(),
                 Tables\Columns\TextColumn::make('age')
                     ->label('Edad')
-                    ->formatStateUsing(fn (Kid $record) => $record->age . ' años')
+                    ->formatStateUsing(fn (Kid $record) => $record->age.' años')
                     ->sortable(),
                 Tables\Columns\TextColumn::make('contacts.first_name')
                     ->label('Contactos')

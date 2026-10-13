@@ -4,7 +4,9 @@ namespace App\Models;
 
 use App\Enums\QrCodeStatus;
 use App\Support\PersonName;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -91,6 +93,44 @@ class Kid extends Model
     public function getFullNameAttribute(): string
     {
         return "{$this->first_name} {$this->last_name}";
+    }
+
+    /**
+     * Los niños que comparten al menos un contacto (papá, mamá, tutor...) con este.
+     *
+     * @return Collection<int, Kid>
+     */
+    public function siblings(): Collection
+    {
+        $contactIds = $this->contacts()->pluck('contacts.id');
+
+        if ($contactIds->isEmpty()) {
+            return new Collection;
+        }
+
+        return static::query()
+            ->whereKeyNot($this->getKey())
+            ->whereHas('contacts', fn (Builder $query) => $query->whereIn('contacts.id', $contactIds))
+            ->orderBy('birth_date')
+            ->get();
+    }
+
+    /**
+     * Le asigna a $sibling los contactos de este niño que aún no tiene, con el
+     * mismo parentesco. Los que ya tenía se quedan como estaban.
+     */
+    public function shareContactsWith(Kid $sibling): void
+    {
+        $alreadyAssigned = $sibling->contacts()->pluck('contacts.id');
+
+        $missing = $this->contacts()
+            ->whereNotIn('contacts.id', $alreadyAssigned)
+            ->get()
+            ->mapWithKeys(fn (Contact $contact) => [
+                $contact->id => ['relationship_type' => $contact->pivot->relationship_type],
+            ]);
+
+        $sibling->contacts()->attach($missing->all());
     }
 
     /**

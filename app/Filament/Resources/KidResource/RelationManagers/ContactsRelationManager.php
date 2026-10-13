@@ -40,13 +40,7 @@ class ContactsRelationManager extends RelationManager
                     ->maxLength(255),
                 Forms\Components\Select::make('relationship_type')
                     ->label('Parentesco')
-                    ->options([
-                        'parent' => 'Padre/Madre',
-                        'family' => 'Familiar',
-                        'friend of parent' => 'Amigo de los Padres',
-                        'guardian' => 'Tutor',
-                        'other' => 'Otro',
-                    ])
+                    ->options(Contact::RELATIONSHIP_TYPES)
                     ->required(),
             ]);
     }
@@ -55,6 +49,7 @@ class ContactsRelationManager extends RelationManager
     {
         return $table
             ->recordTitleAttribute('first_name')
+            ->recordTitle(fn (Contact $record) => "{$record->full_name} ({$record->phone})")
             ->columns([
                 Tables\Columns\TextColumn::make('first_name')
                     ->label('Nombre'),
@@ -64,21 +59,28 @@ class ContactsRelationManager extends RelationManager
                     ->label('Teléfono'),
                 Tables\Columns\TextColumn::make('pivot.relationship_type')
                     ->label('Parentesco')
-                    ->formatStateUsing(function ($state) {
-                        return match ($state) {
-                            'parent' => 'Padre/Madre',
-                            'family' => 'Familiar',
-                            'friend of parent' => 'Amigo de los Padres',
-                            'guardian' => 'Tutor',
-                            'other' => 'Otro',
-                            default => $state,
-                        };
-                    }),
+                    ->formatStateUsing(fn ($state) => Contact::RELATIONSHIP_TYPES[$state] ?? $state),
             ])
             ->filters([
                 //
             ])
             ->headerActions([
+                // Para el papá o la mamá que ya está registrado con un hermano:
+                // se vincula el mismo contacto en vez de capturarlo otra vez.
+                Tables\Actions\AttachAction::make()
+                    ->label('Asignar existente')
+                    ->modalHeading('Asignar un contacto ya registrado')
+                    ->recordSelectSearchColumns(['first_name', 'last_name', 'phone'])
+                    ->form(fn (Tables\Actions\AttachAction $action): array => [
+                        $action->getRecordSelect()
+                            ->label('Contacto')
+                            ->helperText('Busca por nombre, apellido o teléfono.'),
+                        Forms\Components\Select::make('relationship_type')
+                            ->label('Parentesco')
+                            ->options(Contact::RELATIONSHIP_TYPES)
+                            ->default('parent')
+                            ->required(),
+                    ]),
                 Tables\Actions\CreateAction::make()
                     ->using(function (array $data, string $model): Model {
                         $contact = Contact::create([
@@ -96,13 +98,19 @@ class ContactsRelationManager extends RelationManager
                         return $contact;
                     }),
             ])
+            // Quitar, no eliminar: el contacto puede ser también el papá de un
+            // hermano, y borrarlo lo sacaría de todos sus niños.
             ->actions([
                 Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DetachAction::make()
+                    ->label('Quitar')
+                    ->modalHeading('Quitar contacto de este niño')
+                    ->modalDescription('El contacto seguirá registrado con sus otros niños.'),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DetachBulkAction::make()
+                        ->label('Quitar seleccionados'),
                 ]),
             ]);
     }
